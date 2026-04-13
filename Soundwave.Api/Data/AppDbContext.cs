@@ -17,31 +17,35 @@ public class AppDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        
+        modelBuilder.Entity<User>()
+            .HasDiscriminator<UserRole>("Role")
+            .HasValue<User>(UserRole.Listener)
+            .HasValue<Artist>(UserRole.Artist);
 
-        // 1. Связь Артист - Треки (Один-ко-многим)
-        modelBuilder.Entity<Track>()
-            .HasOne(t => t.Artist)
-            .WithMany(u => u.Tracks)
-            .HasForeignKey(t => t.ArtistId)
-            .OnDelete(DeleteBehavior.Restrict); // Чтобы удаление юзера не ломало базу каскадно
+        // Связи для артиста
+        modelBuilder.Entity<Artist>()
+            .HasMany(a => a.Tracks)
+            .WithOne(t => t.Artist)
+            .HasForeignKey(t => t.ArtistId);
 
-        // 2. Связь Альбом - Треки (Один-ко-многим)
-        modelBuilder.Entity<Track>()
-            .HasOne(t => t.Album)
-            .WithMany(a => a.Tracks)
-            .HasForeignKey(t => t.AlbumId)
-            .OnDelete(DeleteBehavior.SetNull);
-
-        // 3. Многие-ко-многим: Лайкнутые треки
+        // Многие-ко-многим: Лайкнутые треки
         modelBuilder.Entity<User>()
             .HasMany(u => u.LikedTracks)
             .WithMany() // У трека нет коллекции "UsersWhoLiked", поэтому оставляем пустым
             .UsingEntity(j => j.ToTable("UserLikedTracks"));
 
-        // 4. Связь Пользователь - Плейлисты (Один-ко-многим)
+        // Связь Пользователь - Плейлисты (Один-ко-многим)
         modelBuilder.Entity<Playlist>()
             .HasOne(p => p.Owner) // Убедись, что в сущности Playlist есть свойство Owner или User
             .WithMany(u => u.Playlists)
             .HasForeignKey(p => p.OwnerId);
+
+        // Связь Альбом - Треки (Один-ко-многим)
+        modelBuilder.Entity<Track>()
+            .HasOne(t => t.Album)
+            .WithMany(a => a.Tracks)
+            .HasForeignKey(t => t.AlbumId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

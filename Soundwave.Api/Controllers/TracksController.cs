@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Soundwave.Api.Helpers;
+using Soundwave.Api.Extensions;
 using Soundwave.Api.Interfaces;
 
 namespace Soundwave.Api.Controllers;

@@ -16,3 +16,11 @@ export interface Album {
     bgColor: string;
     tracks: Track[];
 }
+
+export interface ArtistDetails {
+  id: number;
+  name: string;
+  imageUrl: string;
+  description: string;
+  monthlyListeners: number;
+}

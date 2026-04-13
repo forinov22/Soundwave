@@ -12,7 +12,14 @@ const UserInfo = () => {
   return (
     <>
       {isAuth && <UserButton />}
-      {!isAuth && <Button onClick={() => navigate("/login")}>Login</Button>}
+      {!isAuth && (
+        <Button
+          onClick={() => navigate("/login")}
+          className="bg-white hover:bg-zinc-200 text-black rounded-full font-bold px-6"
+        >
+          Войти
+        </Button>
+      )}
     </>
   );
 };

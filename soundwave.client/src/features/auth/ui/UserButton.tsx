@@ -34,7 +34,7 @@ const UserButton = () => {
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-32">
+      <DropdownMenuContent className="w-32 bg-zinc-900 border-zinc-800 text-zinc-300">
         <DropdownMenuGroup>
           <DropdownMenuItem onClick={() => navigate("/profile")}>
             Profile

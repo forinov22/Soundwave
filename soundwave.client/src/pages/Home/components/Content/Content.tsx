@@ -1,19 +1,20 @@
-import type { CSSProperties } from "react";
-
 interface ContentProps {
-  bgStyle: CSSProperties;
+  gradientColor: string;
   children: React.ReactNode;
 }
 
-const Content = ({ bgStyle, children }: ContentProps) => {
+const Content = ({ gradientColor, children }: ContentProps) => {
   return (
     <div
-      style={bgStyle}
-      className="w-full lg:w-[75%] m-2 lg:ml-0 px-6 pt-4 text-white overflow-auto"
+      style={{
+        // Используем переменную для плавного перехода, если добавишь transition в CSS
+        background: `linear-gradient(to bottom, ${gradientColor} 0%, #121212 400px, #121212 100%)`,
+      }}
+      className="flex-1 rounded-xl border border-zinc-800/50 overflow-y-auto relative scroll-smooth shadow-inner text-white"
     >
-      {children}
+      <div className="p-6">{children}</div>
     </div>
-  )
-}
+  );
+};
 
-export default Content
+export default Content;

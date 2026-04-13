@@ -1,157 +1,188 @@
-import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
-import type { Track } from "@/shared/types/track";
 import {
-  Laptop2,
+  // Laptop2,
   Pause,
   Play,
   Repeat,
   Shuffle,
   SkipBack,
   SkipForward,
-  Volume1,
+  Volume2,
+  ListMusic,
+  Heart,
 } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import type { Track } from "@/features/music/types";
+import { formatDuration } from "@/shared/lib/formatDuration";
+
+import { usePlayerPlayback } from "../lib/usePlayerPlayback";
+import { useRightSidebar } from "@/features/sidebar/lib/useRightSidebar";
 
 interface PlaybackControlsProps {
   isPlaying: boolean;
   currentTime: number;
   duration: number;
   track: Track | null;
+  volume: number;
+  onVolumeChange: (value: number) => void;
 }
-
-const formatDuration = (secs: number | null) => {
-  if (!secs) return "0:00";
-
-  const minutes = Math.floor(secs / 60);
-  const seconds = Math.floor(secs % 60);
-  return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
-};
 
 function PlaybackControls({
   isPlaying,
   currentTime,
   duration,
   track,
+  volume,
+  onVolumeChange,
 }: Readonly<PlaybackControlsProps>) {
+  const {
+    trackList,
+    togglePlay,
+    seek,
+    playNext,
+    playPrevious,
+  } = usePlayerPlayback();
+  const { toggle } = useRightSidebar();
+
   return (
-    <footer className="h-[10%] px-4 bg-zinc-900 border-t border-zinc-800">
-      <div className="h-full max-w-450 mx-auto flex items-center justify-between ">
-        {/* current playing track */}
-        <div className="min-w-45 w-[30%] hidden sm:flex items-center gap-4">
-          {track && (
+    <footer className="h-24 px-4 bg-zinc-950/90 backdrop-blur-xl border-t border-white/5 sticky bottom-0 z-50">
+      <div className="h-full flex items-center justify-between max-w-450 mx-auto">
+        {/* Информация о треке */}
+        <div className="flex items-center gap-4 min-w-45 w-[30%]">
+          {track ? (
             <>
-              <img
-                src={track.image}
-                alt={track.name}
-                className="w-14 h-14 object-cover rounded-md"
-              />
-              <div className="min-w-0 flex-1">
-                <div className="font-medium truncate hover:underline cursor-pointer">
-                  {track.name}
-                </div>
-                <div className="text-sm text-zinc-400 truncate hover:underline cursor-pointer">
-                  Doja Cat
-                </div>
+              <div className="relative group">
+                <img
+                  src={track.imageUrl}
+                  alt={track.title}
+                  className="size-14 object-cover rounded-lg shadow-2xl border border-white/10"
+                />
               </div>
+              <div className="flex flex-col overflow-hidden">
+                <span className="text-sm font-semibold text-white truncate hover:underline cursor-pointer">
+                  {track.title}
+                </span>
+                <span className="text-xs text-zinc-400 truncate hover:text-zinc-200 cursor-pointer">
+                  {track.artistName}
+                </span>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-zinc-300 hover:text-white hover:bg-white/5 transition-all active:scale-90"
+              >
+                <Heart className="size-4" />
+              </Button>
             </>
+          ) : (
+            <div className="flex items-center gap-4 opacity-20">
+              <div className="size-14 bg-zinc-800 rounded-lg" />
+              <div className="space-y-2">
+                <div className="h-3 w-24 bg-zinc-800 rounded" />
+                <div className="h-2 w-16 bg-zinc-800 rounded" />
+              </div>
+            </div>
           )}
         </div>
 
-        {/* player controls */}
-        <div className="flex-1 max-w-full sm:max-w-[45%] flex flex-col items-center gap-1">
-          <div className="flex items-center gap-2 sm:gap-3">
+        {/* Управление воспроизведением */}
+        <div className="flex flex-col items-center gap-2 flex-1 max-w-[40%]">
+          <div className="flex items-center gap-4 md:gap-6">
             <Button
-              size={"icon"}
-              variant={"ghost"}
-              className="hidden sm:inline-flex text-zinc-400 hover:text-white"
+              size="icon"
+              variant="ghost"
+              className="hidden md:flex text-zinc-300 hover:text-white hover:bg-white/5 transition-all active:scale-90"
             >
-              <Shuffle className="h-4 w-4" />
+              <Shuffle className="size-4" />
             </Button>
 
             <Button
-              size={"icon"}
-              variant={"ghost"}
+              size="icon"
+              variant="ghost"
+              onClick={playPrevious}
+              disabled={trackList.length <= 1}
+              className="text-zinc-300 hover:text-white hover:bg-white/5 transition-all active:scale-90"
+            >
+              <SkipBack className="size-5 fill-current" />
+            </Button>
+
+            <Button
+              onClick={togglePlay}
               disabled={!track}
-              className="text-zinc-400 hover:text-white"
-            >
-              <SkipBack className="h-4 w-4" />
-            </Button>
-
-            <Button
-              size={"icon"}
-              variant={"ghost"}
-              className="h-8 w-8 bg-white hover:bg-white/80 text-black rounded-full"
+              className="size-10 rounded-full bg-white hover:bg-emerald-400 text-black transition-all hover:scale-105 active:scale-95 shadow-lg"
             >
               {isPlaying ? (
-                <Pause className="h-5 w-5" />
+                <Pause className="size-5 fill-current" />
               ) : (
-                <Play className="h-5 w-5" />
+                <Play className="size-5 fill-current" />
               )}
             </Button>
 
             <Button
-              size={"icon"}
-              variant={"ghost"}
-              disabled={!track}
-              className="text-zinc-400 hover:text-white"
+              size="icon"
+              variant="ghost"
+              onClick={playNext}
+              disabled={trackList.length <= 1}
+              className="text-zinc-300 hover:text-white hover:bg-white/5 transition-all active:scale-90"
             >
-              <SkipForward className="h-4 w-4" />
+              <SkipForward className="size-5 fill-current" />
             </Button>
 
             <Button
-              size={"icon"}
-              variant={"ghost"}
-              disabled={!track}
-              className="hidden sm:inline-flex text-zinc-400 hover:text-white"
+              size="icon"
+              variant="ghost"
+              className="hidden md:flex text-zinc-300 hover:text-white hover:bg-white/5 transition-all active:scale-90"
             >
-              <Repeat className="h-4 w-4" />
+              <Repeat className="size-4" />
             </Button>
           </div>
 
-          <div className="w-full hidden sm:flex items-center gap-2">
-            <div className="text-xs text-zinc-400">
+          {/* Слайдер прогресса */}
+          <div className="w-full flex items-center gap-3">
+            <span className="text-[10px] font-medium text-zinc-500 min-w-8.75 text-right">
               {formatDuration(currentTime)}
-            </div>
+            </span>
             <Slider
               value={[currentTime]}
-              max={duration}
+              max={duration || 100}
               step={1}
-              className="w-full hover:cursor-grab active:cursor-grabbing"
-              onValueChange={() => {}}
+              onValueChange={(val) => seek(val[0])} // Теперь это реально передвинет ползунок в audio
+              className="w-full"
             />
-            <div className="text-xs text-zinc-400">
+            <span className="text-[10px] font-medium text-zinc-500 min-w-8.75">
               {formatDuration(duration)}
-            </div>
+            </span>
           </div>
         </div>
 
-        {/* volume controls */}
-        <div className="min-w-45 w-[30%] hidden sm:flex items-center justify-end gap-1">
+        {/* Доп. контролы (громкость и очередь) */}
+        <div className="hidden md:flex items-center justify-end gap-3 w-[30%]">
           <Button
-            size={"icon"}
-            variant={"ghost"}
-            className="text-zinc-400 hover:text-white"
+            size="icon"
+            variant="ghost"
+            onClick={() => toggle("queue")} // Теперь открывает очередь
+            className="text-zinc-300 hover:text-white hover:bg-white/5 transition-all active:scale-90"
           >
-            <Laptop2 className="h-4 w-4" />
+            <ListMusic className="size-4" />
           </Button>
-
-          <div className="flex items-center gap-2">
-            <Button
-              size={"icon"}
-              variant={"ghost"}
-              className="text-zinc-400 hover:text-white"
-            >
-              <Volume1 className="h-4 w-4" />
-            </Button>
-
+          <div className="flex items-center gap-2 group">
+            <Volume2 className="size-4 text-zinc-400 group-hover:text-emerald-500" />
             <Slider
-              value={[50]}
+              defaultValue={[volume]}
               max={100}
               step={1}
-              className="w-24 hover:cursor-grab active:cursor-grabbing"
-              onValueChange={() => {}}
+              onValueChange={(val) => onVolumeChange(val[0])}
+              className="w-24 transition-all"
             />
           </div>
+          {/* <Button
+            size="icon"
+            variant="ghost"
+            className="text-zinc-300 hover:text-white hover:bg-white/5 transition-all active:scale-90"
+          >
+            <Laptop2 className="size-4" />
+          </Button> */}
         </div>
       </div>
     </footer>

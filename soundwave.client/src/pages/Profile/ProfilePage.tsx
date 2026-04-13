@@ -2,8 +2,8 @@ import { useNavigate } from "react-router";
 
 import { useAuth } from "@/features/auth/lib/useAuth";
 
-import ListenerPage from "./listener/ListenerPage";
-import ArtistPage from "./artist/ArtistPage";
+import ListenerProfilePage from "./listener/ListenerProfilePage";
+import ArtistProfilePage from "./artist/ArtistProfilePage";
 
 const ProfilePage = () => {
   const { isAuth, user } = useAuth();
@@ -14,10 +14,10 @@ const ProfilePage = () => {
   }
 
   if (user?.role === "artist") {
-    return <ArtistPage />;
+    return <ArtistProfilePage />;
   }
 
-  return <ListenerPage />;
+  return <ListenerProfilePage />;
 };
 
 export default ProfilePage;

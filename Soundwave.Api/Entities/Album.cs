@@ -11,6 +11,6 @@ public class Album
     public long PlayCount { get; set; }
     
     public int ArtistId { get; set; }
-    public User Artist { get; set; } = null!;
+    public Artist Artist { get; set; } = null!;
     public ICollection<Track> Tracks { get; set; } = [];
 }

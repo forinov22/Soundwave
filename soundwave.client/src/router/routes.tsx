@@ -3,6 +3,8 @@ import { Navigate } from "react-router";
 
 import AuthCallbackPage from "@/pages/Auth/AuthCallbackPage";
 import AlbumDetailsPage from "@/pages/Home/components/Content/AlbumDetailsPage";
+import ArtistDetailsPage from "@/pages/Home/components/Content/ArtistDetailsPage";
+import ArtistDiscographyPage from "@/pages/Home/components/Content/ArtistDiscographyPage";
 import HomePage from "@/pages/Home/components/Content/HomePage";
 import MainLayout from "@/pages/Home/MainLayout";
 import LoginPage from "@/pages/Auth/LoginPage";
@@ -20,7 +22,7 @@ export type AppRoute = {
 
 export const routes: AppRoute[] = [
   {
-    path: '/register',
+    path: "/register",
     element: <RegisterPage />,
     publicOnly: true,
   },
@@ -44,6 +46,14 @@ export const routes: AppRoute[] = [
       {
         path: "album/:id",
         element: <AlbumDetailsPage />,
+      },
+      {
+        path: "artist/:id",
+        element: <ArtistDetailsPage />,
+      },
+      {
+        path: "artist/:id/discography",
+        element: <ArtistDiscographyPage />,
       },
     ],
   },

@@ -10,7 +10,7 @@ public class Track
     public long PlayCount { get; set; }
     
     public int ArtistId { get; set; }
-    public User Artist { get; set; } = null!;
+    public Artist Artist { get; set; } = null!;
     
     public int? AlbumId { get; set; }
     public Album? Album { get; set; }

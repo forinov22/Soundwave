@@ -19,6 +19,7 @@ public static class DependencyInjection
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IStorageService, S3StorageService>();
         services.AddScoped<IMusicService, MusicService>();
+        services.AddScoped<IArtistService, ArtistService>();
 
         return services;
     }

@@ -4,34 +4,47 @@ import { useMusicStore } from "../model/musicStore";
 import { musicApi } from "../api/musicApi";
 
 export function useMusic() {
-    const {
-        trendingTracks,
-        popularAlbums,
-        setTrendingTracks,
-        setPopularAlbums
-    } = useMusicStore();
+  const { trendingTracks, popularAlbums, setTrendingTracks, setPopularAlbums } =
+    useMusicStore();
 
-    const { execute: fetchHome, isLoading, error } = useAsync(async () => {
-        const [tracksRes, albumsRes] = await Promise.all([
-            musicApi.getTrending(),
-            musicApi.getPopularAlbums()
-        ]);
+  // Загрузка главной страницы
+  const {
+    execute: fetchHome,
+    isLoading: isHomeLoading,
+    error: homeError,
+  } = useAsync(async () => {
+    const [tracksRes, albumsRes] = await Promise.all([
+      musicApi.getTrending(),
+      musicApi.getPopularAlbums(),
+    ]);
 
-        setTrendingTracks(tracksRes.data);
-        setPopularAlbums(albumsRes.data);
-    });
+    setTrendingTracks(tracksRes.data);
+    setPopularAlbums(albumsRes.data);
+  });
 
-    const fetchAlbum = async (id: number) => {
-        const res = await musicApi.getAlbumById(id);
-        return res.data;
-    };
+  // Загрузка конкретного альбома
+  const {
+    execute: fetchAlbumById,
+    isLoading: isAlbumLoading,
+    error: albumError,
+  } = useAsync(async (id: number) => {
+    const res = await musicApi.getAlbumById(id);
+    return res.data;
+  });
 
-    return {
-        trendingTracks,
-        popularAlbums,
-        isLoading,
-        error,
-        fetchHome,
-        fetchAlbum
-    };
+  return {
+    // Данные из стора
+    trendingTracks,
+    popularAlbums,
+
+    // Состояния Home
+    fetchHome,
+    isHomeLoading,
+    homeError,
+
+    // Состояния Альбома
+    fetchAlbum: fetchAlbumById,
+    isAlbumLoading,
+    albumError,
+  };
 }

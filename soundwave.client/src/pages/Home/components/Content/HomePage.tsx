@@ -1,64 +1,91 @@
-import {useEffect} from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router";
+import { Loader2 } from "lucide-react";
 
 import AlbumItem from "@/shared/ui/AlbumItem";
-import SongItem from "@/shared/ui/SongItem";
-import {useMusic} from "@/features/music/lib/useMusic.ts";
+import TrackItem from "@/shared/ui/TrackItem";
+import { useMusic } from "@/features/music/lib/useMusic.ts";
+import { usePlayerPlayback } from "@/features/player/lib/usePlayerPlayback";
 
-import Navbar from "./Navbar";
+const SectionHeader = ({
+  title,
+  onShowAll,
+}: {
+  title: string;
+  onShowAll: () => void;
+}) => (
+  <div className="flex items-center justify-between mb-4 mt-8 px-2">
+    <h2 className="text-2xl font-bold hover:underline cursor-pointer">
+      {title}
+    </h2>
+    <button
+      onClick={onShowAll}
+      className="text-sm font-bold text-zinc-400 hover:text-white transition-colors"
+    >
+      Показать все
+    </button>
+  </div>
+);
 
 const HomePage = () => {
-    // TODO: add error handling
-    const { trendingTracks, popularAlbums, fetchHome, isLoading } = useMusic();
-
-    useEffect(() => {
-        fetchHome();
-    }, [fetchHome]);
-    
+  const { trendingTracks, popularAlbums, fetchHome, isHomeLoading } = useMusic();
+  const { playTrack } = usePlayerPlayback();
   const navigate = useNavigate();
 
-  const handleAlbumClick = (id: number) => {
-    navigate(`/album/${id}`);
-  };
+  useEffect(() => {
+    fetchHome();
+  }, [fetchHome]);
 
-    if (isLoading) {
-        // TODO: add sceleton
-        return <div className="text-white">Loading music...</div>;
-    }
+  if (isHomeLoading)
+    return (
+      <div className="flex h-full items-center justify-center">
+        <Loader2 className="animate-spin text-emerald-500 size-10" />
+      </div>
+    );
 
   return (
-    <>
-      <Navbar />
-      <div className="mb-4">
-        <h1 className="my-5 text-2xl font-bold">Featured Charts</h1>
-        <div className="flex overflow-auto">
-          {popularAlbums.map((album) => (
-            <AlbumItem
-              key={album.id}
-              // id={album.id}
-              name={album.title}
-              description={album.description}
-              image={album.imageUrl}
-              onClick={() => handleAlbumClick(album.id)}
-            />
-          ))}
-        </div>
+    <div className="max-w-7xl mx-auto pb-20">
+      <SectionHeader
+        title="Популярные треки"
+        onShowAll={() => navigate("/tracks")}
+      />
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        {trendingTracks.slice(0, 5).map((track) => (
+          <TrackItem
+            key={track.id}
+            name={track.title}
+            image={track.imageUrl}
+            artist={track.artistName}
+            onClick={() => playTrack(track)}
+          />
+        ))}
       </div>
-      <div className="mb-4">
-        <h1 className="my-5 text-2xl font-bold">Today's Biggest Hits</h1>
-        <div className="flex overflow-auto">
-          {trendingTracks.map((track) => (
-            <SongItem
-              key={track.id}
-              // id={album.id}
-              name={track.title}
-              description={'description'}
-              image={track.imageUrl}
-            />
-          ))}
-        </div>
+
+      <SectionHeader
+        title="Популярные альбомы"
+        onShowAll={() => navigate("/albums")}
+      />
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        {popularAlbums.slice(0, 5).map((album) => (
+          <AlbumItem
+            key={album.id}
+            name={album.title}
+            image={album.imageUrl}
+            description={album.description}
+            onClick={() => navigate(`/album/${album.id}`)}
+          />
+        ))}
       </div>
-    </>
+
+      <SectionHeader
+        title="Популярные исполнители"
+        onShowAll={() => navigate("/artists")}
+      />
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        {/* ArtistItem должен иметь rounded-full для картинки */}
+        {/* {popularArtists.map(artist => <ArtistItem key={artist.id} artist={artist} />)} */}
+      </div>
+    </div>
   );
 };
 

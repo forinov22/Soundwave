@@ -1,46 +1,100 @@
-import home from '@/assets/home.png'
-import search from '@/assets/search.png'
-import stack from '@/assets/stack.png'
-import arrow from '@/assets/arrow.png'
-import plus from '@/assets/plus.png'
+import { Library, Plus, Search, ListFilter, Heart } from "lucide-react";
 
-const Sidebar = () => {
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+const Sidebar = ({
+  isCollapsed,
+  toggleCollapse,
+}: {
+  isCollapsed: boolean;
+  toggleCollapse: () => void;
+}) => {
   return (
-    <div className="w-[25%] h-full p-2 flex-col gap-2 text-white hidden lg:flex">
-      <div className="h-[15%] rounded bg-[#121212] flex flex-col justify-around">
-        <div className="flex items-center gap-3 pl-8 cursor-pointer">
-          <img src={home} alt="home" className="w-6" />
-          <p className="font-bold">Home</p>
+    <div
+      className={`h-full flex flex-col gap-2 transition-all duration-300 ${isCollapsed ? "w-20" : "w-[320px]"} hidden lg:flex`}
+    >
+      <div className="flex-1 rounded-xl bg-zinc-900/30 border border-zinc-800/50 flex flex-col overflow-hidden backdrop-blur-md">
+        {/* Шапка медиатеки */}
+        <div className="p-4 flex items-center justify-between text-zinc-400">
+          <button
+            onClick={toggleCollapse}
+            className="flex items-center gap-3 px-2 hover:text-white transition-colors group"
+          >
+            <Library className="size-6 group-hover:scale-110 transition-transform" />
+            {!isCollapsed && <span className="font-bold">Моя медиатека</span>}
+          </button>
+          {!isCollapsed && (
+            <Plus className="size-5 hover:text-white cursor-pointer" />
+          )}
         </div>
-        <div className="flex items-center gap-3 pl-8 cursor-pointer">
-          <img src={search} alt="search" className="w-6" />
-          <p className="font-bold">Search</p>
-        </div>
-      </div>
-      <div className="h-[85%] rounded bg-[#121212]">
-        <div className="p-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img src={stack} alt="stack" className="w-8" />
-            <p className="font-semibold">Your Library</p>
+
+        {!isCollapsed && (
+          <>
+            {/* Кнопки фильтрации */}
+            <div className="flex gap-2 px-4 mb-4">
+              {["Плейлисты", "Исполнители", "Альбомы"].map((tag) => (
+                <button
+                  key={tag}
+                  className="px-3 py-1.5 bg-zinc-800/50 hover:bg-zinc-800 rounded-full text-xs font-medium transition-colors"
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+
+            {/* Поиск и Сортировка */}
+            <div className="flex items-center justify-between px-4 mb-2 text-zinc-400">
+              <Search className="size-4 cursor-pointer hover:text-white" />
+              <DropdownMenu>
+                <DropdownMenuTrigger className="flex items-center gap-1 text-xs hover:text-white outline-none">
+                  Недавно добавленные <ListFilter className="size-4" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-zinc-900 border-zinc-800 text-zinc-300">
+                  <DropdownMenuLabel className="text-zinc-500 text-[10px] uppercase">
+                    Сортировка
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-zinc-800" />
+                  <DropdownMenuItem>Недавно добавленные</DropdownMenuItem>
+                  <DropdownMenuItem>По алфавиту</DropdownMenuItem>
+                  <DropdownMenuItem>По автору</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </>
+        )}
+
+        <ScrollArea className="flex-1">
+          <div className="p-2 space-y-1">
+            {/* Пример элемента списка */}
+            <div className="flex items-center gap-3 p-2 hover:bg-zinc-800/50 rounded-md cursor-pointer group transition-colors">
+              <div className="size-12 rounded bg-linear-to-br from-indigo-700 to-emerald-400 flex items-center justify-center">
+                <Heart className="size-5 fill-white text-white" />
+              </div>
+              {!isCollapsed && (
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-zinc-100">
+                    Любимые треки
+                  </span>
+                  <span className="text-xs text-zinc-400">
+                    Плейлист • 128 треков
+                  </span>
+                </div>
+              )}
+            </div>
+            {/* Здесь будет .map() по любимым альбомам и артистам */}
           </div>
-          <div className="flex items-center gap-3">
-            <img src={arrow} alt="arrow" className="w-5" />
-            <img src={plus} alt="plus" className="w-5" />
-          </div>
-        </div>
-        <div className='m-2 p-4 bg-[#242424] rounded font-semibold flex flex-col items-start justify-start'>
-            <h1>Create your first playlist</h1>
-            <p className='font-light'>it's easy we will help you</p>
-            <button className='mt-4 px-4 py-1.5 bg-white rounded-full text-[15px] text-black'>Create Playlist</button>
-        </div>
-        <div className='m-2 p-4 bg-[#242424] rounded font-semibold flex flex-col items-start justify-start mt-4'>
-            <h1>Let's find some podcasts to follow</h1>
-            <p className='font-light'>we'll keep you update on new episodes</p>
-            <button className='mt-4 px-4 py-1.5 bg-white rounded-full text-[15px] text-black'>Browse Podcasts</button>
-        </div>
+        </ScrollArea>
       </div>
     </div>
   );
-}
+};
 
-export default Sidebar
+export default Sidebar;

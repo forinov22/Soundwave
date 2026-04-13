@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Soundwave.Api.Entities;
+﻿namespace Soundwave.Api.Entities;
 
 public enum UserRole
 {
@@ -13,15 +11,22 @@ public class User
     public int Id { get; set; }
     public string Email { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
-    public string? Avatar { get; set; }
-
+    public string? Avatar { get; set; } // Маленькая аватарка
     public string PasswordHash { get; set; } = string.Empty;
-
     public UserRole Role { get; set; } = UserRole.Listener;
 
-    public ICollection<RefreshToken> RefreshTokens { get; set; } = [];
-    public ICollection<Track> Tracks { get; set; } = [];
-    public ICollection<Album> Albums { get; set; } = [];
+    // Связи общие для всех
     public ICollection<Playlist> Playlists { get; set; } = [];
     public ICollection<Track> LikedTracks { get; set; } = [];
+}
+
+public class Artist : User
+{
+    // Поля только для артиста
+    public string? BackgroundImage { get; set; } // Та самая картинка профиля (Banner)
+    public string? Description { get; set; }
+    
+    // Навигационные свойства
+    public ICollection<Track> Tracks { get; set; } = [];
+    public ICollection<Album> Albums { get; set; } = [];
 }

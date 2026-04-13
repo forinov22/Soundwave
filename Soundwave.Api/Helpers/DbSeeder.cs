@@ -8,56 +8,86 @@ public static class DbSeeder
 {
     public static async Task SeedAsync(AppDbContext context)
     {
-        if (await context.Albums.AnyAsync()) return;
+        // Проверяем, есть ли уже данные (используем Users, так как Artist — это User)
+        if (await context.Users.AnyAsync(u => u.Role == UserRole.Artist)) return;
 
-        var admin = new User { 
-            Name = "Soundwave Global", 
-            Email = "official@soundwave.com", 
-            Role = UserRole.Artist,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword("system_generated"), 
+        var random = new Random();
+
+        // 1. Создаем реальных артистов
+        var artists = new List<Artist>
+        {
+            new Artist 
+            { 
+                Name = "The Weeknd", 
+                Email = "abel@xo.com", 
+                Role = UserRole.Artist,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("starboy123"),
+                BackgroundImage = "artists/banners/the-weeknd.jpg",
+                Avatar = "artists/avatars/the-weeknd-avatar.jpg",
+                Description = "Abel Makkonen Tesfaye, known professionally as The Weeknd, is a Canadian singer-songwriter and record producer. Known for his sonic versatility and dark lyricism."
+            },
+            new Artist 
+            { 
+                Name = "Linkin Park", 
+                Email = "contact@lp.com", 
+                Role = UserRole.Artist,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("numb123"),
+                BackgroundImage = "artists/banners/linkin-park.jpg",
+                Avatar = "artists/avatars/linkin-park-avatar.jpg",
+                Description = "Linkin Park is an American rock band from Agoura Hills, California. The band's current lineup comprises vocalists Mike Shinoda and Emily Armstrong."
+            },
+            new Artist 
+            { 
+                Name = "Interworld", 
+                Email = "phonk@interworld.com", 
+                Role = UserRole.Artist,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("phonk-master"),
+                BackgroundImage = "artists/banners/interworld.jpg",
+                Avatar = "artists/avatars/interworld-avatar.jpg",
+                Description = "A leading figure in the modern Phonk scene, best known for the global hit 'Metamorphosis'."
+            }
         };
-        context.Users.Add(admin);
+
+        context.Users.AddRange(artists);
         await context.SaveChangesAsync();
 
+        // 2. Данные для альбомов
         var albumsData = new[] {
-            new { Name = "Top 50 Global", Color = "#2a4365" },
-            new { Name = "Top 50 India", Color = "#22543d" },
-            new { Name = "Trending Global", Color = "#44337a" },
-            new { Name = "Mega Hits", Color = "#234e52" },
-            new { Name = "Happy Favorites", Color = "#744210" },
+            new { Title = "After Hours", Color = "#8b0000", Artist = artists[0] },
+            new { Title = "Meteora", Color = "#2a4365", Artist = artists[1] },
+            new { Title = "Phonk Anthology", Color = "#1a1a1a", Artist = artists[2] },
+            new { Title = "Hybrid Theory", Color = "#4a5568", Artist = artists[1] },
         };
 
-        for (var i = 0; i < albumsData.Length; i++)
+        foreach (var data in albumsData)
         {
-            var model = albumsData[i];
             var album = new Album
             {
-                Title = model.Name,
-                Description = "Your weekly update of the most played tracks",
-                ImageS3Path = $"covers/albums/img{i % 3 + 1}.jpg",
-                BgColor = model.Color,
-                ArtistId = admin.Id,
-                ReleaseDate = DateTime.UtcNow,
-                PlayCount = new Random().Next(100, 10000),
+                Title = data.Title,
+                Description = $"Official release by {data.Artist.Name}",
+                ImageS3Path = $"covers/albums/{data.Title.ToLower().Replace(" ", "-")}.jpg",
+                BgColor = data.Color,
+                ArtistId = data.Artist.Id,
+                ReleaseDate = DateTime.UtcNow.AddMonths(-random.Next(1, 60)),
+                PlayCount = random.Next(1000, 100000),
             };
             context.Albums.Add(album);
-        }
-        await context.SaveChangesAsync();
+            await context.SaveChangesAsync(); // Сохраняем, чтобы получить ID альбома для треков
 
-        var firstAlbum = await context.Albums.FirstAsync();
-        
-        for (var i = 1; i <= 8; i++)
-        {
-            context.Tracks.Add(new Track
+            // 3. Генерируем треки для каждого альбома
+            for (var j = 1; j <= 5; j++)
             {
-                Title = $"Track {i}",
-                AudioS3Path = $"tracks/track{(i % 3 + 1)}.mp3",
-                ImageS3Path = $"covers/tracks/img{i % 3 + 1}.jpg",
-                DurationSeconds = 150 + (i * 10),
-                ArtistId = admin.Id,
-                AlbumId = firstAlbum.Id,
-                PlayCount = new Random().Next(100, 10000)
-            });
+                context.Tracks.Add(new Track
+                {
+                    Title = $"{data.Title} - Track {j}",
+                    AudioS3Path = $"tracks/sample-{random.Next(1, 4)}.mp3",
+                    ImageS3Path = album.ImageS3Path, // Обычно у треков в альбоме та же обложка
+                    DurationSeconds = random.Next(180, 300),
+                    ArtistId = data.Artist.Id,
+                    AlbumId = album.Id,
+                    PlayCount = random.Next(500, 50000)
+                });
+            }
         }
 
         await context.SaveChangesAsync();
