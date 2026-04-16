@@ -6,14 +6,13 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-    /* Светлая тема (опционально, но пусть будет чистой) */
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);
     --card: oklch(0.98 0 0);
     --card-foreground: oklch(0.145 0 0);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.705 0.191 146.73); /* Изумрудный акцент */
+    --primary: oklch(0.705 0.191 146.73);
     --primary-foreground: oklch(0.985 0 0);
     --secondary: oklch(0.97 0 0);
     --secondary-foreground: oklch(0.205 0 0);
@@ -25,25 +24,23 @@
     --border: oklch(0.922 0 0);
     --input: oklch(0.922 0 0);
     --ring: oklch(0.705 0.191 146.73);
-    --radius: 0.75rem; /* Немного увеличили скругления */
+    --radius: 0.75rem;
 }
 
 .dark {
-    /* Наш основной стиль для плеера */
-    --background: oklch(0.1 0 0);       /* Глубокий черный #121212 */
-    --foreground: oklch(0.985 0 0);     /* Почти белый текст */
+    --background: oklch(0.1 0 0);
+    --foreground: oklch(0.985 0 0);
     
-    --card: oklch(0.16 0 0);            /* Чуть светлее фона для карточек */
+    --card: oklch(0.16 0 0);
     --card-foreground: oklch(0.985 0 0);
     
     --popover: oklch(0.16 0 0);
     --popover-foreground: oklch(0.985 0 0);
     
-    /* Изумрудный Spotify Green */
     --primary: oklch(0.705 0.191 146.73); 
-    --primary-foreground: oklch(0.1 0 0); /* Черный текст на зеленом фоне */
+    --primary-foreground: oklch(0.1 0 0);
     
-    --secondary: oklch(0.25 0 0);       /* Для кнопок "не в фокусе" */
+    --secondary: oklch(0.25 0 0);
     --secondary-foreground: oklch(0.985 0 0);
     
     --muted: oklch(0.2 0 0);
@@ -54,7 +51,7 @@
     
     --destructive: oklch(0.6 0.2 25);
     
-    --border: oklch(1 0 0 / 10%);       /* Тонкие полупрозрачные границы */
+    --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 5%);
     --ring: oklch(0.705 0.191 146.73);
     
@@ -108,18 +105,12 @@
 }
 
 @layer base {
-    * {
-        @apply border-border outline-ring/50;
-    }
-    body {
-        @apply bg-background text-foreground antialiased;
-    }
-    html {
-        @apply font-sans;
-    }
+    * { @apply border-border outline-ring/50; }
+    body { @apply bg-background text-foreground antialiased; }
+    html { @apply font-sans; }
 }
 
-/* Скроллбар делаем тонким и современным, а не полностью скрываем */
+/* Scrollbar */
 ::-webkit-scrollbar {
     width: 6px;
 }

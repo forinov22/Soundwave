@@ -5,7 +5,14 @@ import PublicOnlyRoute from "./PublicOnlyRoute";
 import type { AppRoute } from "./routes";
 
 export function renderRoute(route: AppRoute): React.ReactNode {
-  const { index, path, element, children, protected: isProtected, publicOnly } = route;
+  const {
+    index,
+    path,
+    element,
+    children,
+    protected: isProtected,
+    publicOnly,
+  } = route;
 
   let wrappedElement = element;
 
@@ -18,7 +25,7 @@ export function renderRoute(route: AppRoute): React.ReactNode {
   }
 
   if (index) {
-    return <Route index key="index" element={wrappedElement} />
+    return <Route index key="index" element={wrappedElement} />;
   }
 
   return (
