@@ -5,9 +5,9 @@ import Player from "@/features/player/ui/Player";
 import { RightSidebar } from "@/features/sidebar/ui/RightSidebar";
 import { SidebarTrigger } from "@/features/sidebar/ui/SidebarTrigger";
 
-import Sidebar from "./components/Sidebar";
+import Sidebar from "./components/Sidebar/Sidebar";
 import Navbar from "./components/Navbar";
-import Content from "./components/Content/Content";
+import PageLayout from "./components/PageLayout/PageLayout";
 
 export interface LayoutOutletContext {
   setGradientBgColor: (color?: string) => void;
@@ -29,10 +29,10 @@ const MainLayout = () => {
   };
 
   return (
-    <div className="h-screen bg-black flex flex-col overflow-hidden">
+    <div className="flex h-screen flex-col overflow-hidden bg-black">
       <Navbar />
-      
-      <div className="flex-1 flex overflow-hidden p-2 gap-2 relative">
+
+      <div className="relative flex flex-1 gap-2 overflow-hidden p-2">
         {/* Левая панель */}
         <Sidebar
           isCollapsed={isSidebarCollapsed}
@@ -40,8 +40,8 @@ const MainLayout = () => {
         />
 
         {/* Основная рабочая область с контентом */}
-        <div className="flex-1 flex relative overflow-hidden gap-2">
-          <Content gradientColor={gradientColor}>
+        <div className="relative flex flex-1 gap-2 overflow-hidden">
+          <PageLayout gradientColor={gradientColor}>
             <Outlet
               context={
                 {
@@ -51,7 +51,7 @@ const MainLayout = () => {
             />
             {/* Триггер будет прижат к правому краю внутри контента, если сайдбар закрыт */}
             <SidebarTrigger />
-          </Content>
+          </PageLayout>
 
           {/* Правая панель (появляется сбоку от контента) */}
           <RightSidebar />

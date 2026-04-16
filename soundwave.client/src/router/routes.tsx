@@ -2,14 +2,15 @@ import type { ReactNode } from "react";
 import { Navigate } from "react-router";
 
 import AuthCallbackPage from "@/pages/Auth/AuthCallbackPage";
-import AlbumDetailsPage from "@/pages/Home/components/Content/AlbumDetailsPage";
-import ArtistDetailsPage from "@/pages/Home/components/Content/ArtistDetailsPage";
-import ArtistDiscographyPage from "@/pages/Home/components/Content/ArtistDiscographyPage";
-import HomePage from "@/pages/Home/components/Content/HomePage";
+import AlbumDetailsPage from "@/pages/Home/components/PageLayout/AlbumDetailsPage";
+import ArtistDetailsPage from "@/pages/Home/components/PageLayout/ArtistDetailsPage";
+import ArtistDiscographyPage from "@/pages/Home/components/PageLayout/ArtistDiscographyPage";
+import HomePage from "@/pages/Home/components/PageLayout/HomePage";
 import MainLayout from "@/pages/Home/MainLayout";
 import LoginPage from "@/pages/Auth/LoginPage";
 import ProfilePage from "@/pages/Profile/ProfilePage";
 import RegisterPage from "@/pages/Auth/RegisterPage";
+import SearchPage from "@/pages/Search/SearchPage";
 
 export type AppRoute = {
   index?: true;
@@ -42,6 +43,10 @@ export const routes: AppRoute[] = [
       {
         index: true,
         element: <HomePage />,
+      },
+      {
+        path: "/search",
+        element: <SearchPage />,
       },
       {
         path: "album/:id",
