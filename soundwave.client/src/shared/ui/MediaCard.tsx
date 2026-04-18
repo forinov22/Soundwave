@@ -13,6 +13,7 @@ interface MediaCardProps {
   textAlign?: "left" | "center";
   // subtitle в несколько строк
   subtitleClamp?: number;
+  titleUnderlineOnHover?: boolean;
   className?: string;
 }
 
@@ -26,6 +27,7 @@ export function MediaCard({
   imageZoomOnHover = false,
   textAlign = "left",
   subtitleClamp = 1,
+  titleUnderlineOnHover = false,
   className,
 }: Readonly<MediaCardProps>) {
   return (
@@ -73,7 +75,11 @@ export function MediaCard({
       </div>
 
       {/* Текст */}
-      <Typography variant="title" truncate>
+      <Typography
+        variant="title"
+        underlineOnHover={titleUnderlineOnHover}
+        truncate
+      >
         {title}
       </Typography>
 

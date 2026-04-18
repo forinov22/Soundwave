@@ -14,6 +14,7 @@ const AlbumItem = ({ name, image, description, onClick }: AlbumItemProps) => (
     subtitle={description}
     subtitleClamp={2}
     imageZoomOnHover
+    titleUnderlineOnHover
     onClick={onClick}
   />
 );

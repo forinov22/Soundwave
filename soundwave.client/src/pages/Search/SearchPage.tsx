@@ -1,164 +1,303 @@
-// @/features/search/ui/SearchPageComponents.tsx
-
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, MoreHorizontal, Heart } from "lucide-react";
+import { Play, Heart } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { songsData, albumsData } from "@/assets/assets";
+import { TrackTable } from "@/shared/ui/TrackTable";
+import { TrackRow } from "@/shared/ui/TrackRow";
+import { MediaCard } from "@/shared/ui/MediaCard";
 import AlbumItem from "@/shared/ui/AlbumItem";
+import { ArtistItem } from "@/shared/ui/ArtistItem";
+import { Typography } from "@/shared/ui/Typography";
+import { ActionIcon } from "@/shared/ui/ActionIcon";
 
-const MOCK_DATA = {
-  topResult: {
-    title: "After Hours",
-    artist: "The Weeknd",
-    image:
-      "https://vibe.com/wp-content/uploads/2020/03/the-weeknd-after-hours-album-cover.jpg",
-    type: "Альбом",
-  },
-  tracks: [
-    {
-      id: 1,
-      title: "Blinding Lights",
-      artist: "The Weeknd",
-      image: "https://example.com/img1.jpg",
-    },
-    {
-      id: 2,
-      title: "Save Your Tears",
-      artist: "The Weeknd",
-      image: "https://example.com/img2.jpg",
-    },
-  ],
-  albums: [
-    {
-      id: 1,
-      title: "Starboy",
-      image: "https://example.com/starboy.jpg",
-      description: "2016 • Альбом",
-    },
-  ],
+// ─── Мок-данные ────────────────────────────────────────────────────────────
+
+const MOCK_TOP_RESULT = {
+  title: "Top 50 Global",
+  artist: "Various Artists",
+  image: albumsData[0].image,
+  type: "Альбом",
 };
 
-// Лучший результат с динамическим свечением
-export const TopResultCard = ({ item }: any) => (
-  <div className="group relative cursor-pointer overflow-hidden rounded-2xl border border-white/5 bg-zinc-900/40 p-6 transition-all duration-500 hover:bg-zinc-800/40">
-    {/* Мягкое свечение на фоне при ховере */}
-    <div className="absolute -inset-24 bg-emerald-500/10 opacity-0 blur-[100px] transition-opacity duration-700 group-hover:opacity-100" />
+// Ровно 4 трека — чтобы таблица совпадала по высоте с TopResultCard
+const MOCK_TRACKS = songsData.slice(0, 4).map((s) => ({
+  id: s.id,
+  title: s.name,
+  artist: "Various Artists",
+  image: s.image,
+  duration: s.duration,
+}));
 
-    <div className="relative z-10">
-      <div className="relative mb-6 size-28 overflow-hidden rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+const MOCK_ALBUMS = albumsData.map((a) => ({
+  id: a.id,
+  name: a.name,
+  image: a.image,
+  description: a.desc,
+}));
+
+const MOCK_ARTISTS = songsData.slice(0, 5).map((s, i) => ({
+  id: i,
+  name: `Artist ${i + 1}`,
+  image: s.image,
+}));
+
+// ─── Карточка лучшего результата ──────────────────────────────────────────
+
+const TopResultCard = ({ item }: { item: typeof MOCK_TOP_RESULT }) => (
+  <div className="group relative h-full cursor-pointer overflow-hidden rounded-2xl border border-white/5 bg-surface p-6 transition-all duration-300 hover:bg-surface-hover">
+    {/* Свечение при ховере */}
+    <div className="pointer-events-none absolute -inset-24 bg-primary/10 opacity-0 blur-[80px] transition-opacity duration-500 group-hover:opacity-100" />
+
+    <div className="relative z-10 flex h-full flex-col">
+      {/* Обложка */}
+      <div className="relative mb-5 size-28 overflow-hidden rounded-xl shadow-[0_16px_40px_rgba(0,0,0,0.6)]">
         <img
           src={item.image}
-          className="size-full object-cover transition-transform duration-700 group-hover:scale-105"
-          alt=""
+          alt={item.title}
+          className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
-
-        {/* Кнопка Play, которая "выплывает" */}
-        <div className="absolute right-2 bottom-2 translate-y-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-          <div className="flex size-12 items-center justify-center rounded-full bg-emerald-500 text-black shadow-2xl transition-transform hover:scale-110 active:scale-95">
-            <Play className="ml-1 size-6 fill-current" />
+        <div className="absolute right-2 bottom-2 translate-y-3 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+          <div className="flex size-11 items-center justify-center rounded-full bg-primary shadow-xl transition-transform hover:scale-110 active:scale-95">
+            <Play className="ml-0.5 size-5 fill-current text-primary-foreground" />
           </div>
         </div>
       </div>
 
-      <h2 className="mb-2 text-3xl font-black tracking-tight text-white transition-colors group-hover:text-emerald-400">
+      {/* Название */}
+      <h2 className="mb-2 text-3xl font-black tracking-tight text-text-primary transition-colors group-hover:text-primary">
         {item.title}
       </h2>
 
-      <div className="flex items-center gap-3">
-        <span className="rounded-md border border-white/10 bg-black/60 px-2.5 py-0.5 text-[10px] font-black tracking-widest text-white uppercase">
+      {/* Тип + артист */}
+      <div className="mt-auto flex items-center gap-3">
+        <span className="rounded-md border border-white/10 bg-black/50 px-2.5 py-0.5 text-[10px] font-bold tracking-widest text-text-secondary uppercase">
           {item.type}
         </span>
-        <span className="text-sm font-semibold text-zinc-400 decoration-zinc-500 hover:underline">
+        <Typography variant="subtitle" size="sm" underlineOnHover>
           {item.artist}
-        </span>
+        </Typography>
       </div>
     </div>
   </div>
 );
 
-// Стилизованная строка трека для поиска
-export const SearchTrackRow = ({ track, index }: any) => (
-  <div className="group flex cursor-pointer items-center gap-4 rounded-lg p-2 transition-all duration-200 hover:bg-white/10">
-    <div className="relative size-10 shrink-0 overflow-hidden rounded">
-      <img src={track.image} className="size-full object-cover" alt="" />
-      <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
-        <Play className="size-4 fill-white text-white" />
-      </div>
-    </div>
+// ─── Секция ────────────────────────────────────────────────────────────────
 
-    <div className="min-w-0 flex-1">
-      <p className="truncate text-sm font-bold text-white">{track.title}</p>
-      <p className="truncate text-xs font-medium text-zinc-400 transition-colors group-hover:text-zinc-300">
-        {track.artist}
-      </p>
-    </div>
-
-    <div className="flex translate-x-2 transform items-center gap-4 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100">
-      <button className="text-zinc-400 transition-colors hover:text-emerald-500">
-        <Heart className="size-4" />
-      </button>
-      <span className="min-w-[35px] font-mono text-xs text-zinc-500">3:42</span>
-      <button className="text-zinc-400 transition-colors hover:text-white">
-        <MoreHorizontal className="size-4" />
-      </button>
-    </div>
-  </div>
+const Section = ({
+  title,
+  children,
+  className,
+}: {
+  title: string;
+  children: React.ReactNode;
+  className?: string;
+}) => (
+  <section className={cn("mb-10", className)}>
+    <h2 className="mb-5 text-2xl font-black tracking-tight text-text-primary">
+      {title}
+    </h2>
+    {children}
+  </section>
 );
 
-// @/pages/SearchPage.tsx
+// ─── Фильтры ───────────────────────────────────────────────────────────────
+
+const FILTERS = ["Все", "Треки", "Альбомы", "Исполнители", "Плейлисты"];
+
+// ─── Страница ──────────────────────────────────────────────────────────────
 
 const SearchPage = () => {
-  // ... (логика фильтров и MOCK_DATA та же)
+  const [activeFilter, setActiveFilter] = useState("Все");
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25 }}
       className="mx-auto max-w-7xl pb-32"
     >
-      {/* <SearchFilterBar activeFilter={filter} setFilter={setFilter} /> */}
+      {/* Фильтры */}
+      <div className="mb-8 flex flex-wrap gap-2">
+        {FILTERS.map((f) => (
+          <button
+            key={f}
+            onClick={() => setActiveFilter(f)}
+            className={cn(
+              "rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-150",
+              activeFilter === f
+                ? "bg-text-primary text-black"
+                : "bg-surface text-text-secondary hover:bg-surface-hover hover:text-text-primary",
+            )}
+          >
+            {f}
+          </button>
+        ))}
+      </div>
 
       <AnimatePresence mode="wait">
-        <div className="mb-12 grid grid-cols-1 gap-10 lg:grid-cols-12">
-          {/* Лучший результат */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="lg:col-span-5"
-          >
-            <h2 className="mb-5 text-2xl font-black tracking-tight">
-              Лучший результат
-            </h2>
-            <TopResultCard item={MOCK_DATA.topResult} />
-          </motion.div>
+        <motion.div
+          key={activeFilter}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.18 }}
+        >
+          {/* ── Секция 1: Лучший результат + Треки ── */}
+          {(activeFilter === "Все" || activeFilter === "Треки") && (
+            <section className="mb-10">
+              <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-12">
+                {/* Лучший результат */}
+                {activeFilter === "Все" && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.97 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex flex-col lg:col-span-5"
+                  >
+                    <Typography
+                      variant="label"
+                      size="xs"
+                      className="mb-4 text-text-secondary"
+                    >
+                      Лучший результат
+                    </Typography>
+                    {/* flex-1 растягивает карточку на полную высоту колонки */}
+                    <div className="flex-1">
+                      <TopResultCard item={MOCK_TOP_RESULT} />
+                    </div>
+                  </motion.div>
+                )}
 
-          {/* Список треков */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="lg:col-span-7"
-          >
-            <h2 className="mb-5 text-2xl font-black tracking-tight">Песни</h2>
-            <div className="grid gap-0.5">
-              {MOCK_DATA.tracks.map((track, i) => (
-                <SearchTrackRow key={track.id} track={track} index={i} />
-              ))}
-            </div>
-          </motion.div>
-        </div>
+                {/* Треки */}
+                <motion.div
+                  initial={{ opacity: 0, x: 12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.2, delay: 0.05 }}
+                  className={cn(
+                    "flex flex-col",
+                    activeFilter === "Все" ? "lg:col-span-7" : "lg:col-span-12",
+                  )}
+                >
+                  <Typography
+                    variant="label"
+                    size="xs"
+                    className="mb-4 text-text-secondary"
+                  >
+                    Треки
+                  </Typography>
+                  <TrackTable
+                    data={MOCK_TRACKS}
+                    getKey={(t) => t.id}
+                    onRowClick={() => {}}
+                    showHeader={false}
+                    columns={[
+                      {
+                        key: "track",
+                        width: "1fr",
+                        render: (track) => (
+                          <TrackRow
+                            image={track.image}
+                            title={track.title}
+                            subtitle={track.artist}
+                            size="sm"
+                          />
+                        ),
+                      },
+                      {
+                        key: "like",
+                        width: "auto",
+                        align: "right",
+                        render: () => (
+                          <ActionIcon
+                            icon={<Heart className="size-4" />}
+                            variant="primary"
+                            size="sm"
+                            label="В избранное"
+                            className="opacity-0 group-hover:opacity-100"
+                          />
+                        ),
+                      },
+                      {
+                        key: "duration",
+                        width: "auto",
+                        align: "right",
+                        render: (track) => (
+                          <Typography
+                            variant="subtitle"
+                            size="sm"
+                            className="w-10 text-right font-mono"
+                          >
+                            {track.duration}
+                          </Typography>
+                        ),
+                      },
+                    ]}
+                  />
+                </motion.div>
+              </div>
+            </section>
+          )}
+
+          {/* ── Исполнители ── */}
+          {(activeFilter === "Все" || activeFilter === "Исполнители") && (
+            <Section title="Исполнители">
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                {MOCK_ARTISTS.map((artist) => (
+                  <ArtistItem
+                    key={artist.id}
+                    name={artist.name}
+                    image={artist.image}
+                    onClick={() => {}}
+                  />
+                ))}
+              </div>
+            </Section>
+          )}
+
+          {/* ── Альбомы ── */}
+          {(activeFilter === "Все" || activeFilter === "Альбомы") && (
+            <Section title="Альбомы">
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                {MOCK_ALBUMS.map((album) => (
+                  <AlbumItem
+                    key={album.id}
+                    name={album.name}
+                    image={album.image}
+                    description={album.description}
+                    onClick={() => {}}
+                  />
+                ))}
+              </div>
+            </Section>
+          )}
+
+          {/* ── Плейлисты ── */}
+          {(activeFilter === "Все" || activeFilter === "Плейлисты") && (
+            <Section title="Плейлисты">
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                {MOCK_ALBUMS.slice(0, 4).map((album) => (
+                  <MediaCard
+                    key={album.id}
+                    image={album.image}
+                    title={`Плейлист ${album.id + 1}`}
+                    subtitle={album.description}
+                    subtitleClamp={2}
+                    titleUnderlineOnHover
+                    hoverButton={
+                      <div className="flex size-11 items-center justify-center rounded-full bg-primary shadow-xl">
+                        <Play className="ml-0.5 size-5 fill-current text-primary-foreground" />
+                      </div>
+                    }
+                    onClick={() => {}}
+                  />
+                ))}
+              </div>
+            </Section>
+          )}
+        </motion.div>
       </AnimatePresence>
-
-      {/* Сетки категорий (Альбомы и т.д.) */}
-      <div className="space-y-12">
-        <section>
-          <h2 className="mb-6 text-2xl font-black tracking-tight">Альбомы</h2>
-          <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-            {MOCK_DATA.albums.map((album) => (
-              <AlbumItem key={album.id} {...album} />
-            ))}
-          </div>
-        </section>
-      </div>
     </motion.div>
   );
 };

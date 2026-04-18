@@ -15,6 +15,7 @@ interface TrackTableProps<T> {
   columns: TrackTableColumn<T>[];
   onRowClick?: (row: T, index: number) => void;
   showIndex?: boolean;
+  showHeader?: boolean;
   getKey: (row: T) => string | number;
   className?: string;
 }
@@ -28,6 +29,7 @@ export function TrackTable<T>({
   columns,
   onRowClick,
   showIndex = true,
+  showHeader = true,
   getKey,
   className,
 }: Readonly<TrackTableProps<T>>) {
@@ -41,32 +43,34 @@ export function TrackTable<T>({
   return (
     <div className={cn("w-full", className)}>
       {/* Хедер — span везде, никаких блочных тегов внутри ячеек */}
-      <div
-        style={{ gridTemplateColumns: gridCols }}
-        className="grid items-center gap-4 border-b border-track-divider px-4 py-2"
-      >
-        {showIndex && (
-          <span className={cn(headerLabelClass, "block w-4 text-center")}>
-            #
-          </span>
-        )}
-        {columns.map((col) => (
-          <div
-            key={col.key}
-            className={cn(
-              "min-w-0",
-              col.hideOnMobile && "hidden md:block",
-              col.align === "right" && "flex justify-end",
-              col.align === "center" && "flex justify-center",
-            )}
-          >
-            {/* header может быть строкой или ReactNode (иконка Clock) */}
-            {col.header != null && (
-              <span className={headerLabelClass}>{col.header}</span>
-            )}
-          </div>
-        ))}
-      </div>
+      {showHeader && (
+        <div
+          style={{ gridTemplateColumns: gridCols }}
+          className="grid items-center gap-4 border-b border-track-divider px-4 py-2"
+        >
+          {showIndex && (
+            <span className={cn(headerLabelClass, "block w-4 text-center")}>
+              #
+            </span>
+          )}
+          {columns.map((col) => (
+            <div
+              key={col.key}
+              className={cn(
+                "min-w-0",
+                col.hideOnMobile && "hidden md:block",
+                col.align === "right" && "flex justify-end",
+                col.align === "center" && "flex justify-center",
+              )}
+            >
+              {/* header может быть строкой или ReactNode (иконка Clock) */}
+              {col.header != null && (
+                <span className={headerLabelClass}>{col.header}</span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Строки */}
       <div className="mt-2 space-y-0.5">

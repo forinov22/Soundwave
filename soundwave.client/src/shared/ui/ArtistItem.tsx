@@ -13,6 +13,7 @@ export const ArtistItem = ({ name, image, onClick }: ArtistItemProps) => (
     subtitle="Исполнитель"
     imageShape="circle"
     imageZoomOnHover
+    titleUnderlineOnHover
     textAlign="center"
     onClick={onClick}
   />
