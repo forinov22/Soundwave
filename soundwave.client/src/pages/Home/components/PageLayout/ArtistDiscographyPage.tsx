@@ -19,62 +19,47 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { assets, songsData, albumsData } from "@/assets/assets";
-import { formatDuration } from "@/shared/lib/formatDuration";
-import { cn } from "@/lib/utils";
+import { songsData, albumsData } from "@/assets/assets";
 import { Typography } from "@/shared/ui/Typography";
 import { ActionIcon } from "@/shared/ui/ActionIcon";
-import { TrackRow } from "@/shared/ui/TrackRow";
 import { TrackTable } from "@/shared/ui/TrackTable";
+import { EntityHeader } from "@/shared/ui/EntityHeader";
 
 // Суб-компонент для одного релиза в списке
 const ReleaseSection = ({ album, tracks }: { album: any; tracks: any[] }) => {
   return (
     <div className="group/release mb-12">
       {/* Шапка релиза */}
-      <div className="mb-6 flex gap-6">
-        <div className="relative size-36 flex-shrink-0 shadow-2xl md:size-44">
-          <img
-            src={album.image}
-            alt={album.name}
-            className="h-full w-full rounded-md object-cover"
-          />
-          <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity group-hover/release:opacity-100">
-            <Button
-              size="icon"
-              className="size-12 rounded-full bg-emerald-500 text-black transition-transform hover:scale-105"
-            >
-              <Play className="fill-current" />
-            </Button>
-          </div>
-        </div>
-
-        <div className="flex flex-col justify-end py-2">
-          <h2 className="mb-2 cursor-pointer text-2xl font-bold text-white hover:underline md:text-3xl">
-            {album.name}
-          </h2>
-          <div className="flex items-center gap-1.5 text-sm font-medium text-zinc-400">
-            <span className="capitalize">
-              {album.id % 2 === 0 ? "Альбом" : "Сингл"}
-            </span>
-            <span>•</span>
-            <span>2024</span>
-            <span>•</span>
-            <span>{tracks.length} треков</span>
-          </div>
-
-          <div className="mt-6 flex items-center gap-4">
-            <Button
-              size="icon"
-              variant="ghost"
-              className="rounded-full border border-zinc-800 text-zinc-400 hover:text-white"
-            >
-              <Heart className="size-5" />
-            </Button>
-            <MoreHorizontal className="cursor-pointer text-zinc-400 hover:text-white" />
-          </div>
-        </div>
-      </div>
+      <EntityHeader
+        image={album.image}
+        type={album.id % 2 === 0 ? "Альбом" : "Сингл"}
+        title={album.name}
+        meta={["2024", `${tracks.length} треков`]}
+        preset="compact"
+        imageHoverButton={
+          <Button
+            size="icon"
+            className="size-12 rounded-full bg-primary text-primary-foreground transition-transform hover:scale-105"
+          >
+            <Play className="fill-current" />
+          </Button>
+        }
+        actions={
+          <>
+            <ActionIcon
+              icon={<Heart className="size-5" />}
+              variant="primary"
+              withBackground
+              label="В избранное"
+            />
+            <ActionIcon
+              icon={<MoreHorizontal className="size-5" />}
+              label="Ещё"
+            />
+          </>
+        }
+        className="mb-6"
+      />
 
       {/* Таблица треков этого релиза */}
       <TrackTable

@@ -18,6 +18,7 @@ import { ActionIcon } from "@/shared/ui/ActionIcon";
 import { Typography } from "@/shared/ui/Typography";
 import { TrackTable } from "@/shared/ui/TrackTable";
 import { TrackRow } from "@/shared/ui/TrackRow";
+import { EntityHeader } from "@/shared/ui/EntityHeader";
 
 import type { LayoutOutletContext } from "../../MainLayout";
 
@@ -83,51 +84,36 @@ function AlbumDetailsPage() {
   return (
     <div className="relative">
       {/* Header */}
-      <div className="flex flex-col items-center gap-6 pt-6 md:flex-row md:items-end md:gap-8">
-        <img
-          src={album.imageUrl}
-          alt={album.title}
-          className="w-52 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] md:w-64"
-        />
-        <div className="flex flex-col text-center md:text-left">
-          <span className="text-xs font-bold tracking-widest text-emerald-500 uppercase">
-            Альбом
-          </span>
-          <h1 className="mt-2 mb-4 text-4xl font-black text-white md:text-7xl">
-            {album.title}
-          </h1>
-          <div className="flex items-center justify-center gap-2 text-sm font-medium text-zinc-300 md:justify-start">
-            <span className="text-white">MusicApp</span>
-            <span className="text-zinc-500">•</span>
-            <span>{album.description}</span>
-            <span className="text-zinc-500">•</span>
-            <span>2024</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Controls */}
-      <div className="mt-8 mb-8 flex items-center gap-6">
-        <Button
-          size="icon"
-          onClick={() => playAlbum(album.tracks, 0)}
-          className="size-14 rounded-full bg-emerald-500 text-black shadow-lg hover:bg-emerald-400"
-        >
-          <Play className="size-6 fill-current" />
-        </Button>
-
-        <ActionIcon
-          icon={<Heart className="size-8" />}
-          variant="primary"
-          size="lg"
-          label="В избранное"
-        />
-        <ActionIcon
-          icon={<MoreHorizontal className="size-8" />}
-          size="lg"
-          label="Ещё"
-        />
-      </div>
+      <EntityHeader
+        image={album.imageUrl}
+        type="Альбом"
+        title={album.title}
+        meta={["MusicApp", album.description, "2024"]}
+        preset="album"
+        actions={
+          <>
+            <Button
+              size="icon"
+              onClick={() => playAlbum(album.tracks, 0)}
+              className="size-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/80"
+            >
+              <Play className="size-6 fill-current" />
+            </Button>
+            <ActionIcon
+              icon={<Heart className="size-8" />}
+              variant="primary"
+              size="lg"
+              label="В избранное"
+            />
+            <ActionIcon
+              icon={<MoreHorizontal className="size-8" />}
+              size="lg"
+              label="Ещё"
+            />
+          </>
+        }
+        className="mb-8"
+      />
 
       {/* Tracks Table */}
       <TrackTable
