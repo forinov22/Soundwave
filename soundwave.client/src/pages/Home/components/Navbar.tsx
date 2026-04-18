@@ -3,43 +3,40 @@ import { Search, Bell } from "lucide-react";
 
 import logo from "@/assets/logo.svg";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import UserInfo from "@/features/auth/ui/UserInfo";
+import { ActionIcon } from "@/shared/ui/ActionIcon";
 
 const Navbar = () => {
   const navigate = useNavigate();
 
   return (
-    <nav className="h-16 flex items-center justify-between px-6 bg-black border-b border-zinc-900 sticky top-0 z-50">
+    <nav className="sticky top-0 z-50 flex h-16 items-center justify-between border-b border-zinc-900 bg-black px-6">
       <div className="flex items-center gap-8">
         <Link
           to="/"
-          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          className="flex items-center gap-2 transition-opacity hover:opacity-80"
         >
           <img src={logo} alt="logo" className="size-8" />
-          <span className="font-bold text-xl tracking-tight hidden md:block">
+          <span className="hidden text-xl font-bold tracking-tight md:block">
             MusicApp
           </span>
         </Link>
 
-        <div className="relative w-96 hidden md:block">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-500" />
+        <div className="relative hidden w-96 md:block">
+          <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-500" />
           <Input
             placeholder="Что хочешь послушать?"
-            className="pl-10 bg-zinc-900/50 border-zinc-800 focus-visible:ring-emerald-500 transition-all rounded-full h-10 w-full"
+            className="h-10 w-full rounded-full border-zinc-800 bg-zinc-900/50 pl-10 transition-all focus-visible:ring-emerald-500"
           />
         </div>
       </div>
 
       <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="icon"
+        <ActionIcon
+          icon={<Bell className="size-5" />}
           onClick={() => navigate("/notifications")}
-          className="text-zinc-300 hover:text-white hover:bg-white/5 transition-all active:scale-90"
-        >
-          <Bell className="size-5" />
-        </Button>
+          label="Уведомления"
+        />
 
         <UserInfo />
       </div>

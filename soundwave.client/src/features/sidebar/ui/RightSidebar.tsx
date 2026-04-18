@@ -3,10 +3,11 @@ import { Users, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { QueueList } from "@/features/player/ui/QueueList";
+import { ActionIcon } from "@/shared/ui/ActionIcon";
 
 import { useRightSidebar } from "../lib/useRightSidebar";
 import { usePlayerPlayback } from "../../player/lib/usePlayerPlayback";
-import { QueueList } from "@/features/player/ui/QueueList";
 
 export function RightSidebar() {
   const { view, isOpen, artistDetails, isLoading, error, close } =
@@ -23,24 +24,21 @@ export function RightSidebar() {
         initial={{ opacity: 0, x: 300 }}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: 300 }}
-        className="w-80 h-full sticky top-0 flex flex-col bg-zinc-950 border-l border-white/5"
+        className="sticky top-0 flex h-full w-80 flex-col border-l border-white/5 bg-zinc-950"
       >
         {/* Header */}
-        <div className="p-4 flex items-center justify-between">
-          <h2 className="font-bold text-white text-lg">
+        <div className="flex items-center justify-between p-4">
+          <h2 className="text-lg font-bold text-white">
             {view === "trackInfo" ? "О треке" : "Очередь"}
           </h2>
-          <Button
-            variant="ghost"
-            size="icon"
+          <ActionIcon
+            icon={<X className="size-5" />}
             onClick={close}
-            className="text-zinc-400 hover:text-white"
-          >
-            <X className="size-5" />
-          </Button>
+            label="Закрыть"
+          />
         </div>
 
-        <div className="flex-1 relative overflow-hidden">
+        <div className="relative flex-1 overflow-hidden">
           <ScrollArea className="h-full px-4">
             {view === "trackInfo" && currentTrack && (
               <div className="space-y-6 pb-6">
@@ -48,11 +46,11 @@ export function RightSidebar() {
                 <div className="space-y-4">
                   <img
                     src={currentTrack.imageUrl}
-                    className="w-full aspect-square object-cover rounded-xl shadow-2xl border border-white/5"
+                    className="aspect-square w-full rounded-xl border border-white/5 object-cover shadow-2xl"
                     alt={currentTrack.title}
                   />
                   <div>
-                    <h3 className="text-xl font-bold text-white hover:underline cursor-pointer">
+                    <h3 className="cursor-pointer text-xl font-bold text-white hover:underline">
                       {currentTrack.title}
                     </h3>
                     <p className="text-zinc-400">{currentTrack.artistName}</p>
@@ -67,30 +65,30 @@ export function RightSidebar() {
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="bg-zinc-900/50 rounded-2xl overflow-hidden border border-white/5"
+                      className="overflow-hidden rounded-2xl border border-white/5 bg-zinc-900/50"
                     >
                       <img
                         src={artistDetails.imageUrl}
-                        className="w-full h-48 object-cover"
+                        className="h-48 w-full object-cover"
                         alt=""
                       />
-                      <div className="p-4 space-y-3">
-                        <h4 className="font-bold text-white text-lg">
+                      <div className="space-y-3 p-4">
+                        <h4 className="text-lg font-bold text-white">
                           {artistDetails.name}
                         </h4>
-                        <div className="flex items-center gap-2 text-zinc-400 text-sm">
+                        <div className="flex items-center gap-2 text-sm text-zinc-400">
                           <Users className="size-4" />
                           <span>
                             {artistDetails.monthlyListeners.toLocaleString()}{" "}
                             слушателей в месяц
                           </span>
                         </div>
-                        <p className="text-sm text-zinc-400 line-clamp-4 leading-relaxed">
+                        <p className="line-clamp-4 text-sm leading-relaxed text-zinc-400">
                           {artistDetails.description}
                         </p>
                         <Button
                           variant="outline"
-                          className="w-full border-zinc-700 hover:bg-zinc-800 rounded-full text-xs"
+                          className="w-full rounded-full border-zinc-700 text-xs hover:bg-zinc-800"
                         >
                           Подробнее об артисте
                         </Button>
@@ -100,7 +98,7 @@ export function RightSidebar() {
                 )}
 
                 {error && (
-                  <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
+                  <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-xs text-red-400">
                     Не удалось загрузить информацию об артисте: {error}
                   </div>
                 )}
@@ -108,7 +106,7 @@ export function RightSidebar() {
             )}
 
             {view === "queue" && (
-              <div className="text-zinc-500 text-center mt-10">
+              <div className="mt-10 text-center text-zinc-500">
                 <QueueList />
               </div>
             )}
@@ -121,11 +119,11 @@ export function RightSidebar() {
 
 function ArtistCardSkeleton() {
   return (
-    <div className="space-y-3 p-4 bg-zinc-900/50 rounded-2xl border border-white/5">
-      <div className="w-full h-40 bg-zinc-800 animate-pulse rounded-lg" />
-      <div className="h-4 w-1/2 bg-zinc-800 animate-pulse rounded" />
-      <div className="h-3 w-full bg-zinc-800 animate-pulse rounded" />
-      <div className="h-3 w-full bg-zinc-800 animate-pulse rounded" />
+    <div className="space-y-3 rounded-2xl border border-white/5 bg-zinc-900/50 p-4">
+      <div className="h-40 w-full animate-pulse rounded-lg bg-zinc-800" />
+      <div className="h-4 w-1/2 animate-pulse rounded bg-zinc-800" />
+      <div className="h-3 w-full animate-pulse rounded bg-zinc-800" />
+      <div className="h-3 w-full animate-pulse rounded bg-zinc-800" />
     </div>
   );
 }
