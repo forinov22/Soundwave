@@ -1,6 +1,7 @@
 import { Library, Plus, Search, ListFilter, Heart } from "lucide-react";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { TrackRow } from "@/shared/ui/TrackRow";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,31 +20,31 @@ const Sidebar = ({
 }) => {
   return (
     <div
-      className={`h-full flex flex-col gap-2 transition-all duration-300 ${isCollapsed ? "w-20" : "w-[320px]"} hidden lg:flex`}
+      className={`flex h-full flex-col gap-2 transition-all duration-300 ${isCollapsed ? "w-20" : "w-[320px]"} hidden lg:flex`}
     >
-      <div className="flex-1 rounded-xl bg-zinc-900/30 border border-zinc-800/50 flex flex-col overflow-hidden backdrop-blur-md">
+      <div className="flex flex-1 flex-col overflow-hidden rounded-xl border border-zinc-800/50 bg-zinc-900/30 backdrop-blur-md">
         {/* Шапка медиатеки */}
-        <div className="p-4 flex items-center justify-between text-zinc-400">
+        <div className="flex items-center justify-between p-4 text-zinc-400">
           <button
             onClick={toggleCollapse}
-            className="flex items-center gap-3 px-2 hover:text-white transition-colors group"
+            className="group flex items-center gap-3 px-2 transition-colors hover:text-white"
           >
-            <Library className="size-6 group-hover:scale-110 transition-transform" />
+            <Library className="size-6 transition-transform group-hover:scale-110" />
             {!isCollapsed && <span className="font-bold">Моя медиатека</span>}
           </button>
           {!isCollapsed && (
-            <Plus className="size-5 hover:text-white cursor-pointer" />
+            <Plus className="size-5 cursor-pointer hover:text-white" />
           )}
         </div>
 
         {!isCollapsed && (
           <>
             {/* Кнопки фильтрации */}
-            <div className="flex gap-2 px-4 mb-4">
+            <div className="mb-4 flex gap-2 px-4">
               {["Плейлисты", "Исполнители", "Альбомы"].map((tag) => (
                 <button
                   key={tag}
-                  className="px-3 py-1.5 bg-zinc-800/50 hover:bg-zinc-800 rounded-full text-xs font-medium transition-colors"
+                  className="rounded-full bg-zinc-800/50 px-3 py-1.5 text-xs font-medium transition-colors hover:bg-zinc-800"
                 >
                   {tag}
                 </button>
@@ -51,14 +52,14 @@ const Sidebar = ({
             </div>
 
             {/* Поиск и Сортировка */}
-            <div className="flex items-center justify-between px-4 mb-2 text-zinc-400">
+            <div className="mb-2 flex items-center justify-between px-4 text-zinc-400">
               <Search className="size-4 cursor-pointer hover:text-white" />
               <DropdownMenu>
-                <DropdownMenuTrigger className="flex items-center gap-1 text-xs hover:text-white outline-none">
+                <DropdownMenuTrigger className="flex items-center gap-1 text-xs outline-none hover:text-white">
                   Недавно добавленные <ListFilter className="size-4" />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="bg-zinc-900 border-zinc-800 text-zinc-300">
-                  <DropdownMenuLabel className="text-zinc-500 text-[10px] uppercase">
+                <DropdownMenuContent className="border-zinc-800 bg-zinc-900 text-zinc-300">
+                  <DropdownMenuLabel className="text-[10px] text-zinc-500 uppercase">
                     Сортировка
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-zinc-800" />
@@ -72,23 +73,20 @@ const Sidebar = ({
         )}
 
         <ScrollArea className="flex-1">
-          <div className="p-2 space-y-1">
+          <div className="space-y-1 p-2">
             {/* Пример элемента списка */}
-            <div className="flex items-center gap-3 p-2 hover:bg-zinc-800/50 rounded-md cursor-pointer group transition-colors">
-              <div className="size-12 rounded bg-linear-to-br from-indigo-700 to-emerald-400 flex items-center justify-center">
-                <Heart className="size-5 fill-white text-white" />
-              </div>
-              {!isCollapsed && (
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium text-zinc-100">
-                    Любимые треки
-                  </span>
-                  <span className="text-xs text-zinc-400">
-                    Плейлист • 128 треков
-                  </span>
+            <TrackRow
+              image={
+                <div className="flex size-full items-center justify-center rounded bg-linear-to-br from-indigo-700 to-emerald-400">
+                  <Heart className="size-5 fill-white text-white" />
                 </div>
-              )}
-            </div>
+              }
+              title={isCollapsed ? "" : "Любимые треки"}
+              subtitle={isCollapsed ? undefined : "Плейлист • 128 треков"}
+              size="md"
+              highlightOnHover
+              onClick={() => {}}
+            />
             {/* Здесь будет .map() по любимым альбомам и артистам */}
           </div>
         </ScrollArea>

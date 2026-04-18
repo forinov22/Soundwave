@@ -11,15 +11,14 @@ import {
   Heart,
 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import type { Track } from "@/features/music/types";
 import { useRightSidebar } from "@/features/sidebar/lib/useRightSidebar";
 import { formatDuration } from "@/shared/lib/formatDuration";
 import { ActionIcon } from "@/shared/ui/ActionIcon";
+import { TrackRow } from "@/shared/ui/TrackRow";
 
 import { usePlayerPlayback } from "../lib/usePlayerPlayback";
-import { Typography } from "@/shared/ui/Typography";
 
 interface PlaybackControlsProps {
   isPlaying: boolean;
@@ -49,40 +48,20 @@ function PlaybackControls({
         <div className="flex w-[30%] min-w-45 items-center gap-4">
           {track ? (
             <>
-              <div className="group relative">
-                <img
-                  src={track.imageUrl}
-                  alt={track.title}
-                  className="size-14 rounded-lg border border-white/10 object-cover shadow-2xl"
-                />
-              </div>
-              <div className="flex flex-col overflow-hidden">
-                <Typography
-                  variant="title"
-                  size="sm"
-                  as={"span"}
-                  truncate
-                  underlineOnHover
-                >
-                  {track.title}
-                </Typography>
-                <Typography
-                  variant="subtitle"
-                  size="xs"
-                  as={"span"}
-                  truncate
-                  underlineOnHover
-                >
-                  {track.artistName}
-                </Typography>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-zinc-300 transition-all hover:bg-white/5 hover:text-white active:scale-90"
-              >
-                <Heart className="size-4" />
-              </Button>
+              <TrackRow
+                image={track.imageUrl}
+                title={track.title}
+                subtitle={track.artistName}
+                size="md"
+                titleOnClick={() => {}}
+                subtitleOnClick={() => {}}
+                className="overflow-hidden"
+              />
+              <ActionIcon
+                icon={<Heart className="size-4" />}
+                variant="primary"
+                label="В избранное"
+              />
             </>
           ) : (
             <div className="flex items-center gap-4 opacity-20">
