@@ -1,4 +1,5 @@
 import { Play } from "lucide-react";
+import { Typography } from "./Typography";
 
 interface TrackItemProps {
   name: string;
@@ -11,19 +12,23 @@ const TrackItem = ({ name, image, artist, onClick }: TrackItemProps) => {
   return (
     <div
       onClick={onClick}
-      className="group p-3 rounded-xl bg-zinc-900/40 border border-transparent hover:border-zinc-700/50 hover:bg-zinc-800/60 transition-all duration-300 cursor-pointer"
+      className="group cursor-pointer rounded-xl border border-transparent bg-zinc-900/40 p-3 transition-all duration-300 hover:border-zinc-700/50 hover:bg-zinc-800/60"
     >
-      <div className="relative aspect-square mb-3 overflow-hidden rounded-lg shadow-lg">
-        <img src={image} alt={name} className="object-cover w-full h-full" />
+      <div className="relative mb-3 aspect-square overflow-hidden rounded-lg shadow-lg">
+        <img src={image} alt={name} className="h-full w-full object-cover" />
         {/* Кнопка Play при ховере */}
-        <div className="absolute bottom-2 right-2 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-          <div className="bg-emerald-500 p-3 rounded-full shadow-xl text-black">
-            <Play className="fill-current size-5" />
+        <div className="absolute right-2 bottom-2 translate-y-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+          <div className="rounded-full bg-emerald-500 p-3 text-black shadow-xl">
+            <Play className="size-5 fill-current" />
           </div>
         </div>
       </div>
-      <h3 className="font-bold text-zinc-100 truncate">{name}</h3>
-      <p className="text-sm text-zinc-400 truncate">{artist}</p>
+      <Typography variant="title" truncate>
+        {name}
+      </Typography>
+      <Typography variant="subtitle" underlineOnHover truncate>
+        {artist}
+      </Typography>
     </div>
   );
 };

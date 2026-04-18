@@ -15,16 +15,16 @@ interface TypographyProps {
   as?: React.ElementType;
 }
 
-// Варианты — цвета через токены из index.css
+// Цвета через токены из index.css
 const variantStyles: Record<TypographyVariant, string> = {
-  // Основной текст — почти белый
-  title: "font-semibold text-foreground",
-  // Вторичный текст — приглушённый
-  subtitle: "font-normal text-icon",
-  // Совсем приглушённый — для мета-информации
-  caption: "font-normal text-icon",
-  // Лейбл — uppercase, широкий трекинг, для типов сущностей
-  label: "font-bold uppercase tracking-widest text-icon",
+  // Основной текст — почти белый (--text-primary: oklch(0.985 0 0))
+  title: "font-semibold text-text-primary",
+  // Вторичный — серый (--text-secondary: oklch(0.65 0 0))
+  subtitle: "font-normal text-text-secondary",
+  // Мета-информация — приглушённый (--text-muted: oklch(0.5 0 0))
+  caption: "font-normal text-text-muted",
+  // Лейбл типа «АЛЬБОМ» — uppercase, широкий трекинг
+  label: "font-bold uppercase tracking-widest text-text-secondary",
 };
 
 const sizeStyles: Record<TypographySize, string> = {
@@ -51,7 +51,8 @@ export function Typography({
   onClick,
   className,
   children,
-  as: Tag = "span",
+  // p по умолчанию — блочный элемент, title и subtitle идут каждый на своей строке
+  as: Tag = "p",
 }: Readonly<TypographyProps>) {
   const resolvedSize = size ?? variantDefaultSize[variant];
   const isInteractive = !!onClick || underlineOnHover;
@@ -65,11 +66,13 @@ export function Typography({
         truncate && "truncate",
         clamp && `line-clamp-${clamp}`,
         underlineOnHover && "underline-offset-2 hover:underline",
-        // subtitle/caption при hover чуть светлее
+        // subtitle/caption при hover становятся светлее
         isInteractive &&
           (variant === "subtitle" || variant === "caption") &&
-          "transition-colors hover:text-icon-hover",
+          "transition-colors hover:text-text-primary",
         isInteractive && "cursor-pointer",
+        // убираем дефолтные margin у p
+        "m-0",
         className,
       )}
     >

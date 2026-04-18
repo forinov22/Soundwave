@@ -19,6 +19,7 @@ import { formatDuration } from "@/shared/lib/formatDuration";
 import { ActionIcon } from "@/shared/ui/ActionIcon";
 
 import { usePlayerPlayback } from "../lib/usePlayerPlayback";
+import { Typography } from "@/shared/ui/Typography";
 
 interface PlaybackControlsProps {
   isPlaying: boolean;
@@ -56,12 +57,24 @@ function PlaybackControls({
                 />
               </div>
               <div className="flex flex-col overflow-hidden">
-                <span className="cursor-pointer truncate text-sm font-semibold text-white hover:underline">
+                <Typography
+                  variant="title"
+                  size="sm"
+                  as={"span"}
+                  truncate
+                  underlineOnHover
+                >
                   {track.title}
-                </span>
-                <span className="cursor-pointer truncate text-xs text-zinc-400 hover:text-zinc-200">
+                </Typography>
+                <Typography
+                  variant="subtitle"
+                  size="xs"
+                  as={"span"}
+                  truncate
+                  underlineOnHover
+                >
                   {track.artistName}
-                </span>
+                </Typography>
               </div>
               <Button
                 variant="ghost"

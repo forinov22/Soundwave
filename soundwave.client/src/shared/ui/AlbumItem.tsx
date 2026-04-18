@@ -1,3 +1,5 @@
+import { Typography } from "./Typography";
+
 interface AlbumItemProps {
   name: string;
   image: string;
@@ -9,17 +11,21 @@ const AlbumItem = ({ name, image, description, onClick }: AlbumItemProps) => {
   return (
     <div
       onClick={onClick}
-      className="group p-3 rounded-xl bg-zinc-900/40 border border-transparent hover:border-zinc-700/50 hover:bg-zinc-800/60 transition-all duration-300 cursor-pointer"
+      className="group cursor-pointer rounded-xl border border-transparent bg-zinc-900/40 p-3 transition-all duration-300 hover:border-zinc-700/50 hover:bg-zinc-800/60"
     >
-      <div className="aspect-square mb-3 overflow-hidden rounded-lg shadow-lg">
+      <div className="mb-3 aspect-square overflow-hidden rounded-lg shadow-lg">
         <img
           src={image}
           alt={name}
-          className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
       </div>
-      <h3 className="font-bold text-zinc-100 truncate">{name}</h3>
-      <p className="text-xs text-zinc-500 line-clamp-2 mt-1">{description}</p>
+      <Typography variant="title" underlineOnHover truncate>
+        {name}
+      </Typography>
+      <Typography variant="caption" clamp={2} truncate className="mt-1">
+        {description}
+      </Typography>
     </div>
   );
 };

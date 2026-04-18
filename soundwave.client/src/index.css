@@ -6,7 +6,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-    /* shadcn базовые токены — оставляем как есть для совместимости компонентов */
+    /* shadcn базовые токены */
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);
     --card: oklch(0.98 0 0);
@@ -27,7 +27,12 @@
     --ring: oklch(0.705 0.191 146.73);
     --radius: 0.75rem;
 
-    /* Кастомные токены приложения (всегда тёмные) */
+    /* ─── Кастомные токены приложения (всегда тёмные) ─── */
+
+    /* Текст — всегда светлый для тёмного UI */
+    --text-primary:   oklch(0.985 0 0);   /* почти белый — названия треков, заголовки */
+    --text-secondary: oklch(0.65 0 0);    /* серый — имя артиста, подписи */
+    --text-muted:     oklch(0.5 0 0);     /* совсем приглушённый — мета-информация */
 
     /* Поверхности */
     --surface:         oklch(0.22 0 0 / 40%);
@@ -120,7 +125,12 @@
 
     --color-spotify-green: oklch(0.705 0.191 146.73);
 
-    /* Кастомные токены приложения */
+    /* ─── Кастомные токены приложения ─── */
+
+    /* Текст */
+    --color-text-primary:   var(--text-primary);
+    --color-text-secondary: var(--text-secondary);
+    --color-text-muted:     var(--text-muted);
 
     /* Поверхности */
     --color-surface:         var(--surface);
