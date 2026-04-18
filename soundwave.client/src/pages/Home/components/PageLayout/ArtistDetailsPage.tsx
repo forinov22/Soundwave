@@ -7,12 +7,17 @@ import {
   Users,
   Check,
   Plus,
+  Clock,
 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { MediaCard } from "@/shared/ui/MediaCard";
 import { songsData, albumsData } from "@/assets/assets"; // Предположим, путь такой
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { MediaCard } from "@/shared/ui/MediaCard";
+import { ActionIcon } from "@/shared/ui/ActionIcon";
+import { Typography } from "@/shared/ui/Typography";
+import { TrackRow } from "@/shared/ui/TrackRow";
+import { TrackTable } from "@/shared/ui/TrackTable";
 
 import type { LayoutOutletContext } from "../../MainLayout";
 
@@ -100,45 +105,74 @@ const ArtistDetailsPage = () => {
 
       {/* 3. Популярные треки */}
       <section className="mb-10">
-        <h2 className="mb-4 text-2xl font-bold text-white">Популярные треки</h2>
-        <div className="w-full">
-          {songsData.slice(0, 5).map((track, idx) => (
-            <div
-              key={track.id}
-              className="group grid cursor-pointer grid-cols-[16px_auto_1fr_auto_auto] items-center gap-4 rounded-lg px-4 py-2 text-zinc-400 transition-colors hover:bg-white/10"
-            >
-              <span className="flex w-4 justify-center text-sm">
-                <span className="group-hover:hidden">{idx + 1}</span>
-                <Play className="hidden size-3 fill-current text-white group-hover:block" />
-              </span>
-              <img
-                src={track.image}
-                className="size-10 rounded shadow-md"
-                alt=""
-              />
-              <div className="flex min-w-0 flex-col">
-                <span className="truncate font-medium text-white">
-                  {track.name}
-                </span>
-                <div className="mt-0.5 flex items-center gap-1.5">
-                  <span className="rounded-sm bg-zinc-700 px-1 text-[10px] text-zinc-300">
-                    E
-                  </span>
-                  <span className="truncate text-xs">Night Visions</span>
-                </div>
-              </div>
-              <span className="hidden text-sm md:block">854,234,102</span>
-              <div className="flex items-center gap-4">
-                <div className="flex w-8 justify-center">
-                  <Plus className="size-4 opacity-0 transition-opacity group-hover:opacity-100 hover:text-white" />
-                </div>
-                <span className="w-10 text-right text-sm">
+        <h2 className="mb-4 text-2xl font-bold text-text-primary">
+          Популярные треки
+        </h2>
+        <TrackTable
+          data={songsData.slice(0, 5)}
+          getKey={(t) => t.id}
+          onRowClick={() => {}}
+          columns={[
+            {
+              key: "track",
+              header: "Название",
+              width: "1fr",
+              render: (track) => (
+                <TrackRow
+                  image={track.image}
+                  title={track.name}
+                  subtitle="Night Visions"
+                  size="sm"
+                  subtitlePrefix={
+                    <span className="shrink-0 rounded-sm bg-white/10 px-1 text-[10px] text-text-secondary">
+                      E
+                    </span>
+                  }
+                />
+              ),
+            },
+            {
+              key: "plays",
+              // Нет header — над этой колонкой пусто
+              width: "auto",
+              hideOnMobile: true,
+              render: () => (
+                <Typography variant="subtitle" size="sm">
+                  854 234 102
+                </Typography>
+              ),
+            },
+            {
+              key: "actions",
+              width: "auto",
+              align: "right",
+              // Нет header — над плюсиком пусто
+              render: () => (
+                <ActionIcon
+                  icon={<Plus className="size-4" />}
+                  size="sm"
+                  label="Добавить"
+                  className="opacity-0 group-hover:opacity-100"
+                />
+              ),
+            },
+            {
+              key: "duration",
+              header: <Clock className="size-4" />,
+              width: "auto",
+              align: "right",
+              render: (track) => (
+                <Typography
+                  variant="subtitle"
+                  size="sm"
+                  className="w-10 text-right font-mono"
+                >
                   {track.duration}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
+                </Typography>
+              ),
+            },
+          ]}
+        />
       </section>
 
       {/* 4. Секция Музыка с фильтрами */}

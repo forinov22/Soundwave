@@ -12,11 +12,14 @@ import {
 import { Button } from "@/components/ui/button";
 import type { Album } from "@/features/music/types";
 import { useMusic } from "@/features/music/lib/useMusic";
+import { usePlayerPlayback } from "@/features/player/lib/usePlayerPlayback";
 import { formatDuration } from "@/shared/lib/formatDuration";
 import { ActionIcon } from "@/shared/ui/ActionIcon";
+import { Typography } from "@/shared/ui/Typography";
+import { TrackTable } from "@/shared/ui/TrackTable";
+import { TrackRow } from "@/shared/ui/TrackRow";
 
 import type { LayoutOutletContext } from "../../MainLayout";
-import { usePlayerPlayback } from "@/features/player/lib/usePlayerPlayback";
 
 function AlbumDetailsPage() {
   const { setGradientBgColor } = useOutletContext<LayoutOutletContext>();
@@ -127,51 +130,48 @@ function AlbumDetailsPage() {
       </div>
 
       {/* Tracks Table */}
-      <div className="w-full">
-        <div className="grid grid-cols-[16px_4fr_3fr_1fr] gap-4 border-b border-zinc-800 px-4 py-2 text-xs font-bold tracking-wider text-zinc-400 uppercase">
-          <span>#</span>
-          <span>Название</span>
-          <span className="hidden md:block">Альбом</span>
-          <span className="flex justify-end">
-            <Clock className="size-4" />
-          </span>
-        </div>
-
-        <div className="mt-2 space-y-1">
-          {album.tracks.map((track, idx) => (
-            <div
-              key={track.id}
-              onClick={() => playAlbum(album.tracks, idx)}
-              className="group grid cursor-pointer grid-cols-[16px_4fr_3fr_1fr] items-center gap-4 rounded-lg px-4 py-3 transition-colors hover:bg-zinc-800/40"
-            >
-              <span className="text-sm text-zinc-500 group-hover:text-emerald-500">
-                {idx + 1}
-              </span>
-              <div className="flex items-center gap-3">
-                <img
-                  src={track.imageUrl}
-                  alt={track.title}
-                  className="size-10 rounded shadow-md"
-                />
-                <div>
-                  <div className="max-w-50 truncate font-medium text-white md:max-w-md">
-                    {track.title}
-                  </div>
-                  <div className="text-xs text-zinc-400 underline-offset-2 group-hover:text-zinc-300 hover:underline">
-                    {track.artistName}
-                  </div>
-                </div>
-              </div>
-              <span className="hidden text-sm text-zinc-400 md:block">
+      <TrackTable
+        data={album.tracks}
+        getKey={(t) => t.id}
+        onRowClick={(_, idx) => playAlbum(album.tracks, idx)}
+        columns={[
+          {
+            key: "track",
+            header: "Название",
+            width: "4fr",
+            render: (track) => (
+              <TrackRow
+                image={track.imageUrl}
+                title={track.title}
+                subtitle={track.artistName}
+                size="sm"
+              />
+            ),
+          },
+          {
+            key: "album",
+            header: "Альбом",
+            width: "3fr",
+            hideOnMobile: true,
+            render: () => (
+              <Typography variant="subtitle" size="sm">
                 {album.title}
-              </span>
-              <span className="flex justify-end text-sm text-zinc-400">
+              </Typography>
+            ),
+          },
+          {
+            key: "duration",
+            header: <Clock className="size-4" />,
+            width: "auto",
+            align: "right",
+            render: (track) => (
+              <Typography variant="subtitle" size="sm">
                 {formatDuration(track.durationSeconds)}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
+              </Typography>
+            ),
+          },
+        ]}
+      />
     </div>
   );
 }
