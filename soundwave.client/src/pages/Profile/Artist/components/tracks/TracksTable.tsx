@@ -27,7 +27,7 @@ const TracksTable = () => (
       {
         key: "date",
         header: "Дата выпуска",
-        width: "auto",
+        width: "160px",
         hideOnMobile: true,
         render: () => (
           <span className="flex items-center gap-2">
@@ -39,8 +39,11 @@ const TracksTable = () => (
         ),
       },
       {
+        // Пустой header — обязателен чтобы хедер и строки имели одинаковое
+        // количество ячеек и grid-template-columns совпадал
         key: "actions",
-        width: "auto",
+        header: "",
+        width: "40px",
         align: "right",
         render: () => (
           <button

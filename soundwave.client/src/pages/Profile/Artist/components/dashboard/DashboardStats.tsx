@@ -1,53 +1,43 @@
 import { Library, ListMusic, PlayCircle, Users2 } from "lucide-react";
-
 import StatsCard from "./StatsCard";
 
 const statsData = [
   {
     icon: ListMusic,
-    label: "Total Songs",
+    label: "Треков",
     value: "15",
-    bgColor: "bg-emerald-500/10",
-    iconColor: "text-emerald-500",
+    bgColor: "bg-primary/10",
+    iconColor: "text-primary",
   },
   {
     icon: Library,
-    label: "Total Albums",
+    label: "Альбомов",
     value: "3",
     bgColor: "bg-violet-500/10",
-    iconColor: "text-violet-500",
+    iconColor: "text-violet-400",
   },
   {
     icon: Users2,
-    label: "Total Followers",
+    label: "Подписчиков",
     value: "253 500",
     bgColor: "bg-orange-500/10",
-    iconColor: "text-orange-500",
+    iconColor: "text-orange-400",
   },
   {
     icon: PlayCircle,
-    label: "Total Auditions",
+    label: "Прослушиваний",
     value: "1 503 100",
     bgColor: "bg-sky-500/10",
-    iconColor: "text-sky-500",
+    iconColor: "text-sky-400",
   },
 ];
 
-const DashboardStats = () => {
-  return (
-    <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-      {statsData.map((stat) => (
-        <StatsCard
-          key={stat.label}
-          icon={stat.icon}
-          label={stat.label}
-          value={stat.value}
-          bgColor={stat.bgColor}
-          iconColor={stat.iconColor}
-        />
-      ))}
-    </div>
-  );
-};
+const DashboardStats = () => (
+  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+    {statsData.map((stat) => (
+      <StatsCard key={stat.label} {...stat} />
+    ))}
+  </div>
+);
 
 export default DashboardStats;

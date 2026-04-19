@@ -25,7 +25,7 @@ const MainLayout = () => {
       return;
     }
 
-    setGradientColor(`linear-gradient(${color}, #121212)`);
+    setGradientColor(color);
   };
 
   return (

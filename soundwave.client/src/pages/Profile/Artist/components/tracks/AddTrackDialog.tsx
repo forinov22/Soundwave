@@ -155,7 +155,7 @@ const AddTrackDialog = () => {
           <Button
             onClick={() => setIsOpen(false)}
             variant="ghost"
-            className="rounded-full text-text-secondary hover:text-text-primary"
+            className="rounded-full text-text-secondary hover:bg-white/5 hover:text-text-primary"
           >
             Отмена
           </Button>

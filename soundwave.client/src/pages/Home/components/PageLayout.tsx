@@ -10,7 +10,7 @@ const PageLayout = ({ gradientColor, children }: ContentProps) => {
         // Используем переменную для плавного перехода, если добавишь transition в CSS
         background: `linear-gradient(to bottom, ${gradientColor} 0%, #121212 400px, #121212 100%)`,
       }}
-      className="flex-1 rounded-xl border border-zinc-800/50 overflow-y-auto relative scroll-smooth shadow-inner text-white"
+      className="relative flex-1 overflow-y-auto scroll-smooth rounded-xl border border-zinc-800/50 text-white shadow-inner"
     >
       <div className="p-6">{children}</div>
     </div>

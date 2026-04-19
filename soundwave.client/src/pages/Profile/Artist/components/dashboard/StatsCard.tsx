@@ -15,7 +15,8 @@ const StatsCard = ({
   bgColor,
   iconColor,
 }: StatsCardProps) => (
-  <div className="group rounded-2xl border border-white/5 bg-surface p-6 transition-all duration-300 hover:bg-surface-hover">
+  // Явные светлые значения — не через --surface токен, чтобы не зависеть от темы
+  <div className="group overflow-hidden rounded-2xl border border-white/5 bg-[oklch(0.22_0_0)] p-6 transition-all duration-300 hover:bg-[oklch(0.26_0_0)]">
     <div className="flex items-center gap-5">
       <div
         className={cn(

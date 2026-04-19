@@ -99,7 +99,7 @@ const AlbumDialog = ({ album, onSave, children }: AlbumDialogProps) => {
           <Button
             variant="ghost"
             onClick={() => setIsOpen(false)}
-            className="rounded-full text-text-secondary hover:text-text-primary"
+            className="rounded-full text-text-secondary hover:bg-white/5 hover:text-text-primary"
           >
             Отмена
           </Button>
@@ -131,7 +131,7 @@ const AlbumCard = ({ album, onEdit, onDelete }: AlbumCardProps) => {
   const tracks = songsData.slice(0, album.trackCount);
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/5 bg-surface transition-all duration-300 hover:bg-surface-hover">
+    <div className="overflow-hidden rounded-2xl border border-white/5 bg-[oklch(0.28_0_0)] transition-all duration-300 hover:bg-[oklch(0.32_0_0)]">
       {/* Верхняя часть — обложка + инфо */}
       <div
         className="flex cursor-pointer items-center gap-4 p-4"
@@ -271,7 +271,7 @@ const AlbumsTabContent = () => {
   };
 
   return (
-    <div className="rounded-2xl border border-white/5 bg-surface p-6">
+    <div className="rounded-2xl border border-white/5 bg-[oklch(0.22_0_0)] p-6">
       {/* Шапка */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
