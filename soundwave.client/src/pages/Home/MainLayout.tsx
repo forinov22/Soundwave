@@ -5,9 +5,9 @@ import Player from "@/features/player/ui/Player";
 import { RightSidebar } from "@/features/sidebar/ui/RightSidebar";
 import { SidebarTrigger } from "@/features/sidebar/ui/SidebarTrigger";
 
-import Sidebar from "./components/Sidebar/Sidebar";
+import Sidebar from "./components/Sidebar";
 import Navbar from "./components/Navbar";
-import PageLayout from "./components/PageLayout/PageLayout";
+import PageLayout from "./components/PageLayout";
 
 export interface LayoutOutletContext {
   setGradientBgColor: (color?: string) => void;

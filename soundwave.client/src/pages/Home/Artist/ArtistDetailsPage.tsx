@@ -19,7 +19,7 @@ import { Typography } from "@/shared/ui/Typography";
 import { TrackRow } from "@/shared/ui/TrackRow";
 import { TrackTable } from "@/shared/ui/TrackTable";
 
-import type { LayoutOutletContext } from "../../MainLayout";
+import type { LayoutOutletContext } from "../MainLayout";
 
 const ArtistDetailsPage = () => {
   const { id } = useParams();

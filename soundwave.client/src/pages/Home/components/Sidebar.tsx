@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router";
 import { Library, Plus, Search, ListFilter, Heart } from "lucide-react";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -11,6 +12,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+let _playlistCounter = 1;
+
 const Sidebar = ({
   isCollapsed,
   toggleCollapse,
@@ -18,6 +21,15 @@ const Sidebar = ({
   isCollapsed: boolean;
   toggleCollapse: () => void;
 }) => {
+  const navigate = useNavigate();
+
+  const handleCreatePlaylist = () => {
+    // В реальном приложении здесь будет вызов API
+    // Пока используем локальный счётчик как id
+    const newId = _playlistCounter++;
+    navigate(`/playlist/${newId}`);
+  };
+
   return (
     <div
       className={`flex h-full flex-col gap-2 transition-all duration-300 ${isCollapsed ? "w-20" : "w-[320px]"} hidden lg:flex`}
@@ -33,7 +45,10 @@ const Sidebar = ({
             {!isCollapsed && <span className="font-bold">Моя медиатека</span>}
           </button>
           {!isCollapsed && (
-            <Plus className="size-5 cursor-pointer hover:text-white" />
+            <Plus
+              onClick={handleCreatePlaylist}
+              className="size-5 cursor-pointer hover:text-white"
+            />
           )}
         </div>
 

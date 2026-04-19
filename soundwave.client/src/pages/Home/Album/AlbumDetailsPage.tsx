@@ -20,7 +20,7 @@ import { TrackTable } from "@/shared/ui/TrackTable";
 import { TrackRow } from "@/shared/ui/TrackRow";
 import { EntityHeader } from "@/shared/ui/EntityHeader";
 
-import type { LayoutOutletContext } from "../../MainLayout";
+import type { LayoutOutletContext } from "../MainLayout";
 
 function AlbumDetailsPage() {
   const { setGradientBgColor } = useOutletContext<LayoutOutletContext>();

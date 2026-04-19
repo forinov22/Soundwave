@@ -2,10 +2,11 @@ import type { ReactNode } from "react";
 import { Navigate } from "react-router";
 
 import AuthCallbackPage from "@/pages/Auth/AuthCallbackPage";
-import AlbumDetailsPage from "@/pages/Home/components/PageLayout/AlbumDetailsPage";
-import ArtistDetailsPage from "@/pages/Home/components/PageLayout/ArtistDetailsPage";
-import ArtistDiscographyPage from "@/pages/Home/components/PageLayout/ArtistDiscographyPage";
-import HomePage from "@/pages/Home/components/PageLayout/HomePage";
+import AlbumDetailsPage from "@/pages/Home/Album/AlbumDetailsPage";
+import PlaylistDetailsPage from "@/pages/Home/Playlist/PlaylistDetailsPage";
+import ArtistDetailsPage from "@/pages/Home/Artist/ArtistDetailsPage";
+import ArtistDiscographyPage from "@/pages/Home/Artist/ArtistDiscographyPage";
+import HomePage from "@/pages/Home/HomePage";
 import MainLayout from "@/pages/Home/MainLayout";
 import LoginPage from "@/pages/Auth/LoginPage";
 import ProfilePage from "@/pages/Profile/ProfilePage";
@@ -51,6 +52,10 @@ export const routes: AppRoute[] = [
       {
         path: "album/:id",
         element: <AlbumDetailsPage />,
+      },
+      {
+        path: "playlist/:id",
+        element: <PlaylistDetailsPage />,
       },
       {
         path: "artist/:id",
