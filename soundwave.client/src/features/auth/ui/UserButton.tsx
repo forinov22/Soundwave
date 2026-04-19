@@ -34,16 +34,16 @@ const UserButton = () => {
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-32 bg-zinc-900 border-zinc-800 text-zinc-300">
+      <DropdownMenuContent className="w-32 border-zinc-800 bg-zinc-900 text-zinc-300">
         <DropdownMenuGroup>
           <DropdownMenuItem onClick={() => navigate("/profile")}>
-            Profile
+            Профиль
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem onClick={signOut} variant="destructive">
-            Log out
+            Выйти
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>

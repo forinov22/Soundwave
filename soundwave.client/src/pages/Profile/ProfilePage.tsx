@@ -2,8 +2,8 @@ import { useNavigate } from "react-router";
 
 import { useAuth } from "@/features/auth/lib/useAuth";
 
-import ListenerProfilePage from "./listener/ListenerProfilePage";
-import ArtistProfilePage from "./artist/ArtistProfilePage";
+import ListenerProfilePage from "./Listener/ListenerProfilePage";
+import ArtistProfilePage from "./Artist/ArtistProfilePage";
 
 const ProfilePage = () => {
   const { isAuth, user } = useAuth();
