@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { useArtist } from "@/features/artist/lib/useArtist";
 
 interface CreateTrackModel {
   name: string;
@@ -21,11 +22,12 @@ interface CreateTrackModel {
 }
 
 const AddTrackDialog = () => {
+  // createTrack сам пишет в стор — onCreated колбэк больше не нужен
+  const { createTrack, isCreatingTrack } = useArtist();
   const [isOpen, setIsOpen] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-
   const [newTrack, setNewTrack] = useState<CreateTrackModel>({
     name: "",
     audio: null,
@@ -44,11 +46,20 @@ const AddTrackDialog = () => {
     if (file) setNewTrack((p) => ({ ...p, audio: file }));
   };
 
-  const handleSubmit = () => {
-    // TODO: вызов API
-    setIsOpen(false);
-    setNewTrack({ name: "", audio: null, image: null });
-    setImagePreview(null);
+  const handleSubmit = async () => {
+    if (!newTrack.audio || !newTrack.image || !newTrack.name.trim()) return;
+
+    const track = await createTrack({
+      title: newTrack.name.trim(),
+      audio: newTrack.audio,
+      image: newTrack.image,
+    });
+
+    if (track) {
+      setIsOpen(false);
+      setNewTrack({ name: "", audio: null, image: null });
+      setImagePreview(null);
+    }
   };
 
   return (
@@ -71,7 +82,6 @@ const AddTrackDialog = () => {
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          {/* Дроп-зона обложки */}
           <div
             onClick={() => imageInputRef.current?.click()}
             className={cn(
@@ -112,7 +122,6 @@ const AddTrackDialog = () => {
             />
           </div>
 
-          {/* Поля */}
           <div className="space-y-4">
             <div className="space-y-1.5">
               <label className="text-xs font-bold tracking-wider text-text-muted uppercase">
@@ -161,10 +170,15 @@ const AddTrackDialog = () => {
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={!newTrack.name.trim() || !newTrack.audio}
+            disabled={
+              !newTrack.name.trim() ||
+              !newTrack.audio ||
+              !newTrack.image ||
+              isCreatingTrack
+            }
             className="rounded-full bg-primary px-8 font-bold text-primary-foreground hover:bg-primary/80"
           >
-            Опубликовать
+            {isCreatingTrack ? "Загрузка..." : "Опубликовать"}
           </Button>
         </DialogFooter>
       </DialogContent>

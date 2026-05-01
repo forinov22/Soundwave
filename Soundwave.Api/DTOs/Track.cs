@@ -18,3 +18,17 @@ public record AlbumDto(
     string BgColor,
     List<TrackDto> Tracks
 );
+
+public record CreateTrackRequest(
+    string Title,
+    int? AlbumId,
+    IFormFile? Audio,
+    IFormFile? Image
+);
+
+public record CreateAlbumRequest(
+    string Title,
+    string? Description,
+    DateTime? ReleaseDate,
+    IFormFile? Image
+);
