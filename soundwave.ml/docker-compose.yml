@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  soundwave-ml:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: soundwave-ml
+    ports:
+      - "8001:8001"
+    volumes:
+      - ml_data:/app/data
+      - ./models:/app/models:ro
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8001
+      - LOG_LEVEL=info
+      - INTERNAL_TOKEN=${INTERNAL_TOKEN:-change-me-in-production}
+      - S3_BUCKET=${S3_BUCKET:-soundwave}
+      - S3_ACCESS_KEY=${S3_ACCESS_KEY:-minioadmin}
+      - S3_SECRET_KEY=${S3_SECRET_KEY:-minioadmin}
+      - S3_ENDPOINT_URL=${S3_ENDPOINT_URL:-http://host.docker.internal:9000}
+      - S3_FORCE_PATH_STYLE=true
+      - DOTNET_BASE_URL=${DOTNET_BASE_URL:-http://host.docker.internal:5000}
+      - DOTNET_CALLBACK_PATH=/api/internal/tracks/{track_id}/processed
+      - EMBEDDING_SIZE=256
+      - N_MELS=128
+      - TARGET_SR=22050
+      - DEVICE=cpu
+      # Numba кеш — без этого librosa падает в Docker
+      - NUMBA_CACHE_DIR=/tmp/numba_cache
+      - NUMBA_DISABLE_JIT=0
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 30s
+      timeout: 10s
+      start_period: 90s
+      retries: 3
+
+volumes:
+  ml_data:

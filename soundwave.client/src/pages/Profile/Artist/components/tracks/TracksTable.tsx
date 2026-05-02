@@ -1,15 +1,20 @@
-import { Calendar, Loader2, Trash2 } from "lucide-react";
+import { Clock, Loader2, Trash2 } from "lucide-react";
 
-import type { Track } from "@/shared/types/Track";
+import {
+  isPublishedTrack,
+  type ArtistTrack,
+} from "@/features/artist/types/ArtistTrack";
 import { TrackTable } from "@/shared/ui/TrackTable";
 import { TrackRow } from "@/shared/ui/TrackRow";
 import { Typography } from "@/shared/ui/Typography";
 import { formatDuration } from "@/shared/lib/formatDuration";
 
+import TrackStatusBadge from "./TrackStatusBadge";
+
 interface TracksTableProps {
-  tracks: Track[];
+  tracks: ArtistTrack[];
   isLoading: boolean;
-  onDelete?: (trackId: number) => void;
+  onDelete: (trackId: number, trackTitle: string) => void;
 }
 
 const TracksTable = ({ tracks, isLoading, onDelete }: TracksTableProps) => {
@@ -28,7 +33,7 @@ const TracksTable = ({ tracks, isLoading, onDelete }: TracksTableProps) => {
           Нет треков
         </Typography>
         <Typography variant="subtitle" size="sm">
-          Добавьте первый трек с помощью кнопки выше
+          Загрузите первый трек с помощью кнопки выше
         </Typography>
       </div>
     );
@@ -43,7 +48,7 @@ const TracksTable = ({ tracks, isLoading, onDelete }: TracksTableProps) => {
         {
           key: "track",
           header: "Название",
-          width: "1fr",
+          width: "1.5fr",
           render: (track) => (
             <TrackRow
               image={track.imageUrl}
@@ -54,13 +59,21 @@ const TracksTable = ({ tracks, isLoading, onDelete }: TracksTableProps) => {
           ),
         },
         {
+          key: "status",
+          header: "Статус",
+          // Без width: 1fr оставит элементу гибкость и позволит truncate работать.
+          width: "1fr",
+          hideOnMobile: true,
+          render: (track) => <TrackStatusBadge track={track} />,
+        },
+        {
           key: "duration",
           header: "Длительность",
           width: "120px",
           hideOnMobile: true,
           render: (track) => (
             <span className="flex items-center gap-2">
-              <Calendar className="size-3.5 text-text-muted" />
+              <Clock className="size-3.5 text-text-muted" />
               <Typography variant="subtitle" size="sm">
                 {formatDuration(track.durationSeconds)}
               </Typography>
@@ -72,18 +85,32 @@ const TracksTable = ({ tracks, isLoading, onDelete }: TracksTableProps) => {
           header: "",
           width: "40px",
           align: "right",
-          render: (track) => (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete?.(track.id);
-              }}
-              className="flex size-8 items-center justify-center rounded-full text-text-muted opacity-0 transition-all group-hover:opacity-100 hover:bg-red-500/10 hover:text-red-400 active:scale-90"
-              aria-label="Удалить трек"
-            >
-              <Trash2 className="size-4" />
-            </button>
-          ),
+          render: (track) => {
+            // Опубликованные треки нельзя удалить — кнопка задизейблена.
+            // Бэк всё равно отдаст 409, но лучше не давать пытаться.
+            const isPublished = isPublishedTrack(track);
+            return (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (isPublished) return;
+                  onDelete(track.id, track.title);
+                }}
+                disabled={isPublished}
+                className="flex size-8 items-center justify-center rounded-full text-text-muted opacity-0 transition-all group-hover:opacity-100 hover:bg-red-500/10 hover:text-red-400 active:scale-90 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-text-muted"
+                aria-label={
+                  isPublished
+                    ? "Опубликованный трек нельзя удалить"
+                    : "Удалить трек"
+                }
+                title={
+                  isPublished ? "Трек опубликован — нельзя удалить" : undefined
+                }
+              >
+                <Trash2 className="size-4" />
+              </button>
+            );
+          },
         },
       ]}
     />

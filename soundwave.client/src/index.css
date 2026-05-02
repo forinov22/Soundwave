@@ -50,6 +50,17 @@
     /* Таблицы треков */
     --track-row-hover: oklch(1 0 0 / 5%);
     --track-divider:   oklch(1 0 0 / 10%);
+
+    /* Graphite-поверхности — для админских интерфейсов */
+    --graphite-page:    oklch(0.145 0 0);   /* фон страницы */
+    --graphite-panel:   oklch(0.165 0 0);   /* большие контейнеры (вкладка) */
+    --graphite-card:    oklch(0.185 0 0);   /* карточки релизов, статсы */
+    --graphite-card-hover: oklch(0.205 0 0);
+    --graphite-inset:   oklch(0.135 0 0);   /* поля ввода, "вдавленные" области */
+
+    /* Тонкие хайрлайны — почти невидимые */
+    --hairline:         oklch(1 0 0 / 4%);
+    --hairline-strong:  oklch(1 0 0 / 8%);
 }
 
 /* shadcn тёмная тема — нужна для корректной работы shadcn-компонентов */
@@ -148,11 +159,19 @@
     /* Таблицы треков */
     --color-track-row-hover: var(--track-row-hover);
     --color-track-divider:   var(--track-divider);
+
+    --color-graphite-page:       var(--graphite-page);
+    --color-graphite-panel:      var(--graphite-panel);
+    --color-graphite-card:       var(--graphite-card);
+    --color-graphite-card-hover: var(--graphite-card-hover);
+    --color-graphite-inset:      var(--graphite-inset);
+    --color-hairline:            var(--hairline);
+    --color-hairline-strong:     var(--hairline-strong);
 }
 
 @layer base {
     * { @apply border-border outline-ring/50; }
-    body { @apply bg-background text-foreground antialiased; }
+    body { @apply bg-graphite-page text-foreground antialiased; }
     html { @apply font-sans; }
 }
 

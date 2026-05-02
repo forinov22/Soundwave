@@ -5,47 +5,74 @@ namespace Soundwave.Api.Data;
 
 public class AppDbContext : DbContext
 {
-    public DbSet<Album> Albums => Set<Album>();
+    public DbSet<Release> Releases => Set<Release>();
+    public DbSet<ReleaseTrack> ReleaseTracks => Set<ReleaseTrack>();
     public DbSet<Playlist> Playlists => Set<Playlist>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<Track> Tracks => Set<Track>();
     public DbSet<User> Users => Set<User>();
-    
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        
+
+        // TPH-наследование User → Artist
         modelBuilder.Entity<User>()
             .HasDiscriminator<UserRole>("Role")
             .HasValue<User>(UserRole.Listener)
             .HasValue<Artist>(UserRole.Artist);
 
-        // Связи для артиста
+        // Артист — треки (1:N)
         modelBuilder.Entity<Artist>()
             .HasMany(a => a.Tracks)
             .WithOne(t => t.Artist)
-            .HasForeignKey(t => t.ArtistId);
+            .HasForeignKey(t => t.ArtistId)
+            .OnDelete(DeleteBehavior.Cascade);
 
-        // Многие-ко-многим: Лайкнутые треки
+        // Артист — релизы (1:N)
+        modelBuilder.Entity<Artist>()
+            .HasMany(a => a.Releases)
+            .WithOne(r => r.Artist)
+            .HasForeignKey(r => r.ArtistId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Релиз — треки (M:N через ReleaseTrack с Position)
+        modelBuilder.Entity<ReleaseTrack>()
+            .HasKey(rt => new { rt.ReleaseId, rt.TrackId });
+
+        modelBuilder.Entity<ReleaseTrack>()
+            .HasOne(rt => rt.Release)
+            .WithMany(r => r.ReleaseTracks)
+            .HasForeignKey(rt => rt.ReleaseId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ReleaseTrack>()
+            .HasOne(rt => rt.Track)
+            .WithMany(t => t.ReleaseTracks)
+            .HasForeignKey(rt => rt.TrackId)
+            // Удаление трека тянет за собой связи. Сервис всё равно проверит,
+            // что трек не входит в опубликованные релизы — сюда мы попадём
+            // только в разрешённых случаях (force-delete с черновиков).
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Уникальность позиции в пределах релиза — мягкая защита
+        // от дублей при конкурентных вставках.
+        modelBuilder.Entity<ReleaseTrack>()
+            .HasIndex(rt => new { rt.ReleaseId, rt.Position })
+            .IsUnique();
+
+        // Лайкнутые треки (M:N, без обратной коллекции)
         modelBuilder.Entity<User>()
             .HasMany(u => u.LikedTracks)
-            .WithMany() // У трека нет коллекции "UsersWhoLiked", поэтому оставляем пустым
+            .WithMany()
             .UsingEntity(j => j.ToTable("UserLikedTracks"));
 
-        // Связь Пользователь - Плейлисты (Один-ко-многим)
+        // Плейлисты (1:N)
         modelBuilder.Entity<Playlist>()
-            .HasOne(p => p.Owner) // Убедись, что в сущности Playlist есть свойство Owner или User
+            .HasOne(p => p.Owner)
             .WithMany(u => u.Playlists)
             .HasForeignKey(p => p.OwnerId);
-
-        // Связь Альбом - Треки (Один-ко-многим)
-        modelBuilder.Entity<Track>()
-            .HasOne(t => t.Album)
-            .WithMany(a => a.Tracks)
-            .HasForeignKey(t => t.AlbumId)
-            .OnDelete(DeleteBehavior.SetNull);
     }
 }

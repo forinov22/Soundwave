@@ -1,4 +1,4 @@
-import { Library, ListMusic, PlayCircle, Users2 } from "lucide-react";
+import { Disc3, ListMusic, PlayCircle, Users2 } from "lucide-react";
 import StatsCard from "./StatsCard";
 
 const statsData = [
@@ -10,8 +10,8 @@ const statsData = [
     iconColor: "text-primary",
   },
   {
-    icon: Library,
-    label: "Альбомов",
+    icon: Disc3,
+    label: "Релизов",
     value: "3",
     bgColor: "bg-violet-500/10",
     iconColor: "text-violet-400",
@@ -33,7 +33,7 @@ const statsData = [
 ];
 
 const DashboardStats = () => (
-  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+  <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
     {statsData.map((stat) => (
       <StatsCard key={stat.label} {...stat} />
     ))}

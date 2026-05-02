@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { ImagePlus, Music, Plus } from "lucide-react";
+import { ImagePlus, Music } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -22,7 +22,6 @@ interface CreateTrackModel {
 }
 
 const AddTrackDialog = () => {
-  // createTrack сам пишет в стор — onCreated колбэк больше не нужен
   const { createTrack, isCreatingTrack } = useArtist();
   const [isOpen, setIsOpen] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -33,6 +32,11 @@ const AddTrackDialog = () => {
     audio: null,
     image: null,
   });
+
+  const reset = () => {
+    setNewTrack({ name: "", audio: null, image: null });
+    setImagePreview(null);
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -57,38 +61,43 @@ const AddTrackDialog = () => {
 
     if (track) {
       setIsOpen(false);
-      setNewTrack({ name: "", audio: null, image: null });
-      setImagePreview(null);
+      reset();
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(o) => {
+        setIsOpen(o);
+        if (!o) reset();
+      }}
+    >
       <DialogTrigger asChild>
-        <Button className="rounded-full bg-primary px-6 font-bold text-primary-foreground shadow-lg shadow-primary/10 transition-all hover:scale-105 hover:bg-primary/80">
-          <Plus className="mr-2 size-4" />
-          Добавить трек
+        <Button className="rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground hover:bg-primary/90">
+          Загрузить трек
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="rounded-3xl border-white/10 bg-zinc-950 p-8 text-text-primary sm:max-w-md">
+      <DialogContent className="rounded-3xl border-hairline bg-graphite-panel p-8 text-text-primary sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-text-primary">
+          <DialogTitle className="text-xl font-semibold text-text-primary">
             Новый трек
           </DialogTitle>
           <DialogDescription className="text-text-secondary">
-            Загрузите аудиофайл и обложку для вашего релиза.
+            Загрузите аудиофайл и обложку. Трек попадёт в плейграунд — оттуда вы
+            добавите его в релиз.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
+        <div className="space-y-5 py-4">
           <div
             onClick={() => imageInputRef.current?.click()}
             className={cn(
-              "group relative mx-auto aspect-square w-40 cursor-pointer overflow-hidden",
-              "rounded-2xl border-2 border-dashed border-white/20 transition-all",
-              "hover:border-primary/50 hover:bg-primary/5",
-              newTrack.image && "border-solid border-primary/60",
+              "group relative mx-auto aspect-square w-36 cursor-pointer overflow-hidden",
+              "rounded-2xl border-2 border-dashed border-white/10 bg-graphite-inset transition-all",
+              "hover:border-primary/40 hover:bg-primary/5",
+              newTrack.image && "border-solid border-primary/50",
             )}
           >
             {imagePreview ? (
@@ -98,8 +107,8 @@ const AddTrackDialog = () => {
                   alt=""
                   className="size-full object-cover"
                 />
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
-                  <ImagePlus className="size-6 text-white" />
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/55 opacity-0 transition-opacity group-hover:opacity-100">
+                  <ImagePlus className="size-5 text-white" />
                   <span className="text-xs font-medium text-white">
                     Изменить
                   </span>
@@ -107,7 +116,7 @@ const AddTrackDialog = () => {
               </>
             ) : (
               <div className="flex size-full flex-col items-center justify-center gap-2 text-text-secondary">
-                <ImagePlus className="size-8" />
+                <ImagePlus className="size-7" />
                 <span className="px-2 text-center text-xs leading-tight">
                   Выбрать обложку
                 </span>
@@ -122,31 +131,31 @@ const AddTrackDialog = () => {
             />
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold tracking-wider text-text-muted uppercase">
-                Название трека
+              <label className="text-[11px] font-semibold tracking-wider text-text-muted uppercase">
+                Название
               </label>
               <Input
                 value={newTrack.name}
                 onChange={(e) =>
                   setNewTrack((p) => ({ ...p, name: e.target.value }))
                 }
-                placeholder="Название вашего шедевра..."
-                className="h-11 rounded-xl border-white/10 bg-white/5 text-text-primary placeholder:text-text-muted focus-visible:ring-primary"
+                placeholder="Название трека..."
+                className="h-10 rounded-xl border-hairline bg-graphite-inset text-text-primary placeholder:text-text-muted focus-visible:ring-primary"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold tracking-wider text-text-muted uppercase">
+              <label className="text-[11px] font-semibold tracking-wider text-text-muted uppercase">
                 Аудиофайл
               </label>
               <Button
                 onClick={() => audioInputRef.current?.click()}
                 variant="outline"
-                className="h-11 w-full justify-start rounded-xl border-white/10 bg-white/5 px-4 text-text-secondary hover:bg-white/10 hover:text-text-primary"
+                className="h-10 w-full justify-start rounded-xl border-hairline bg-graphite-inset px-3 text-text-secondary hover:bg-white/[0.04] hover:text-text-primary"
               >
-                <Music className="mr-2 size-4" />
+                <Music className="mr-2 size-3.5" />
                 {newTrack.audio ? newTrack.audio.name : "Выбрать файл..."}
               </Button>
               <input
@@ -164,7 +173,7 @@ const AddTrackDialog = () => {
           <Button
             onClick={() => setIsOpen(false)}
             variant="ghost"
-            className="rounded-full text-text-secondary hover:bg-white/5 hover:text-text-primary"
+            className="rounded-full text-text-secondary hover:bg-white/[0.04] hover:text-text-primary"
           >
             Отмена
           </Button>
@@ -176,9 +185,9 @@ const AddTrackDialog = () => {
               !newTrack.image ||
               isCreatingTrack
             }
-            className="rounded-full bg-primary px-8 font-bold text-primary-foreground hover:bg-primary/80"
+            className="rounded-full bg-primary px-6 font-semibold text-primary-foreground hover:bg-primary/90"
           >
-            {isCreatingTrack ? "Загрузка..." : "Опубликовать"}
+            {isCreatingTrack ? "Загрузка..." : "Загрузить"}
           </Button>
         </DialogFooter>
       </DialogContent>

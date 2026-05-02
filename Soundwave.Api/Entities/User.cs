@@ -22,11 +22,9 @@ public class User
 
 public class Artist : User
 {
-    // Поля только для артиста
-    public string? BackgroundImage { get; set; } // Та самая картинка профиля (Banner)
+    public string? BackgroundImage { get; set; }
     public string? Description { get; set; }
-    
-    // Навигационные свойства
+ 
     public ICollection<Track> Tracks { get; set; } = [];
-    public ICollection<Album> Albums { get; set; } = [];
+    public ICollection<Release> Releases { get; set; } = [];
 }

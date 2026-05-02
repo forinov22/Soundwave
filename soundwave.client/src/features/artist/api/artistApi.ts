@@ -1,35 +1,102 @@
 import { apiClient } from "@/shared/api/apiClient";
-import type { Track } from "@/shared/types/Track";
+import type { ReleaseDetails } from "@/shared/types/Release";
 
-import type { CreateTrackPayload } from "../types/CreateTrackPayload";
-import type { CreateAlbumPayload } from "../types/CreateAlbumPayload";
-import type { ArtistAlbum } from "../types/ArtistAlbum";
+import type { ArtistTrack } from "../types/ArtistTrack";
+import type {
+  CreateTrackPayload,
+  CreateReleasePayload,
+  UpdateReleasePayload,
+} from "../types/Payloads";
+
+// Хелпер для multipart-эндпоинтов.
+// Все опциональные поля (включая File) пропускаются, если не заданы.
+function toFormData(
+  record: Record<string, string | Blob | undefined>,
+): FormData {
+  const fd = new FormData();
+  for (const [key, value] of Object.entries(record)) {
+    if (value === undefined) continue;
+    fd.append(key, value);
+  }
+  return fd;
+}
 
 export const artistApi = {
-  // Треки и альбомы текущего авторизованного артиста
-  getMyTracks: () => apiClient.get<Track[]>("/api/artist/me/tracks"),
+  // ── Треки (плейграунд) ──────────────────────────────────────────────────
 
-  getMyAlbums: () => apiClient.get<ArtistAlbum[]>("/api/artist/me/albums"),
+  getMyTracks: () => apiClient.get<ArtistTrack[]>("/api/tracks/me"),
 
-  // POST /api/tracks  — multipart/form-data
   createTrack: (payload: CreateTrackPayload) => {
-    const form = new FormData();
-    form.append("title", payload.title);
-    form.append("audio", payload.audio);
-    form.append("image", payload.image);
-    if (payload.albumId !== undefined) {
-      form.append("albumId", String(payload.albumId));
-    }
-    return apiClient.post<Track>("/api/tracks", form);
+    const form = toFormData({
+      title: payload.title,
+      audio: payload.audio,
+      image: payload.image,
+    });
+    return apiClient.post<ArtistTrack>("/api/tracks", form);
   },
 
-  // POST /api/albums  — multipart/form-data
-  createAlbum: (payload: CreateAlbumPayload) => {
-    const form = new FormData();
-    form.append("title", payload.title);
-    form.append("image", payload.image);
-    if (payload.description) form.append("description", payload.description);
-    if (payload.releaseDate) form.append("releaseDate", payload.releaseDate);
-    return apiClient.post<ArtistAlbum>("/api/albums", form);
+  // force=true — подтверждение удаления трека вместе со связями в драфтах.
+  // Без force бэк вернёт 409 со списком драфтов.
+  deleteTrack: (trackId: number, force = false) =>
+    apiClient.delete<void>(`/api/tracks/${trackId}`, {
+      params: force ? { force: true } : undefined,
+    }),
+
+  // ── Релизы ──────────────────────────────────────────────────────────────
+
+  getMyDrafts: () => apiClient.get<ReleaseDetails[]>("/api/releases/me/drafts"),
+
+  getMyPublished: () =>
+    apiClient.get<ReleaseDetails[]>("/api/releases/me/published"),
+
+  // Один свой релиз (для редактора) — с треками
+  getMyReleaseById: (id: number) =>
+    apiClient.get<ReleaseDetails>(`/api/releases/me/${id}`),
+
+  createRelease: (payload: CreateReleasePayload) => {
+    const form = toFormData({
+      title: payload.title,
+      description: payload.description,
+      releaseDate: payload.releaseDate,
+      image: payload.image,
+    });
+    return apiClient.post<ReleaseDetails>("/api/releases", form);
   },
+
+  updateRelease: (id: number, payload: UpdateReleasePayload) => {
+    const form = toFormData({
+      title: payload.title,
+      description: payload.description,
+      releaseDate: payload.releaseDate,
+      image: payload.image,
+    });
+    return apiClient.patch<ReleaseDetails>(`/api/releases/${id}`, form);
+  },
+
+  // ── Состав релиза ───────────────────────────────────────────────────────
+
+  // Все три возвращают свежий ReleaseDetails — фронт сразу заменяет в сторе.
+  addTrackToRelease: (releaseId: number, trackId: number) =>
+    apiClient.post<ReleaseDetails>(`/api/releases/${releaseId}/tracks`, {
+      trackId,
+    }),
+
+  removeTrackFromRelease: (releaseId: number, trackId: number) =>
+    apiClient.delete<ReleaseDetails>(
+      `/api/releases/${releaseId}/tracks/${trackId}`,
+    ),
+
+  reorderTracks: (releaseId: number, trackIds: number[]) =>
+    apiClient.put<ReleaseDetails>(`/api/releases/${releaseId}/tracks/order`, {
+      trackIds,
+    }),
+
+  // ── Публикация и удаление ───────────────────────────────────────────────
+
+  publishRelease: (releaseId: number) =>
+    apiClient.post<ReleaseDetails>(`/api/releases/${releaseId}/publish`),
+
+  // Draft → hard delete, Published → soft (Archived). Бэк сам разруливает.
+  deleteRelease: (releaseId: number) =>
+    apiClient.delete<void>(`/api/releases/${releaseId}`),
 };

@@ -1,0 +1,51 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "soundwave-ml"
+version = "0.1.0"
+requires-python = ">=3.11"
+
+dependencies = [
+    # API
+    "fastapi>=0.111.0",
+    "uvicorn[standard]>=0.30.0",
+    "python-multipart>=0.0.9",       # для UploadFile
+
+    # Config
+    "pydantic-settings>=2.3.0",
+
+    # ML — аудио
+    "torch>=2.3.0",
+    "torchaudio>=2.3.0",
+    "librosa>=0.10.2",
+    "scipy>=1.13.0",
+    "numpy>=1.26.0",
+
+    # Векторный индекс
+    "hnswlib>=0.8.0",
+
+    # S3
+    "boto3>=1.34.0",
+
+    # HTTP-клиент (для callback в .NET)
+    "httpx>=0.27.0",
+
+    # БД
+    # sqlite3 входит в stdlib — ничего не нужно
+
+    # Утилиты
+    "aiofiles>=23.2.1",
+    "tqdm>=4.66.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.2.0",
+    "pytest-asyncio>=0.23.0",
+    "httpx>=0.27.0",  # TestClient
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]

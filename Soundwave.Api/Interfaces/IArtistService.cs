@@ -6,29 +6,23 @@ public interface IArtistService
 {
     Task<Artist?> GetArtistByIdAsync(int id);
 
-    // Треки и альбомы конкретного артиста
+    // Все треки артиста (плейграунд + те, что в релизах).
     Task<IEnumerable<Track>> GetArtistTracksAsync(int artistId);
-    Task<IEnumerable<Album>> GetArtistAlbumsAsync(int artistId);
-    
-    // Создание трека — принимает стримы файлов, возвращает созданный трек
+
+    // Загрузка трека в плейграунд. Без привязки к релизу.
     Task<Track> CreateTrackAsync(
         int artistId,
         string title,
-        int? albumId,
         Stream audioStream,
         string audioFileName,
         string audioContentType,
         Stream imageStream,
         string imageFileName,
         string imageContentType);
- 
-    // Создание альбома — без треков, треки добавляются отдельно
-    Task<Album> CreateAlbumAsync(
-        int artistId,
-        string title,
-        string description,
-        DateTime releaseDate,
-        Stream imageStream,
-        string imageFileName,
-        string imageContentType);
+
+    // Удаление трека.
+    // - Если трек в опубликованном релизе → ConflictException (никогда нельзя).
+    // - Если трек в черновиках и force=false → ConflictException со списком черновиков.
+    // - Если force=true → удаляются связи с черновиками, затем сам трек.
+    Task DeleteTrackAsync(int trackId, int artistId, bool force);
 }

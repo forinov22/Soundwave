@@ -1,5 +1,6 @@
 ﻿namespace Soundwave.Api.Entities;
 
+[Obsolete]
 public class Album
 {
     public int Id { get; set; }

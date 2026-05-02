@@ -1,41 +1,40 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Music, Album } from "lucide-react";
+import { Disc3, Music } from "lucide-react";
 
 import Header from "./components/Header";
 import DashboardStats from "./components/dashboard/DashboardStats";
-import TracksTabContent from "./components/tracks/TracksTabContent";
-import AlbumsTabContent from "./components/albums/AlbumsTabContent";
+import TracksTabContent from "@/pages/Profile/Artist/components/tracks/TracksTabContent";
+import ReleasesTabContent from "@/pages/Profile/Artist/components/releases/ReleasesTabContent";
 
 const ArtistProfilePage = () => (
-  // Фон чуть светлее чем #121212 — как PageLayout в основном приложении
-  <div className="min-h-screen bg-[#1a1a1a] p-8 text-text-primary">
-    <div className="mx-auto max-w-7xl space-y-8">
+  <div className="min-h-screen bg-graphite-page p-8 text-text-primary">
+    <div className="mx-auto max-w-7xl space-y-10">
       <Header />
       <DashboardStats />
 
-      <Tabs defaultValue="tracks" className="space-y-6">
-        <TabsList className="w-fit rounded-full border border-white/5 bg-white/5 p-1">
+      <Tabs defaultValue="releases" className="space-y-8">
+        <TabsList className="h-auto w-fit gap-1 rounded-full border border-hairline bg-graphite-card p-1">
           <TabsTrigger
-            value="tracks"
-            className="rounded-full px-6 text-text-secondary transition-all data-[state=active]:bg-white/10 data-[state=active]:text-text-primary"
+            value="releases"
+            className="rounded-full px-5 py-1.5 text-sm text-text-secondary transition-all hover:bg-white/4 hover:text-text-secondary data-[state=active]:bg-white/6 data-[state=active]:text-text-primary data-[state=active]:shadow-none"
           >
-            <Music className="mr-2 size-4" />
-            Треки
+            <Disc3 className="mr-2 size-3.5" />
+            Релизы
           </TabsTrigger>
           <TabsTrigger
-            value="albums"
-            className="rounded-full px-6 text-text-secondary transition-all data-[state=active]:bg-white/10 data-[state=active]:text-text-primary"
+            value="tracks"
+            className="rounded-full px-5 py-1.5 text-sm text-text-secondary transition-all hover:bg-white/4 hover:text-text-secondary data-[state=active]:bg-white/6 data-[state=active]:text-text-primary data-[state=active]:shadow-none"
           >
-            <Album className="mr-2 size-4" />
-            Альбомы
+            <Music className="mr-2 size-3.5" />
+            Треки
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="tracks" className="mt-6 outline-hidden">
-          <TracksTabContent />
+        <TabsContent value="releases" className="outline-hidden">
+          <ReleasesTabContent />
         </TabsContent>
-        <TabsContent value="albums" className="mt-6 outline-hidden">
-          <AlbumsTabContent />
+        <TabsContent value="tracks" className="outline-hidden">
+          <TracksTabContent />
         </TabsContent>
       </Tabs>
     </div>

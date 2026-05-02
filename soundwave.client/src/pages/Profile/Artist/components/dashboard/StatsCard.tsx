@@ -15,22 +15,29 @@ const StatsCard = ({
   bgColor,
   iconColor,
 }: StatsCardProps) => (
-  // Явные светлые значения — не через --surface токен, чтобы не зависеть от темы
-  <div className="group overflow-hidden rounded-2xl border border-white/5 bg-[oklch(0.22_0_0)] p-6 transition-all duration-300 hover:bg-[oklch(0.26_0_0)]">
-    <div className="flex items-center gap-5">
+  <div
+    className={cn(
+      "group rounded-2xl border border-hairline bg-graphite-card p-5",
+      "transition-colors duration-200 hover:bg-graphite-card-hover",
+    )}
+  >
+    <div className="flex items-center gap-4">
       <div
         className={cn(
-          "rounded-xl p-4 transition-transform group-hover:scale-110",
+          "flex size-12 items-center justify-center rounded-xl",
+          "transition-transform group-hover:scale-105",
           bgColor,
         )}
       >
-        <Icon className={cn("size-7", iconColor)} />
+        <Icon className={cn("size-5", iconColor)} />
       </div>
-      <div>
-        <p className="text-xs font-bold tracking-wider text-text-muted uppercase">
+      <div className="min-w-0">
+        <p className="text-[11px] font-semibold tracking-wider text-text-muted uppercase">
           {label}
         </p>
-        <p className="mt-1 text-3xl font-black text-text-primary">{value}</p>
+        <p className="mt-0.5 text-2xl font-bold tracking-tight text-text-primary">
+          {value}
+        </p>
       </div>
     </div>
   </div>

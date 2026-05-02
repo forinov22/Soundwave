@@ -13,6 +13,7 @@ public static class DependencyInjection
     public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<S3Options>(configuration.GetSection(S3Options.S3Settings));
+        services.Configure<MlServiceOptions>(configuration.GetSection(MlServiceOptions.MlServiceSettings));
         services.Configure<GoogleOptions>(configuration.GetSection(GoogleOptions.GoogleSettings));
 
         services.AddScoped<IAuthService, AuthService>();
@@ -20,13 +21,19 @@ public static class DependencyInjection
         services.AddScoped<IStorageService, S3StorageService>();
         services.AddScoped<IMusicService, MusicService>();
         services.AddScoped<IArtistService, ArtistService>();
+        services.AddScoped<IReleaseService, ReleaseService>();
 
         return services;
     }
 
     public static IServiceCollection AddAuthServices(this IServiceCollection services, IConfiguration configuration)
     {
-        var googleSettings = configuration.GetSection(GoogleOptions.GoogleSettings).Get<GoogleOptions>();
+        var googleSettings = configuration
+            .GetSection(GoogleOptions.GoogleSettings)
+            .Get<GoogleOptions>();
+        
+        if (string.IsNullOrEmpty(googleSettings.ClientId) || string.IsNullOrEmpty(googleSettings.ClientSecret))
+            throw  new ArgumentException("Google Client ID and Client Secret not set");
 
         services.AddAuthentication(options =>
         {
@@ -63,6 +70,22 @@ public static class DependencyInjection
         });
 
         services.AddAuthorization();
+        return services;
+    }
+    
+    public static IServiceCollection AddMlServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        var mlServiceSettings = configuration
+            .GetSection(MlServiceOptions.MlServiceSettings)
+            .Get<MlServiceOptions>();
+
+        if (string.IsNullOrEmpty(mlServiceSettings.BaseUrl))
+            throw new ArgumentException("Ml Service Base URL not set");
+        
+        services.AddHttpClient<MlServiceClient>(
+            client => client.BaseAddress = new Uri(mlServiceSettings.BaseUrl)
+        );
+
         return services;
     }
 

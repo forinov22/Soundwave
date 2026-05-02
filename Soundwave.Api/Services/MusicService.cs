@@ -16,26 +16,51 @@ public class MusicService : IMusicService
 
     public async Task<IEnumerable<Track>> GetTrendingTracksAsync()
     {
+        // Только треки, входящие хотя бы в один опубликованный релиз.
         return await _context.Tracks
             .Include(t => t.Artist)
+            .Where(t => t.ReleaseTracks
+                .Any(rt => rt.Release.Status == ReleaseStatus.Published))
             .OrderByDescending(t => t.PlayCount)
             .Take(10)
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<Album>> GetPopularAlbumsAsync()
+    public async Task<IEnumerable<Release>> GetPopularReleasesAsync()
     {
-        return await _context.Albums
-            .Include(a => a.Artist)
+        // Витрина: только мета + артист. Треки на главной не нужны,
+        // не грузим их.
+        return await _context.Releases
+            .Include(r => r.Artist)
+            .Where(r => r.Status == ReleaseStatus.Published)
+            .OrderByDescending(r => r.PublishedAt)
             .Take(6)
             .ToListAsync();
     }
 
-    public async Task<Album?> GetAlbumByIdAsync(int id)
+    public Task<Release?> GetReleaseMetaByIdAsync(int id)
     {
-        return await _context.Albums
-            .Include(a => a.Artist)
-            .Include(a => a.Tracks)
-            .FirstOrDefaultAsync(a => a.Id == id);
+        // Шапка страницы релиза. Без треков — фронт догрузит их отдельно.
+        return _context.Releases
+            .Include(r => r.Artist)
+            .FirstOrDefaultAsync(r => r.Id == id && r.Status == ReleaseStatus.Published);
+    }
+
+    public async Task<IEnumerable<ReleaseTrack>?> GetReleaseTracksAsync(int releaseId)
+    {
+        // Сначала проверяем существование и статус — иначе вернём null,
+        // и контроллер ответит 404. Это отличает «релиз не существует»
+        // от «релиз существует, но треков пока нет».
+        var exists = await _context.Releases
+            .AnyAsync(r => r.Id == releaseId && r.Status == ReleaseStatus.Published);
+
+        if (!exists) return null;
+
+        return await _context.ReleaseTracks
+            .Include(rt => rt.Track)
+                .ThenInclude(t => t.Artist)
+            .Where(rt => rt.ReleaseId == releaseId)
+            .OrderBy(rt => rt.Position)
+            .ToListAsync();
     }
 }
