@@ -8,4 +8,5 @@ export interface Track {
   durationSeconds: number;
   artistName: string;
   artistId: number;
+  playCount: number;
 }

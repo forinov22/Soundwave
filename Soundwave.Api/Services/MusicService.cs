@@ -63,4 +63,52 @@ public class MusicService : IMusicService
             .OrderBy(rt => rt.Position)
             .ToListAsync();
     }
+    
+    public async Task<IEnumerable<Track>> GetArtistPopularTracksAsync(int artistId, int limit = 5)
+    {
+        return await _context.Tracks
+            .Include(t => t.Artist)
+            .Where(t =>
+                t.ArtistId == artistId &&
+                t.ReleaseTracks.Any(rt => rt.Release.Status == ReleaseStatus.Published))
+            .OrderByDescending(t => t.PlayCount)
+            .Take(limit)
+            .ToListAsync();
+    }
+ 
+    public async Task<(IEnumerable<Release> releases, int totalCount)> GetArtistReleasesAsync(
+        int artistId,
+        string? type,
+        int page,
+        int pageSize)
+    {
+        // Базовый запрос: опубликованные релизы артиста с треками
+        var query = _context.Releases
+            .Include(r => r.ReleaseTracks.OrderBy(rt => rt.Position))
+            .ThenInclude(rt => rt.Track)           // ← добавлено: грузим треки
+            .ThenInclude(t => t.Artist)        // ← и имя артиста для каждого трека
+            .Where(r => r.ArtistId == artistId && r.Status == ReleaseStatus.Published);
+ 
+        // Фильтр по типу — тип вычисляется из кол-ва треков
+        if (!string.IsNullOrEmpty(type))
+        {
+            query = type switch
+            {
+                "Single" => query.Where(r => r.ReleaseTracks.Count == 1),
+                "EP"     => query.Where(r => r.ReleaseTracks.Count >= 2 && r.ReleaseTracks.Count <= 6),
+                "Album"  => query.Where(r => r.ReleaseTracks.Count > 6),
+                _        => query
+            };
+        }
+ 
+        var totalCount = await query.CountAsync();
+ 
+        var releases = await query
+            .OrderByDescending(r => r.ReleaseDate)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+ 
+        return (releases, totalCount);
+    }
 }

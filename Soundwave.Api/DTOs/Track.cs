@@ -8,7 +8,8 @@ public record TrackDto(
     string ImageUrl,
     int DurationSeconds,
     string ArtistName,
-    int ArtistId
+    int ArtistId,
+    long PlayCount
 );
 
 // Состояние трека в плейграунде артиста — где он сейчас «лежит».

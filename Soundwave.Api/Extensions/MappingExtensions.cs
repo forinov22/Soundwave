@@ -6,16 +6,22 @@ namespace Soundwave.Api.Extensions;
 
 public static class MappingExtensions
 {
-    public static ArtistDetailsDto ToDto(this Artist a, IStorageService storage)
+    public static ArtistDetailsDto ToDto(this Artist artist, IStorageService storage)
     {
-        var totalPlays = a.Tracks.Sum(t => t.PlayCount);
-
         return new ArtistDetailsDto(
-            a.Id,
-            a.Name,
-            a.BackgroundImage != null ? storage.GetPresignedUrl(a.BackgroundImage) : null,
-            a.Description ?? "Биография уточняется...",
-            totalPlays
+            Id: artist.Id,
+            Name: artist.Name,
+            AvatarUrl: string.IsNullOrEmpty(artist.Avatar)
+                ? null
+                : storage.GetPresignedUrl(artist.Avatar),
+            BannerUrl: string.IsNullOrEmpty(artist.BackgroundImage)
+                ? null
+                : storage.GetPresignedUrl(artist.BackgroundImage),
+            Description: artist.Description,
+            MonthlyListeners: artist.Tracks
+                .SelectMany(t => t.ReleaseTracks)
+                .Where(rt => rt.Release.Status == ReleaseStatus.Published)
+                .Sum(rt => rt.Track.PlayCount)
         );
     }
     
@@ -30,7 +36,8 @@ public static class MappingExtensions
             ImageUrl: storage.GetPresignedUrl(track.ImageS3Path),
             DurationSeconds: track.DurationSeconds,
             ArtistName: track.Artist?.Name ?? string.Empty,
-            ArtistId: track.ArtistId
+            ArtistId: track.ArtistId,
+            PlayCount: track.PlayCount
         );
     }
 
