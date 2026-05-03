@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams } from "react-router";
+import { useParams, useNavigate } from "react-router";
 import {
   Play,
   MoreHorizontal,
@@ -8,7 +8,8 @@ import {
   Globe,
   Trash2,
   Pencil,
-  // Loader2,
+  Loader2,
+  Heart,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -20,131 +21,111 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { songsData, albumsData } from "@/assets/assets";
 import { formatDuration } from "@/shared/lib/formatDuration";
 import { EntityHeader } from "@/shared/ui/EntityHeader";
 import { ActionIcon } from "@/shared/ui/ActionIcon";
 import { TrackTable } from "@/shared/ui/TrackTable";
 import { TrackRow } from "@/shared/ui/TrackRow";
 import { Typography } from "@/shared/ui/Typography";
+import { usePlaylistDetails } from "@/features/playlists/lib/usePlaylistDetails";
 
 import { EditPlaylistModal } from "./EditPlaylistModal";
 import { TrackSearchInput } from "./TrackSearchInput";
+import { useAuth } from "@/features/auth/lib/useAuth";
 
-// import type { LayoutOutletContext } from "../MainLayout";
-
-// ─── Типы ──────────────────────────────────────────────────────────────────
-
-interface PlaylistTrack {
-  id: number;
-  name: string;
-  image: string;
-  duration: string;
-  albumName: string;
-  artistName: string;
-}
-
-interface PlaylistState {
-  name: string;
-  description: string;
-  image: string | null;
-  isPublic: boolean;
-  tracks: PlaylistTrack[];
-}
-
-// ─── Хардкод начального состояния ──────────────────────────────────────────
-
-const INITIAL_TRACKS: PlaylistTrack[] = songsData.slice(0, 3).map((s) => ({
-  id: s.id,
-  name: s.name,
-  image: s.image,
-  duration: s.duration,
-  albumName: albumsData[s.id % albumsData.length]?.name ?? "Неизвестно",
-  artistName: "Various Artists",
-}));
-
-const PLACEHOLDER_IMAGE = songsData[0].image;
-
-// ─── Страница ──────────────────────────────────────────────────────────────
+const LIKED_SONGS_IMAGE = (
+  <div className="flex size-full items-center justify-center bg-linear-to-br from-indigo-700 to-emerald-400">
+    <Heart className="size-16 fill-white text-white" />
+  </div>
+);
 
 function PlaylistDetailsPage() {
-  // const { setGradientBgColor } = useOutletContext<LayoutOutletContext>();
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const playlistId = Number(id);
 
-  const [playlist, setPlaylist] = useState<PlaylistState>({
-    name: `Мой плейлист ${id ?? ""}`,
-    description: "",
-    image: null,
-    isPublic: false,
-    tracks: INITIAL_TRACKS,
-  });
+  const { user } = useAuth();
+  const userId = user?.id;
+
+  const {
+    details,
+    isLoading,
+    error,
+    updatePlaylist,
+    isUpdating,
+    addTrack,
+    isAddingTrack,
+    removeTrack,
+    deletePlaylist,
+    togglePublic,
+  } = usePlaylistDetails(playlistId);
 
   const [isEditOpen, setIsEditOpen] = useState(false);
 
-  // Текущий пользователь всегда владелец (хардкод)
-  const isOwner = true;
+  if (isLoading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="size-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
-  const addedTrackIds = playlist.tracks.map((t) => t.id);
+  if (error || !details) {
+    return (
+      <div className="flex h-64 flex-col items-center justify-center gap-2">
+        <Typography variant="title" size="lg">
+          Плейлист не найден
+        </Typography>
+        <Typography variant="subtitle" size="sm">
+          Возможно, он был удалён или недоступен
+        </Typography>
+      </div>
+    );
+  }
 
-  const handleAddTrack = (track: {
-    id: number;
-    name: string;
-    image: string;
-    duration: string;
-    albumName?: string;
-  }) => {
-    setPlaylist((prev) => ({
-      ...prev,
-      tracks: [
-        ...prev.tracks,
-        {
-          id: track.id,
-          name: track.name,
-          image: track.image,
-          duration: track.duration,
-          albumName: track.albumName ?? "",
-          artistName: "Various Artists",
-        },
-      ],
-    }));
-  };
+  const isOwner = details.ownerId === userId;
+  const addedTrackIds = details.tracks.map((t) => t.id);
 
-  const handleRemoveTrack = (trackId: number) => {
-    setPlaylist((prev) => ({
-      ...prev,
-      tracks: prev.tracks.filter((t) => t.id !== trackId),
-    }));
-  };
+  const totalDuration = details.tracks.reduce(
+    (acc, t) => acc + t.durationSeconds,
+    0,
+  );
 
-  const handleSaveEdit = (data: {
+  const handleSaveEdit = async (data: {
     name: string;
     description: string;
     image: string | null;
   }) => {
-    setPlaylist((prev) => ({ ...prev, ...data }));
+    await updatePlaylist({ title: data.name, description: data.description });
   };
 
-  const handleTogglePublic = () => {
-    setPlaylist((prev) => ({ ...prev, isPublic: !prev.isPublic }));
+  const handleDelete = async () => {
+    await deletePlaylist();
+    navigate(-1);
   };
 
-  const totalDuration = playlist.tracks.reduce((acc, t) => {
-    const [m, s] = t.duration.split(":").map(Number);
-    return acc + (m * 60 + (s || 0));
-  }, 0);
+  let image = details.imageUrl ?? (
+    <div className="flex size-full items-center justify-center rounded bg-zinc-700">
+      <span className="text-9xl text-zinc-400">♪</span>
+    </div>
+  );
+
+  if (details.isLikedSongs) {
+    image = LIKED_SONGS_IMAGE;
+  }
 
   return (
     <div className="relative pb-20">
-      {/* Хедер */}
       <EntityHeader
-        image={playlist.image ?? PLACEHOLDER_IMAGE}
-        type="Плейлист"
-        title={playlist.name}
+        image={image}
+        type={details.isLikedSongs ? "Любимые треки" : "Плейлист"}
+        title={details.title}
         meta={[
-          playlist.description || null,
-          `${playlist.tracks.length} треков`,
+          details.description || null,
+          `${details.tracks.length} треков`,
           totalDuration > 0 ? formatDuration(totalDuration) : null,
-          playlist.isPublic ? "Открытый" : "Закрытый",
+          (!details.isLikedSongs && details.isPublic && "Открытый") || null,
+          (!details.isLikedSongs && !details.isPublic && "Закрытый") || null,
         ]}
         preset="album"
         actions={
@@ -152,13 +133,12 @@ function PlaylistDetailsPage() {
             <Button
               size="icon"
               className="size-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/80"
-              disabled={playlist.tracks.length === 0}
+              disabled={details.tracks.length === 0}
             >
               <Play className="size-6 fill-current" />
             </Button>
 
-            {/* Три точки с dropdown */}
-            {isOwner && (
+            {isOwner && !details.isLikedSongs && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <div>
@@ -182,25 +162,28 @@ function PlaylistDetailsPage() {
                   </DropdownMenuItem>
 
                   <DropdownMenuItem
-                    onClick={handleTogglePublic}
+                    onClick={togglePublic}
                     className="cursor-pointer gap-2 hover:bg-white/5 focus:bg-white/5"
                   >
-                    {playlist.isPublic ? (
+                    {details.isPublic ? (
                       <>
-                        <Lock className="size-4 text-text-secondary" />
-                        Сделать закрытым
+                        <Lock className="size-4 text-text-secondary" /> Сделать
+                        закрытым
                       </>
                     ) : (
                       <>
-                        <Globe className="size-4 text-text-secondary" />
-                        Сделать открытым
+                        <Globe className="size-4 text-text-secondary" /> Сделать
+                        открытым
                       </>
                     )}
                   </DropdownMenuItem>
 
                   <DropdownMenuSeparator className="bg-white/10" />
 
-                  <DropdownMenuItem className="cursor-pointer gap-2 text-red-400 hover:bg-red-500/10 focus:bg-red-500/10 focus:text-red-400">
+                  <DropdownMenuItem
+                    onClick={handleDelete}
+                    className="cursor-pointer gap-2 text-red-400 hover:bg-red-500/10 focus:bg-red-500/10 focus:text-red-400"
+                  >
                     <Trash2 className="size-4" />
                     Удалить плейлист
                   </DropdownMenuItem>
@@ -212,10 +195,9 @@ function PlaylistDetailsPage() {
         className="mb-8"
       />
 
-      {/* Таблица треков */}
-      {playlist.tracks.length > 0 ? (
+      {details.tracks.length > 0 ? (
         <TrackTable
-          data={playlist.tracks}
+          data={details.tracks}
           getKey={(t) => t.id}
           onRowClick={() => {}}
           columns={[
@@ -225,8 +207,8 @@ function PlaylistDetailsPage() {
               width: "4fr",
               render: (track) => (
                 <TrackRow
-                  image={track.image}
-                  title={track.name}
+                  image={track.imageUrl}
+                  title={track.title}
                   subtitle={track.artistName}
                   size="sm"
                 />
@@ -239,7 +221,7 @@ function PlaylistDetailsPage() {
               hideOnMobile: true,
               render: (track) => (
                 <Typography variant="subtitle" size="sm" truncate>
-                  {track.albumName}
+                  {track.albumTitle ?? "—"}
                 </Typography>
               ),
             },
@@ -255,14 +237,13 @@ function PlaylistDetailsPage() {
                     size="sm"
                     className="w-10 text-right font-mono"
                   >
-                    {track.duration}
+                    {formatDuration(track.durationSeconds)}
                   </Typography>
-                  {/* Удалить трек — только для владельца */}
                   {isOwner && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleRemoveTrack(track.id);
+                        removeTrack(track.id);
                       }}
                       className={cn(
                         "flex size-7 items-center justify-center rounded-full",
@@ -280,19 +261,19 @@ function PlaylistDetailsPage() {
           ]}
         />
       ) : (
-        /* Пустое состояние */
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <Typography variant="title" size="lg" className="mb-2">
             Плейлист пуст
           </Typography>
           <Typography variant="subtitle" size="sm" className="mb-6 max-w-xs">
-            Найдите треки ниже и добавьте их в плейлист
+            {details.isLikedSongs
+              ? "Лайкайте треки — они появятся здесь"
+              : "Найдите треки ниже и добавьте их в плейлист"}
           </Typography>
         </div>
       )}
 
-      {/* Поиск треков — только для владельца */}
-      {isOwner && (
+      {isOwner && !details.isLikedSongs && (
         <div className="mt-10">
           <Typography
             as="h2"
@@ -304,21 +285,24 @@ function PlaylistDetailsPage() {
           </Typography>
           <TrackSearchInput
             addedTrackIds={addedTrackIds}
-            onAdd={handleAddTrack}
+            onAdd={(track) => addTrack(track.id)}
+            isLoading={isAddingTrack}
             className="max-w-lg"
           />
         </div>
       )}
 
-      {/* Модалка редактирования */}
-      <EditPlaylistModal
-        isOpen={isEditOpen}
-        onClose={() => setIsEditOpen(false)}
-        initialName={playlist.name}
-        initialDescription={playlist.description}
-        initialImage={playlist.image ?? undefined}
-        onSave={handleSaveEdit}
-      />
+      {isEditOpen && (
+        <EditPlaylistModal
+          isOpen={isEditOpen}
+          onClose={() => setIsEditOpen(false)}
+          initialName={details.title}
+          initialDescription={details.description}
+          initialImage={details.imageUrl ?? undefined}
+          onSave={handleSaveEdit}
+          isSaving={isUpdating}
+        />
+      )}
     </div>
   );
 }

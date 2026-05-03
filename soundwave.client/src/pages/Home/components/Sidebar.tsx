@@ -1,5 +1,12 @@
 import { useNavigate } from "react-router";
-import { Library, Plus, Search, ListFilter, Heart } from "lucide-react";
+import {
+  Library,
+  Plus,
+  Search,
+  ListFilter,
+  Heart,
+  Loader2,
+} from "lucide-react";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { TrackRow } from "@/shared/ui/TrackRow";
@@ -11,8 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-let _playlistCounter = 1;
+import { usePlaylists } from "@/features/playlists/lib/usePlaylists";
 
 const Sidebar = ({
   isCollapsed,
@@ -22,20 +28,21 @@ const Sidebar = ({
   toggleCollapse: () => void;
 }) => {
   const navigate = useNavigate();
+  const { playlists, isLoading, createPlaylist, isCreating } = usePlaylists();
 
-  const handleCreatePlaylist = () => {
-    // В реальном приложении здесь будет вызов API
-    // Пока используем локальный счётчик как id
-    const newId = _playlistCounter++;
-    navigate(`/playlist/${newId}`);
+  const handleCreatePlaylist = async () => {
+    const created = await createPlaylist();
+    if (created) navigate(`/playlist/${created.id}`);
   };
 
   return (
     <div
-      className={`flex h-full flex-col gap-2 transition-all duration-300 ${isCollapsed ? "w-20" : "w-[320px]"} hidden lg:flex`}
+      className={`flex h-full flex-col gap-2 transition-all duration-300 ${
+        isCollapsed ? "w-20" : "w-[320px]"
+      } hidden lg:flex`}
     >
       <div className="flex flex-1 flex-col overflow-hidden rounded-xl border border-zinc-800/50 bg-zinc-900/30 backdrop-blur-md">
-        {/* Шапка медиатеки */}
+        {/* Шапка */}
         <div className="flex items-center justify-between p-4 text-zinc-400">
           <button
             onClick={toggleCollapse}
@@ -45,16 +52,22 @@ const Sidebar = ({
             {!isCollapsed && <span className="font-bold">Моя медиатека</span>}
           </button>
           {!isCollapsed && (
-            <Plus
+            <button
               onClick={handleCreatePlaylist}
-              className="size-5 cursor-pointer hover:text-white"
-            />
+              disabled={isCreating}
+              className="hover:text-white disabled:opacity-50"
+            >
+              {isCreating ? (
+                <Loader2 className="size-5 animate-spin" />
+              ) : (
+                <Plus className="size-5" />
+              )}
+            </button>
           )}
         </div>
 
         {!isCollapsed && (
           <>
-            {/* Кнопки фильтрации */}
             <div className="mb-4 flex gap-2 px-4">
               {["Плейлисты", "Исполнители", "Альбомы"].map((tag) => (
                 <button
@@ -66,7 +79,6 @@ const Sidebar = ({
               ))}
             </div>
 
-            {/* Поиск и Сортировка */}
             <div className="mb-2 flex items-center justify-between px-4 text-zinc-400">
               <Search className="size-4 cursor-pointer hover:text-white" />
               <DropdownMenu>
@@ -89,20 +101,41 @@ const Sidebar = ({
 
         <ScrollArea className="flex-1">
           <div className="space-y-1 p-2">
-            {/* Пример элемента списка */}
-            <TrackRow
-              image={
-                <div className="flex size-full items-center justify-center rounded bg-linear-to-br from-indigo-700 to-emerald-400">
-                  <Heart className="size-5 fill-white text-white" />
-                </div>
-              }
-              title={isCollapsed ? "" : "Любимые треки"}
-              subtitle={isCollapsed ? undefined : "Плейлист • 128 треков"}
-              size="md"
-              highlightOnHover
-              onClick={() => {}}
-            />
-            {/* Здесь будет .map() по любимым альбомам и артистам */}
+            {isLoading && (
+              <div className="flex justify-center py-4">
+                <Loader2 className="size-5 animate-spin text-zinc-500" />
+              </div>
+            )}
+
+            {playlists.map((playlist) => (
+              <TrackRow
+                key={playlist.id}
+                image={
+                  playlist.isLikedSongs ? (
+                    // Специальная иконка для «Любимых треков»
+                    <div className="flex size-full items-center justify-center rounded bg-gradient-to-br from-indigo-700 to-emerald-400">
+                      <Heart className="size-5 fill-white text-white" />
+                    </div>
+                  ) : playlist.imageUrl ? (
+                    playlist.imageUrl
+                  ) : (
+                    // Дефолтная обложка плейлиста
+                    <div className="flex size-full items-center justify-center rounded bg-zinc-700">
+                      <span className="text-xs text-zinc-400">♪</span>
+                    </div>
+                  )
+                }
+                title={isCollapsed ? "" : playlist.title}
+                subtitle={
+                  isCollapsed
+                    ? undefined
+                    : `Плейлист · ${playlist.trackCount} треков`
+                }
+                size="md"
+                highlightOnHover
+                onClick={() => navigate(`/playlist/${playlist.id}`)}
+              />
+            ))}
           </div>
         </ScrollArea>
       </div>

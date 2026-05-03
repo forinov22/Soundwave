@@ -8,6 +8,7 @@ public class AppDbContext : DbContext
     public DbSet<Release> Releases => Set<Release>();
     public DbSet<ReleaseTrack> ReleaseTracks => Set<ReleaseTrack>();
     public DbSet<Playlist> Playlists => Set<Playlist>();
+    public DbSet<PlaylistTrack> PlaylistTracks => Set<PlaylistTrack>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<Track> Tracks => Set<Track>();
     public DbSet<User> Users => Set<User>();
@@ -63,13 +64,26 @@ public class AppDbContext : DbContext
             .HasIndex(rt => new { rt.ReleaseId, rt.Position })
             .IsUnique();
 
-        // Лайкнутые треки (M:N, без обратной коллекции)
-        modelBuilder.Entity<User>()
-            .HasMany(u => u.LikedTracks)
+        modelBuilder.Entity<PlaylistTrack>()
+            .HasKey(pt => new { pt.PlaylistId, pt.TrackId });
+ 
+        modelBuilder.Entity<PlaylistTrack>()
+            .HasOne(pt => pt.Playlist)
+            .WithMany(p => p.PlaylistTracks)
+            .HasForeignKey(pt => pt.PlaylistId)
+            .OnDelete(DeleteBehavior.Cascade);
+ 
+        modelBuilder.Entity<PlaylistTrack>()
+            .HasOne(pt => pt.Track)
             .WithMany()
-            .UsingEntity(j => j.ToTable("UserLikedTracks"));
-
-        // Плейлисты (1:N)
+            .HasForeignKey(pt => pt.TrackId)
+            .OnDelete(DeleteBehavior.Cascade);
+ 
+        modelBuilder.Entity<PlaylistTrack>()
+            .HasIndex(pt => new { pt.PlaylistId, pt.Position })
+            .IsUnique();
+ 
+        // Плейлист → владелец
         modelBuilder.Entity<Playlist>()
             .HasOne(p => p.Owner)
             .WithMany(u => u.Playlists)

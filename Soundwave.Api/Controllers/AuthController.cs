@@ -118,7 +118,7 @@ public class AuthController : ControllerBase
             return Redirect("http://localhost:3000/auth-callback");
         }
         
-        var user = _authService.GetOrCreateUser(email, name, picture);
+        var user = await _authService.GetOrCreateUserAsync(email, name, picture);
         
         var accessToken = _tokenService.GenerateAccessToken(user);
         var refreshToken = _tokenService.GenerateRefreshToken();

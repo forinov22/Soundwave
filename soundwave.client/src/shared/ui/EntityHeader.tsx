@@ -4,7 +4,7 @@ import { Typography } from "@/shared/ui/Typography";
 type EntityHeaderPreset = "album" | "single" | "playlist" | "compact";
 
 interface EntityHeaderProps {
-  image: string;
+  image: string | React.ReactNode;
   // Тип над заголовком — "Альбом", "Сингл", "Плейлист"
   type?: string;
   title: string;
@@ -90,15 +90,27 @@ export function EntityHeader({
         className="group/img relative shrink-0"
         style={{ width: imgPx, height: imgPx }}
       >
-        <img
-          src={image}
-          alt={title}
-          className={cn(
-            "h-full w-full object-cover",
-            cfg.rounded,
-            "shadow-[0_20px_50px_rgba(0,0,0,0.5)]",
-          )}
-        />
+        {typeof image === "string" ? (
+          <img
+            src={image}
+            alt={title}
+            className={cn(
+              "h-full w-full object-cover",
+              cfg.rounded,
+              "shadow-[0_20px_50px_rgba(0,0,0,0.5)]",
+            )}
+          />
+        ) : (
+          <div
+            className={cn(
+              "h-full w-full overflow-hidden",
+              cfg.rounded,
+              "shadow-[0_20px_50px_rgba(0,0,0,0.5)]",
+            )}
+          >
+            {image}
+          </div>
+        )}
 
         {/* Hover-кнопка поверх картинки */}
         {imageHoverButton && (

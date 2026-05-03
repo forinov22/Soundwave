@@ -6,69 +6,57 @@ import { Input } from "@/components/ui/input";
 import { TrackTable } from "@/shared/ui/TrackTable";
 import { TrackRow } from "@/shared/ui/TrackRow";
 import { Typography } from "@/shared/ui/Typography";
-import { songsData, albumsData } from "@/assets/assets";
-
-interface SearchTrack {
-  id: number;
-  name: string;
-  image: string;
-  duration: string;
-  albumName?: string;
-}
+import { apiClient } from "@/shared/api/apiClient";
+import type { Track } from "@/shared/types/Track";
 
 interface TrackSearchInputProps {
-  // id треков уже добавленных в плейлист — чтобы не показывать их в результатах
   addedTrackIds: number[];
-  onAdd: (track: SearchTrack) => void;
+  onAdd: (trackId: number) => void;
+  isLoading?: boolean;
   className?: string;
 }
-
-// Симулируем поиск по хардкод данным
-const searchTracks = (query: string): SearchTrack[] => {
-  if (!query.trim()) return [];
-  const q = query.toLowerCase();
-  return songsData
-    .filter((s) => s.name.toLowerCase().includes(q))
-    .map((s) => ({
-      id: s.id,
-      name: s.name,
-      image: s.image,
-      duration: s.duration,
-      albumName: albumsData[s.id % albumsData.length]?.name,
-    }));
-};
 
 export function TrackSearchInput({
   addedTrackIds,
   onAdd,
+  isLoading = false,
   className,
 }: Readonly<TrackSearchInputProps>) {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<SearchTrack[]>([]);
+  const [results, setResults] = useState<Track[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  // Симуляция дебаунс-поиска
+  // Debounced поиск через API
   useEffect(() => {
     if (!query.trim()) {
       setResults([]);
       setIsOpen(false);
       return;
     }
-    setIsLoading(true);
-    const t = setTimeout(() => {
-      const found = searchTracks(query).filter(
-        (t) => !addedTrackIds.includes(t.id),
-      );
-      setResults(found);
-      setIsOpen(true);
-      setIsLoading(false);
+
+    setIsSearching(true);
+    const timer = setTimeout(async () => {
+      try {
+        // GET /api/tracks/search?q=... — нужно добавить этот эндпоинт
+        // (или переиспользовать trending с query-параметром)
+        const res = await apiClient.get<Track[]>("/api/tracks/search", {
+          params: { q: query.trim(), limit: 20 },
+        });
+        const filtered = res.data.filter((t) => !addedTrackIds.includes(t.id));
+        setResults(filtered);
+        setIsOpen(true);
+      } catch {
+        setResults([]);
+      } finally {
+        setIsSearching(false);
+      }
     }, 300);
-    return () => clearTimeout(t);
+
+    return () => clearTimeout(timer);
   }, [query, addedTrackIds]);
 
-  // Закрываем дропдаун при клике вне
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (
@@ -82,8 +70,8 @@ export function TrackSearchInput({
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const handleAdd = (track: SearchTrack) => {
-    onAdd(track);
+  const handleAdd = (track: Track) => {
+    onAdd(track.id);
     setQuery("");
     setResults([]);
     setIsOpen(false);
@@ -92,7 +80,7 @@ export function TrackSearchInput({
   return (
     <div ref={wrapperRef} className={cn("relative", className)}>
       <div className="relative">
-        {isLoading ? (
+        {isSearching || isLoading ? (
           <Loader2 className="absolute top-1/2 left-3 size-4 -translate-y-1/2 animate-spin text-text-muted" />
         ) : (
           <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-text-muted" />
@@ -106,7 +94,6 @@ export function TrackSearchInput({
         />
       </div>
 
-      {/* Дропдаун с результатами */}
       {isOpen && (
         <div className="absolute top-full right-0 left-0 z-40 mt-1 overflow-hidden rounded-xl border border-white/10 bg-zinc-900 shadow-2xl">
           {results.length === 0 ? (
@@ -128,26 +115,11 @@ export function TrackSearchInput({
                     width: "1fr",
                     render: (track) => (
                       <TrackRow
-                        image={track.image}
-                        title={track.name}
-                        subtitle={track.albumName}
+                        image={track.imageUrl}
+                        title={track.title}
+                        subtitle={track.artistName}
                         size="sm"
                       />
-                    ),
-                  },
-                  {
-                    key: "album",
-                    width: "auto",
-                    hideOnMobile: true,
-                    render: (track) => (
-                      <Typography
-                        variant="subtitle"
-                        size="sm"
-                        truncate
-                        className="max-w-32"
-                      >
-                        {track.albumName}
-                      </Typography>
                     ),
                   },
                   {

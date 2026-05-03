@@ -1,29 +1,21 @@
-﻿using System.Text;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Soundwave.Api.Data;
 using Soundwave.Api.Entities;
 
 namespace Soundwave.Api.Services;
 
-public interface IAuthService
-{
-    User? GetUserByEmail(string email);
-    User GetOrCreateUser(string email, string name, string? picture);
-    
-    Task<User> RegisterAsync(string email, string password, string name);
-    bool VerifyPassword(string password, string passwordHash);
-    
-    // Refresh tokens
-    void SaveRefreshToken(int userId, string token);
-    User? GetUserByRefreshToken(string token);
-    void RemoveRefreshToken(string token);
-}
-
 public class AuthService : IAuthService
 {
     private readonly AppDbContext _db;
+    private readonly IPlaylistService _playlistService;
 
-    public AuthService(AppDbContext db) => _db = db;
+    public AuthService(
+        AppDbContext db,
+        IPlaylistService playlistService)
+    {
+        _db = db;
+        _playlistService = playlistService;
+    }
 
     public User? GetUserByEmail(string email)
     {
@@ -31,7 +23,7 @@ public class AuthService : IAuthService
         return user;
     }
     
-    public User GetOrCreateUser(string email, string name, string picutre)
+    public async Task<User> GetOrCreateUserAsync(string email, string name, string picutre)
     {
         var user = _db.Users.FirstOrDefault(u => u.Email == email);
         if (user is not null) return user;
@@ -44,7 +36,10 @@ public class AuthService : IAuthService
         };
 
         _db.Users.Add(user);
-        _db.SaveChanges();
+        await _db.SaveChangesAsync();
+        
+        await _playlistService.CreateLikedSongsPlaylistAsync(user.Id);
+
 
         return user;
     }

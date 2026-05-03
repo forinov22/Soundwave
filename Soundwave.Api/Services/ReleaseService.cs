@@ -346,15 +346,15 @@ public class ReleaseService : IReleaseService
 
         // Плейлисты, в которых есть хотя бы один трек этого релиза.
         var playlistsWithTracks = await _context.Playlists
-            .Include(p => p.Tracks.Where(t => trackIds.Contains(t.Id)))
-            .Where(p => p.Tracks.Any(t => trackIds.Contains(t.Id)))
+            .Include(p => p.PlaylistTracks.Where(pt => trackIds.Contains(pt.TrackId)))
+            .Where(p => p.PlaylistTracks.Any(pt => trackIds.Contains(pt.TrackId)))
             .ToListAsync();
 
         foreach (var playlist in playlistsWithTracks)
         {
-            var toRemove = playlist.Tracks.Where(t => trackIds.Contains(t.Id)).ToList();
-            foreach (var t in toRemove)
-                playlist.Tracks.Remove(t);
+            var toRemove = playlist.PlaylistTracks.Where(pt => trackIds.Contains(pt.TrackId)).ToList();
+            foreach (var pt in toRemove)
+                playlist.PlaylistTracks.Remove(pt);
         }
 
         // Лайкнутые треки (User.LikedTracks). Тот же подход:

@@ -115,6 +115,56 @@ public static class MappingExtensions
             Tracks: orderedTracks
         );
     }
+    
+    public static PlaylistSummaryDto ToSummaryDto(this Playlist playlist, IStorageService storage)
+    {
+        return new PlaylistSummaryDto(
+            Id: playlist.Id,
+            Title: playlist.Title,
+            ImageUrl: string.IsNullOrEmpty(playlist.ImageS3Path)
+                ? null
+                : storage.GetPresignedUrl(playlist.ImageS3Path),
+            TrackCount: playlist.PlaylistTracks?.Count ?? 0,
+            IsLikedSongs: playlist.IsLikedSongs,
+            IsPublic: playlist.IsPublic
+        );
+    }
+ 
+    public static PlaylistDetailsDto ToDetailsDto(this Playlist playlist, IStorageService storage)
+    {
+        var tracks = (playlist.PlaylistTracks ?? [])
+            .OrderBy(pt => pt.Position)
+            .Select(pt => new PlaylistTrackDto(
+                Id: pt.Track.Id,
+                Title: pt.Track.Title,
+                AudioUrl: storage.GetPresignedUrl(pt.Track.AudioS3Path),
+                ImageUrl: storage.GetPresignedUrl(pt.Track.ImageS3Path),
+                DurationSeconds: pt.Track.DurationSeconds,
+                ArtistName: pt.Track.Artist?.Name ?? string.Empty,
+                ArtistId: pt.Track.ArtistId,
+                AlbumTitle: pt.Track.ReleaseTracks
+                    .Where(rt => rt.Release.Status == ReleaseStatus.Published)
+                    .Select(rt => rt.Release.Title)
+                    .FirstOrDefault(),
+                AddedAt: pt.AddedAt,
+                PlayCount: pt.Track.PlayCount
+            ))
+            .ToList();
+ 
+        return new PlaylistDetailsDto(
+            Id: playlist.Id,
+            Title: playlist.Title,
+            Description: playlist.Description,
+            ImageUrl: string.IsNullOrEmpty(playlist.ImageS3Path)
+                ? null
+                : storage.GetPresignedUrl(playlist.ImageS3Path),
+            IsPublic: playlist.IsPublic,
+            IsLikedSongs: playlist.IsLikedSongs,
+            OwnerId: playlist.OwnerId,
+            OwnerName: playlist.Owner?.Name ?? string.Empty,
+            Tracks: tracks
+        );
+    }
 
     // ── Helpers ────────────────────────────────────────────────────────────
 
