@@ -14,13 +14,13 @@ const SectionHeader = ({
   title: string;
   onShowAll: () => void;
 }) => (
-  <div className="flex items-center justify-between mb-4 mt-8 px-2">
-    <h2 className="text-2xl font-bold hover:underline cursor-pointer">
+  <div className="mt-8 mb-4 flex items-center justify-between px-2">
+    <h2 className="cursor-pointer text-2xl font-bold hover:underline">
       {title}
     </h2>
     <button
       onClick={onShowAll}
-      className="text-sm font-bold text-zinc-400 hover:text-white transition-colors"
+      className="text-sm font-bold text-zinc-400 transition-colors hover:text-white"
     >
       Показать все
     </button>
@@ -28,7 +28,8 @@ const SectionHeader = ({
 );
 
 const HomePage = () => {
-  const { trendingTracks, popularAlbums, fetchHome, isHomeLoading } = useMusic();
+  const { trendingTracks, popularReleases, fetchHome, isHomeLoading } =
+    useMusic();
   const { playTrack } = usePlayerPlayback();
   const navigate = useNavigate();
 
@@ -39,17 +40,17 @@ const HomePage = () => {
   if (isHomeLoading)
     return (
       <div className="flex h-full items-center justify-center">
-        <Loader2 className="animate-spin text-emerald-500 size-10" />
+        <Loader2 className="size-10 animate-spin text-emerald-500" />
       </div>
     );
 
   return (
-    <div className="max-w-7xl mx-auto pb-20">
+    <div className="mx-auto max-w-7xl pb-20">
       <SectionHeader
         title="Популярные треки"
         onShowAll={() => navigate("/tracks")}
       />
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {trendingTracks.slice(0, 5).map((track) => (
           <TrackItem
             key={track.id}
@@ -65,14 +66,14 @@ const HomePage = () => {
         title="Популярные альбомы"
         onShowAll={() => navigate("/albums")}
       />
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {popularAlbums.slice(0, 5).map((album) => (
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        {popularReleases.slice(0, 5).map((release) => (
           <AlbumItem
-            key={album.id}
-            name={album.title}
-            image={album.imageUrl}
-            description={album.description}
-            onClick={() => navigate(`/album/${album.id}`)}
+            key={release.id}
+            name={release.title}
+            image={release.imageUrl}
+            description={release.description}
+            onClick={() => navigate(`/album/${release.id}`)}
           />
         ))}
       </div>
@@ -81,7 +82,7 @@ const HomePage = () => {
         title="Популярные исполнители"
         onShowAll={() => navigate("/artists")}
       />
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {/* ArtistItem должен иметь rounded-full для картинки */}
         {/* {popularArtists.map(artist => <ArtistItem key={artist.id} artist={artist} />)} */}
       </div>

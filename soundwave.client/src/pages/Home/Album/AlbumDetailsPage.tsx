@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import type { Album } from "@/features/music/types";
 import { useMusic } from "@/features/music/lib/useMusic";
 import { usePlayerPlayback } from "@/features/player/lib/usePlayerPlayback";
 import { formatDuration } from "@/shared/lib/formatDuration";
@@ -21,23 +20,24 @@ import { TrackRow } from "@/shared/ui/TrackRow";
 import { EntityHeader } from "@/shared/ui/EntityHeader";
 
 import type { LayoutOutletContext } from "../MainLayout";
+import type { ReleaseDetails } from "@/shared/types/Release";
 
 function AlbumDetailsPage() {
   const { setGradientBgColor } = useOutletContext<LayoutOutletContext>();
   const { id } = useParams();
   const { playAlbum } = usePlayerPlayback();
 
-  const { fetchAlbum, isAlbumLoading, albumError } = useMusic();
+  const { fetchRelease, isReleaseLoading, releaseError } = useMusic();
 
-  const [album, setAlbum] = useState<Album | null>(null);
+  const [release, setRelease] = useState<ReleaseDetails | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
       if (!id) return;
 
-      const data = await fetchAlbum(Number(id));
+      const data = await fetchRelease(Number(id));
       if (data) {
-        setAlbum(data);
+        setRelease(data);
         setGradientBgColor(data.bgColor || "#22c55e33");
       }
     };
@@ -47,10 +47,10 @@ function AlbumDetailsPage() {
     return () => {
       setGradientBgColor(); // Убираем цвет при размонтировании
     };
-  }, [id, fetchAlbum, setGradientBgColor]);
+  }, [id, fetchRelease, setGradientBgColor]);
 
   // Обработка загрузки
-  if (isAlbumLoading) {
+  if (isReleaseLoading) {
     return (
       <div className="flex h-[70vh] items-center justify-center">
         <Loader2 className="size-10 animate-spin text-emerald-500" />
@@ -59,15 +59,15 @@ function AlbumDetailsPage() {
   }
 
   // Обработка ошибки
-  if (albumError || !album) {
+  if (releaseError || !release) {
     return (
       <div className="flex h-[70vh] animate-in flex-col items-center justify-center gap-4 text-zinc-500 duration-300 fade-in zoom-in">
         <CircleAlert className="size-16 stroke-1 text-red-500/50" />
         <h2 className="text-2xl font-bold text-zinc-100">
-          {albumError ? "Ошибка при загрузке альбома" : "Альбом не найден"}
+          {releaseError ? "Ошибка при загрузке альбома" : "Альбом не найден"}
         </h2>
         <p className="max-w-xs text-center text-zinc-400">
-          {albumError ||
+          {releaseError ||
             "Похоже, этого альбома больше не существует или ссылка неверна."}
         </p>
         <Button
@@ -85,16 +85,16 @@ function AlbumDetailsPage() {
     <div className="relative">
       {/* Header */}
       <EntityHeader
-        image={album.imageUrl}
+        image={release.imageUrl}
         type="Альбом"
-        title={album.title}
-        meta={["MusicApp", album.description, "2024"]}
+        title={release.title}
+        meta={["MusicApp", release.description, "2024"]}
         preset="album"
         actions={
           <>
             <Button
               size="icon"
-              onClick={() => playAlbum(album.tracks, 0)}
+              onClick={() => playAlbum(release.tracks, 0)}
               className="size-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/80"
             >
               <Play className="size-6 fill-current" />
@@ -117,9 +117,9 @@ function AlbumDetailsPage() {
 
       {/* Tracks Table */}
       <TrackTable
-        data={album.tracks}
+        data={release.tracks}
         getKey={(t) => t.id}
-        onRowClick={(_, idx) => playAlbum(album.tracks, idx)}
+        onRowClick={(_, idx) => playAlbum(release.tracks, idx)}
         columns={[
           {
             key: "track",
@@ -141,7 +141,7 @@ function AlbumDetailsPage() {
             hideOnMobile: true,
             render: () => (
               <Typography variant="subtitle" size="sm">
-                {album.title}
+                {release.title}
               </Typography>
             ),
           },

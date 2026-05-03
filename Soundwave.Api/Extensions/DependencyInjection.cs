@@ -23,6 +23,7 @@ public static class DependencyInjection
         services.AddScoped<IArtistService, ArtistService>();
         services.AddScoped<IReleaseService, ReleaseService>();
         services.AddScoped<IPlaylistService, PlaylistService>();
+        services.AddScoped<SearchService>();
 
         return services;
     }

@@ -2,10 +2,15 @@
 
 import { useMusicStore } from "../model/musicStore";
 import { musicApi } from "../api/musicApi";
+import type { ReleaseDetails } from "@/shared/types/Release";
 
 export function useMusic() {
-  const { trendingTracks, popularAlbums, setTrendingTracks, setPopularAlbums } =
-    useMusicStore();
+  const {
+    trendingTracks,
+    popularReleases,
+    setTrendingTracks,
+    setPopularReleases,
+  } = useMusicStore();
 
   // Загрузка главной страницы
   const {
@@ -13,29 +18,35 @@ export function useMusic() {
     isLoading: isHomeLoading,
     error: homeError,
   } = useAsync(async () => {
-    const [tracksRes, albumsRes] = await Promise.all([
+    const [tracksRes, releasesRes] = await Promise.all([
       musicApi.getTrending(),
-      musicApi.getPopularAlbums(),
+      musicApi.getPopularReleases(),
     ]);
 
     setTrendingTracks(tracksRes.data);
-    setPopularAlbums(albumsRes.data);
+    setPopularReleases(releasesRes.data);
   });
 
   // Загрузка конкретного альбома
   const {
-    execute: fetchAlbumById,
-    isLoading: isAlbumLoading,
-    error: albumError,
+    execute: fetchReleaseById,
+    isLoading: isReleaseLoading,
+    error: releaseError,
   } = useAsync(async (id: number) => {
-    const res = await musicApi.getAlbumById(id);
-    return res.data;
+    const metaPromise = musicApi.getReleaseById(id);
+    const tracksPromise = musicApi.getReleaseTracks(id);
+
+    const [meta, tracks] = await Promise.all([metaPromise, tracksPromise]);
+    return {
+      ...meta.data,
+      tracks: tracks.data,
+    } as ReleaseDetails;
   });
 
   return {
     // Данные из стора
     trendingTracks,
-    popularAlbums,
+    popularReleases,
 
     // Состояния Home
     fetchHome,
@@ -43,8 +54,8 @@ export function useMusic() {
     homeError,
 
     // Состояния Альбома
-    fetchAlbum: fetchAlbumById,
-    isAlbumLoading,
-    albumError,
+    fetchRelease: fetchReleaseById,
+    isReleaseLoading,
+    releaseError,
   };
 }
