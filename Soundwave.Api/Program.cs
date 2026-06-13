@@ -20,13 +20,17 @@ builder.Services
     .AddCorsPolicy();
 
 var app = builder.Build();
+var isDevelopment = app.Environment.IsDevelopment();
 
-if (app.Environment.IsDevelopment())
+if (isDevelopment)
 {
     app.MapOpenApi();
 }
+else
+{
+    app.UseHttpsRedirection();
+}
 
-app.UseHttpsRedirection();
 app.UseCors("frontend");
 
 app.UseAuthentication();

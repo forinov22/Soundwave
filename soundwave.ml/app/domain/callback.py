@@ -24,7 +24,6 @@ class DotNetCallback:
         self._base_url = settings.dotnet_base_url.rstrip("/")
         self._path_template = settings.dotnet_callback_path
         self._token = settings.internal_token
-        self._client = httpx.AsyncClient(timeout=10.0, verify=False)
 
     async def notify(
         self,
@@ -37,19 +36,20 @@ class DotNetCallback:
         headers = {"X-Internal-Token": self._token}
 
         try:
-            resp = await self._client.post(url, json=payload, headers=headers)
-            if resp.status_code not in (200, 204):
-                logger.warning(
-                    "Callback for track %s returned status %d: %s",
-                    external_track_id, resp.status_code, resp.text[:200],
-                )
-            else:
-                logger.info("Callback sent for track %s (success=%s)", external_track_id, success)
+            async with httpx.AsyncClient(timeout=10.0, verify=False) as client:
+                resp = await client.post(url, json=payload, headers=headers)
+                if resp.status_code not in (200, 204):
+                    logger.warning(
+                        "Callback for track %s returned status %d: %s",
+                        external_track_id, resp.status_code, resp.text[:200],
+                    )
+                else:
+                    logger.info(
+                        "Callback sent for track %s (success=%s)",
+                        external_track_id, success,
+                    )
         except Exception as exc:
-            # Callback не должен убивать обработку — логируем и идём дальше
             logger.error(
-                "Failed to send callback for track %s: %s", external_track_id, exc
+                "Failed to send callback for track %s: %s",
+                external_track_id, exc,
             )
-
-    async def close(self):
-        await self._client.aclose()
