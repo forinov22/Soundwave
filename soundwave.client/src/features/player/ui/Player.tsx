@@ -10,6 +10,7 @@ function Player() {
     currentTrack: track,
     isPlaying,
     playNext,
+    repeatMode,
   } = usePlayerPlayback();
 
   const {
@@ -76,7 +77,14 @@ function Player() {
         src={track?.audioUrl}
         onLoadedMetadata={handleLoadedMeta}
         onTimeUpdate={handleTimeUpdate}
-        onEnded={playNext}
+        onEnded={() => {
+        if (repeatMode === "one" && audioRef.current) {
+          audioRef.current.currentTime = 0;
+          audioRef.current.play();
+        } else {
+          playNext();
+        }
+      }}
       >
         <track kind="captions" />
       </audio>

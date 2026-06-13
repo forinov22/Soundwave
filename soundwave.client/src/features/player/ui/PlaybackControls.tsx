@@ -3,6 +3,7 @@ import {
   Pause,
   Play,
   Repeat,
+  Repeat1,
   Shuffle,
   SkipBack,
   SkipForward,
@@ -38,8 +39,17 @@ function PlaybackControls({
   volume,
   onVolumeChange,
 }: Readonly<PlaybackControlsProps>) {
-  const { trackList, togglePlay, seek, playNext, playPrevious } =
-    usePlayerPlayback();
+  const {
+    trackList,
+    togglePlay,
+    seek,
+    playNext,
+    playPrevious,
+    shuffleMode,
+    repeatMode,
+    toggleShuffle,
+    cycleRepeat,
+  } = usePlayerPlayback();
   const { toggle } = useRightSidebar();
   const { isLiked, toggleLike } = useLike();
 
@@ -89,8 +99,13 @@ function PlaybackControls({
         <div className="flex max-w-[40%] flex-1 flex-col items-center gap-2">
           <div className="flex items-center gap-4 md:gap-6">
             <ActionIcon
-              icon={<Shuffle className="size-4" />}
-              label="Перемешать"
+              icon={
+                <Shuffle
+                  className={`size-4 ${shuffleMode ? "text-emerald-500" : ""}`}
+                />
+              }
+              onClick={toggleShuffle}
+              label={shuffleMode ? "Выключить перемешивание" : "Перемешать"}
             />
             <ActionIcon
               icon={<SkipBack className="size-5 fill-current" />}
@@ -119,7 +134,25 @@ function PlaybackControls({
               disabled={trackList.length <= 1}
               label="Следующий"
             />
-            <ActionIcon icon={<Repeat className="size-4" />} label="Повтор" />
+            <ActionIcon
+              icon={
+                repeatMode === "one" ? (
+                  <Repeat1 className="size-4 text-emerald-500" />
+                ) : (
+                  <Repeat
+                    className={`size-4 ${repeatMode === "all" ? "text-emerald-500" : ""}`}
+                  />
+                )
+              }
+              onClick={cycleRepeat}
+              label={
+                repeatMode === "none"
+                  ? "Повторять всё"
+                  : repeatMode === "all"
+                    ? "Повторять один трек"
+                    : "Выключить повтор"
+              }
+            />
           </div>
 
           {/* Слайдер прогресса */}

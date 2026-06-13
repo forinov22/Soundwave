@@ -46,8 +46,8 @@ public static class DbSeeder
                 Email = "contact@lp.com",
                 Role = UserRole.Artist,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("numb123"),
-                BackgroundImage = "artists/banners/linkin-park.jpg",
-                Avatar = "artists/avatars/linkin-park-avatar.jpg",
+                BackgroundImage = "artists/banners/the-weeknd.jpg",
+                Avatar = "artists/avatars/the-weeknd-avatar.jpg",
                 Description = "Linkin Park is an American rock band from Agoura Hills, California. The band's current lineup comprises vocalists Mike Shinoda and Emily Armstrong."
             },
             new Artist
@@ -56,8 +56,8 @@ public static class DbSeeder
                 Email = "phonk@interworld.com",
                 Role = UserRole.Artist,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("phonk-master"),
-                BackgroundImage = "artists/banners/interworld.jpg",
-                Avatar = "artists/avatars/interworld-avatar.jpg",
+                BackgroundImage = "artists/banners/the-weeknd.jpg",
+                Avatar = "artists/avatars/the-weeknd-avatar.jpg",
                 Description = "A leading figure in the modern Phonk scene, best known for the global hit 'Metamorphosis'."
             }
         };
@@ -86,7 +86,7 @@ public static class DbSeeder
             {
                 Title = data.Title,
                 Description = $"Official release by {data.Artist.Name}",
-                ImageS3Path = $"covers/releases/{data.Title.ToLower().Replace(" ", "-")}.jpg",
+                ImageS3Path = $"covers/releases/superman.jpg",
                 BgColor = data.Color,
                 ArtistId = data.Artist.Id,
                 Status = ReleaseStatus.Published,
@@ -106,7 +106,7 @@ public static class DbSeeder
                     Title = data.TrackCount == 1
                         ? data.Title // у сингла трек называется как релиз
                         : $"{data.Title} - Track {j}",
-                    AudioS3Path = $"tracks/sample-{random.Next(1, 4)}.mp3",
+                    AudioS3Path = $"tracks/sample-{random.Next(1, 5)}.mp3",
                     ImageS3Path = release.ImageS3Path,
                     DurationSeconds = random.Next(180, 300),
                     ArtistId = data.Artist.Id,
@@ -137,7 +137,7 @@ public static class DbSeeder
             {
                 Title = $"Demo Sketch #{k}",
                 AudioS3Path = $"tracks/sample-{random.Next(1, 4)}.mp3",
-                ImageS3Path = "covers/releases/after-hours.jpg",
+                ImageS3Path = "covers/releases/superman.jpg",
                 DurationSeconds = random.Next(120, 240),
                 ArtistId = weeknd.Id,
                 PlayCount = 0,

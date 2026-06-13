@@ -16,6 +16,11 @@ export function usePlayerPlayback() {
     seek,
     reorderTrackList,
     removeTrack,
+    shuffleMode,
+    repeatMode,
+    shuffledIndices,
+    toggleShuffle,
+    cycleRepeat,
   } = usePlayer(
     useShallow((state) => ({
       trackList: state.trackList,
@@ -28,6 +33,11 @@ export function usePlayerPlayback() {
       seek: state.seek,
       reorderTrackList: state.reorderTrackList,
       removeTrack: state.removeTrack,
+      shuffleMode: state.shuffleMode,
+      repeatMode: state.repeatMode,
+      shuffledIndices: state.shuffledIndices,
+      toggleShuffle: state.toggleShuffle,
+      cycleRepeat: state.cycleRepeat,
     })),
   );
 
@@ -42,12 +52,44 @@ export function usePlayerPlayback() {
 
   const playNext = () => {
     if (trackList.length === 0 || currentTrackIndex === null) return;
-    const nextIndex = (currentTrackIndex + 1) % trackList.length;
-    setCurrentTrackIndex(nextIndex);
+
+    if (shuffleMode && shuffledIndices.length > 0) {
+      const pos = shuffledIndices.indexOf(currentTrackIndex);
+      const nextPos = pos + 1;
+      if (nextPos >= shuffledIndices.length) {
+        if (repeatMode === "none") return;
+        setCurrentTrackIndex(shuffledIndices[0]);
+      } else {
+        setCurrentTrackIndex(shuffledIndices[nextPos]);
+      }
+      return;
+    }
+
+    const nextIndex = currentTrackIndex + 1;
+    if (nextIndex >= trackList.length) {
+      if (repeatMode === "none") return;
+      setCurrentTrackIndex(0);
+    } else {
+      setCurrentTrackIndex(nextIndex);
+    }
   };
 
   const playPrevious = () => {
     if (trackList.length === 0 || currentTrackIndex === null) return;
+
+    if (shuffleMode && shuffledIndices.length > 0) {
+      const pos = shuffledIndices.indexOf(currentTrackIndex);
+      const prevPos = pos - 1;
+      if (prevPos < 0) {
+        setCurrentTrackIndex(
+          shuffledIndices[shuffledIndices.length - 1],
+        );
+      } else {
+        setCurrentTrackIndex(shuffledIndices[prevPos]);
+      }
+      return;
+    }
+
     const prevIndex =
       (currentTrackIndex - 1 + trackList.length) % trackList.length;
     setCurrentTrackIndex(prevIndex);
@@ -80,5 +122,9 @@ export function usePlayerPlayback() {
     removeFromQueue,
     playFromQueue,
     hasTracks: trackList.length > 0,
+    shuffleMode,
+    repeatMode,
+    toggleShuffle,
+    cycleRepeat,
   };
 }
