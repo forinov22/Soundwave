@@ -9,6 +9,7 @@ import {
   Plus,
   Clock,
   Loader2,
+  Heart,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -22,6 +23,7 @@ import { formatDuration } from "@/shared/lib/formatDuration";
 import { useArtistPublic } from "@/features/artist-public/lib/useArtistPublic";
 import { artistPublicApi } from "@/features/artist-public/api/artistPublicApi";
 import { useAsync } from "@/shared/hooks/useAsync";
+import { useLikeArtist } from "@/features/likes/lib/useLikeArtist";
 import type { Release } from "@/shared/types/Release";
 
 import type { LayoutOutletContext } from "../MainLayout";
@@ -35,9 +37,9 @@ const ArtistDetailsPage = () => {
 
   const artistId = Number(id);
   const [activeFilter, setActiveFilter] = useState<string>("Все");
-  const [isFollowing, setIsFollowing] = useState(false);
 
   const { profile, popularTracks, isLoading } = useArtistPublic(artistId);
+  const { isArtistFollowed, toggleFollowArtist } = useLikeArtist();
 
   // Превью релизов для секции "Музыка"
   const { execute: fetchReleases, isLoading: isReleasesLoading } = useAsync(
@@ -131,16 +133,30 @@ const ArtistDetailsPage = () => {
         </Button>
         <Button
           variant="outline"
-          onClick={() => setIsFollowing(!isFollowing)}
+          onClick={() => toggleFollowArtist(artistId)}
           className={cn(
             "rounded-full border-zinc-600 px-6 text-xs font-bold tracking-widest uppercase transition-all",
-            isFollowing
+            isArtistFollowed(artistId)
               ? "border-emerald-500 text-emerald-500"
               : "text-white hover:border-white",
           )}
         >
-          {isFollowing ? "Вы подписаны" : "Подписаться"}
+          {isArtistFollowed(artistId) ? "Вы подписаны" : "Подписаться"}
         </Button>
+        <ActionIcon
+          icon={
+            <Heart
+              className={
+                isArtistFollowed(artistId)
+                  ? "size-7 fill-emerald-500 text-emerald-500"
+                  : "size-7"
+              }
+            />
+          }
+          size="lg"
+          label={isArtistFollowed(artistId) ? "Убрать из медиатеки" : "Сохранить в медиатеку"}
+          onClick={() => toggleFollowArtist(artistId)}
+        />
         <MoreHorizontal className="size-8 cursor-pointer text-zinc-400 hover:text-white" />
       </div>
 

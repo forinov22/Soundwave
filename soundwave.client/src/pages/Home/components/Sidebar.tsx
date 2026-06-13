@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router";
 import {
   Library,
@@ -6,6 +7,7 @@ import {
   ListFilter,
   Heart,
   Loader2,
+  Music2,
 } from "lucide-react";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -19,6 +21,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { usePlaylists } from "@/features/playlists/lib/usePlaylists";
+import { useLikes } from "@/features/likes/lib/useLikes";
+import { cn } from "@/lib/utils";
+
+type LibraryFilter = "Плейлисты" | "Исполнители" | "Альбомы";
+
+const FILTERS: LibraryFilter[] = ["Плейлисты", "Исполнители", "Альбомы"];
 
 const Sidebar = ({
   isCollapsed,
@@ -28,7 +36,21 @@ const Sidebar = ({
   toggleCollapse: () => void;
 }) => {
   const navigate = useNavigate();
-  const { playlists, isLoading, createPlaylist, isCreating } = usePlaylists();
+  const [activeFilter, setActiveFilter] = useState<LibraryFilter>("Плейлисты");
+
+  const {
+    playlists,
+    isLoading: playlistsLoading,
+    createPlaylist,
+    isCreating,
+  } = usePlaylists();
+  const {
+    likedReleases,
+    followedArtists,
+    isLoading: likesLoading,
+  } = useLikes();
+
+  const isLoading = playlistsLoading || likesLoading;
 
   const handleCreatePlaylist = async () => {
     const created = await createPlaylist();
@@ -51,7 +73,7 @@ const Sidebar = ({
             <Library className="size-6 transition-transform group-hover:scale-110" />
             {!isCollapsed && <span className="font-bold">Моя медиатека</span>}
           </button>
-          {!isCollapsed && (
+          {!isCollapsed && activeFilter === "Плейлисты" && (
             <button
               onClick={handleCreatePlaylist}
               disabled={isCreating}
@@ -69,10 +91,16 @@ const Sidebar = ({
         {!isCollapsed && (
           <>
             <div className="mb-4 flex gap-2 px-4">
-              {["Плейлисты", "Исполнители", "Альбомы"].map((tag) => (
+              {FILTERS.map((tag) => (
                 <button
                   key={tag}
-                  className="rounded-full bg-zinc-800/50 px-3 py-1.5 text-xs font-medium transition-colors hover:bg-zinc-800"
+                  onClick={() => setActiveFilter(tag)}
+                  className={cn(
+                    "rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
+                    activeFilter === tag
+                      ? "bg-white text-black"
+                      : "bg-zinc-800/50 text-zinc-300 hover:bg-zinc-800",
+                  )}
                 >
                   {tag}
                 </button>
@@ -107,35 +135,96 @@ const Sidebar = ({
               </div>
             )}
 
-            {playlists.map((playlist) => (
-              <TrackRow
-                key={playlist.id}
-                image={
-                  playlist.isLikedSongs ? (
-                    // Специальная иконка для «Любимых треков»
-                    <div className="flex size-full items-center justify-center rounded bg-gradient-to-br from-indigo-700 to-emerald-400">
-                      <Heart className="size-5 fill-white text-white" />
-                    </div>
-                  ) : playlist.imageUrl ? (
-                    playlist.imageUrl
-                  ) : (
-                    // Дефолтная обложка плейлиста
-                    <div className="flex size-full items-center justify-center rounded bg-zinc-700">
-                      <span className="text-xs text-zinc-400">♪</span>
-                    </div>
-                  )
-                }
-                title={isCollapsed ? "" : playlist.title}
-                subtitle={
-                  isCollapsed
-                    ? undefined
-                    : `Плейлист · ${playlist.trackCount} треков`
-                }
-                size="md"
-                highlightOnHover
-                onClick={() => navigate(`/playlist/${playlist.id}`)}
-              />
-            ))}
+            {/* Плейлисты */}
+            {activeFilter === "Плейлисты" &&
+              playlists.map((playlist) => (
+                <TrackRow
+                  key={playlist.id}
+                  image={
+                    playlist.isLikedSongs ? (
+                      <div className="flex size-full items-center justify-center rounded bg-gradient-to-br from-indigo-700 to-emerald-400">
+                        <Heart className="size-5 fill-white text-white" />
+                      </div>
+                    ) : playlist.imageUrl ? (
+                      playlist.imageUrl
+                    ) : (
+                      <div className="flex size-full items-center justify-center rounded bg-zinc-700">
+                        <span className="text-xs text-zinc-400">♪</span>
+                      </div>
+                    )
+                  }
+                  title={isCollapsed ? "" : playlist.title}
+                  subtitle={
+                    isCollapsed
+                      ? undefined
+                      : `Плейлист · ${playlist.trackCount} треков`
+                  }
+                  size="md"
+                  highlightOnHover
+                  onClick={() => navigate(`/playlist/${playlist.id}`)}
+                />
+              ))}
+
+            {/* Артисты (подписки) */}
+            {activeFilter === "Исполнители" && (
+              <>
+                {followedArtists.length === 0 && !isLoading && (
+                  <p className="px-2 py-4 text-center text-xs text-zinc-500">
+                    Подпишитесь на артистов — они появятся здесь
+                  </p>
+                )}
+                {followedArtists.map((artist) => (
+                  <TrackRow
+                    key={artist.id}
+                    image={
+                      artist.avatarUrl ?? (
+                        <div className="flex size-full items-center justify-center rounded-full bg-zinc-700">
+                          <Music2 className="size-4 text-zinc-400" />
+                        </div>
+                      )
+                    }
+                    imageShape="circle"
+                    title={isCollapsed ? "" : artist.name}
+                    subtitle={isCollapsed ? undefined : "Артист"}
+                    size="md"
+                    highlightOnHover
+                    onClick={() => navigate(`/artist/${artist.id}`)}
+                  />
+                ))}
+              </>
+            )}
+
+            {/* Альбомы (лайкнутые) */}
+            {activeFilter === "Альбомы" && (
+              <>
+                {likedReleases.length === 0 && !isLoading && (
+                  <p className="px-2 py-4 text-center text-xs text-zinc-500">
+                    Лайкайте альбомы — они появятся здесь
+                  </p>
+                )}
+                {likedReleases.map((release) => (
+                  <TrackRow
+                    key={release.id}
+                    image={
+                      release.imageUrl ?? (
+                        <div className="flex size-full items-center justify-center rounded bg-zinc-700">
+                          <Music2 className="size-4 text-zinc-400" />
+                        </div>
+                      )
+                    }
+                    title={isCollapsed ? "" : release.title}
+                    subtitle={
+                      isCollapsed
+                        ? undefined
+                        : `${release.type} · ${release.artistName}`
+                    }
+                    size="md"
+                    highlightOnHover
+                    onClick={() => navigate(`/album/${release.id}`)}
+                  />
+                ))}
+              </>
+            )}
           </div>
         </ScrollArea>
       </div>

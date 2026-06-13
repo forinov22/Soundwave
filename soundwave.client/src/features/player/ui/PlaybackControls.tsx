@@ -17,6 +17,7 @@ import { TrackRow } from "@/shared/ui/TrackRow";
 import { formatDuration } from "@/shared/lib/formatDuration";
 import { Slider } from "@/components/ui/slider";
 import { useRightSidebar } from "@/features/sidebar/lib/useRightSidebar";
+import { useLike } from "@/features/playlists/lib/useLike";
 
 import { usePlayerPlayback } from "../lib/usePlayerPlayback";
 
@@ -40,6 +41,7 @@ function PlaybackControls({
   const { trackList, togglePlay, seek, playNext, playPrevious } =
     usePlayerPlayback();
   const { toggle } = useRightSidebar();
+  const { isLiked, toggleLike } = useLike();
 
   return (
     <footer className="sticky bottom-0 z-50 h-24 border-t border-white/5 bg-zinc-950/90 px-4 backdrop-blur-xl">
@@ -58,9 +60,18 @@ function PlaybackControls({
                 className="overflow-hidden"
               />
               <ActionIcon
-                icon={<Heart className="size-4" />}
+                icon={
+                  <Heart
+                    className={
+                      track && isLiked(track.id)
+                        ? "size-4 fill-emerald-500 text-emerald-500"
+                        : "size-4"
+                    }
+                  />
+                }
                 variant="primary"
-                label="В избранное"
+                label={track && isLiked(track.id) ? "Убрать из избранного" : "В избранное"}
+                onClick={() => track && toggleLike(track.id)}
               />
             </>
           ) : (

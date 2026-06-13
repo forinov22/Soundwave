@@ -12,6 +12,9 @@ public class AppDbContext : DbContext
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<Track> Tracks => Set<Track>();
     public DbSet<User> Users => Set<User>();
+    public DbSet<UserLikedRelease> UserLikedReleases => Set<UserLikedRelease>();
+    public DbSet<UserFollowedArtist> UserFollowedArtists => Set<UserFollowedArtist>();
+    public DbSet<UserSavedPlaylist> UserSavedPlaylists => Set<UserSavedPlaylist>();
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
@@ -88,5 +91,17 @@ public class AppDbContext : DbContext
             .HasOne(p => p.Owner)
             .WithMany(u => u.Playlists)
             .HasForeignKey(p => p.OwnerId);
+
+        // UserLikedReleases
+        modelBuilder.Entity<UserLikedRelease>()
+            .HasKey(x => new { x.UserId, x.ReleaseId });
+
+        // UserFollowedArtists
+        modelBuilder.Entity<UserFollowedArtist>()
+            .HasKey(x => new { x.UserId, x.ArtistId });
+
+        // UserSavedPlaylists
+        modelBuilder.Entity<UserSavedPlaylist>()
+            .HasKey(x => new { x.UserId, x.PlaylistId });
     }
 }

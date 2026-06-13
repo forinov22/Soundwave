@@ -5,41 +5,46 @@ import { usePlaylistStore } from "../model/playlistStore";
 
 // Хук лайка трека. Оптимистичный: обновляем UI сразу, откатываем при ошибке.
 export function useLike() {
-  const store = usePlaylistStore();
+  // Подписываемся именно на likedTrackIds — компонент ре-рендерится
+  // при каждом изменении Set (новая ссылка после addLikedTrack / removeLikedTrack).
+  const likedTrackIds = usePlaylistStore((s) => s.likedTrackIds);
+  const addLikedTrack = usePlaylistStore((s) => s.addLikedTrack);
+  const removeLikedTrack = usePlaylistStore((s) => s.removeLikedTrack);
 
   const toggleLike = useCallback(
     async (trackId: number) => {
-      const wasLiked = store.isLiked(trackId);
+      const wasLiked = likedTrackIds.has(trackId);
 
       // Оптимистично обновляем
       if (wasLiked) {
-        store.removeLikedTrack(trackId);
+        removeLikedTrack(trackId);
       } else {
-        store.addLikedTrack(trackId);
+        addLikedTrack(trackId);
       }
 
       try {
         const res = await playlistApi.toggleLike(trackId);
         // Синхронизируем с реальным ответом сервера
         if (res.data.liked) {
-          store.addLikedTrack(trackId);
+          addLikedTrack(trackId);
         } else {
-          store.removeLikedTrack(trackId);
+          removeLikedTrack(trackId);
         }
       } catch {
         // Откат при ошибке
         if (wasLiked) {
-          store.addLikedTrack(trackId);
+          addLikedTrack(trackId);
         } else {
-          store.removeLikedTrack(trackId);
+          removeLikedTrack(trackId);
         }
       }
     },
-    [store],
+    [likedTrackIds, addLikedTrack, removeLikedTrack],
   );
 
   return {
-    isLiked: (trackId: number) => store.isLiked(trackId),
+    // Читаем напрямую из реактивного Set — не через store.isLiked()
+    isLiked: (trackId: number) => likedTrackIds.has(trackId),
     toggleLike,
   };
 }

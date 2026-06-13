@@ -28,6 +28,7 @@ import { TrackTable } from "@/shared/ui/TrackTable";
 import { TrackRow } from "@/shared/ui/TrackRow";
 import { Typography } from "@/shared/ui/Typography";
 import { usePlaylistDetails } from "@/features/playlists/lib/usePlaylistDetails";
+import { useLikePlaylist } from "@/features/likes/lib/useLikePlaylist";
 
 import { EditPlaylistModal } from "./EditPlaylistModal";
 import { TrackSearchInput } from "./TrackSearchInput";
@@ -46,6 +47,7 @@ function PlaylistDetailsPage() {
 
   const { user } = useAuth();
   const userId = user?.id;
+  const { isPlaylistSaved, toggleSavePlaylist } = useLikePlaylist();
 
   const {
     details,
@@ -137,6 +139,24 @@ function PlaylistDetailsPage() {
             >
               <Play className="size-6 fill-current" />
             </Button>
+
+            {!isOwner && !details.isLikedSongs && details.isPublic && (
+              <ActionIcon
+                icon={
+                  <Heart
+                    className={
+                      isPlaylistSaved(details.id)
+                        ? "size-8 fill-emerald-500 text-emerald-500"
+                        : "size-8"
+                    }
+                  />
+                }
+                variant="primary"
+                size="lg"
+                label={isPlaylistSaved(details.id) ? "Убрать из медиатеки" : "Сохранить в медиатеку"}
+                onClick={() => toggleSavePlaylist(details.id)}
+              />
+            )}
 
             {isOwner && !details.isLikedSongs && (
               <DropdownMenu>

@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useMusic } from "@/features/music/lib/useMusic";
 import { usePlayerPlayback } from "@/features/player/lib/usePlayerPlayback";
+import { useLikeRelease } from "@/features/likes/lib/useLikeRelease";
 import { formatDuration } from "@/shared/lib/formatDuration";
 import { ActionIcon } from "@/shared/ui/ActionIcon";
 import { Typography } from "@/shared/ui/Typography";
@@ -28,6 +29,7 @@ function AlbumDetailsPage() {
   const { playAlbum } = usePlayerPlayback();
 
   const { fetchRelease, isReleaseLoading, releaseError } = useMusic();
+  const { isReleaseLiked, toggleLikeRelease } = useLikeRelease();
 
   const [release, setRelease] = useState<ReleaseDetails | null>(null);
 
@@ -100,10 +102,19 @@ function AlbumDetailsPage() {
               <Play className="size-6 fill-current" />
             </Button>
             <ActionIcon
-              icon={<Heart className="size-8" />}
+              icon={
+                <Heart
+                  className={
+                    release && isReleaseLiked(release.id)
+                      ? "size-8 fill-emerald-500 text-emerald-500"
+                      : "size-8"
+                  }
+                />
+              }
               variant="primary"
               size="lg"
-              label="В избранное"
+              label={release && isReleaseLiked(release.id) ? "Убрать из избранного" : "В избранное"}
+              onClick={() => release && toggleLikeRelease(release.id)}
             />
             <ActionIcon
               icon={<MoreHorizontal className="size-8" />}

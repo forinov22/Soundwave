@@ -15,9 +15,14 @@ export function usePlaylists() {
     const res = await playlistApi.getMine();
     store.setPlaylists(res.data);
 
-    // Инициализируем set лайков из «Любимых треков»
+    // Сразу загружаем детали «Любимых треков», чтобы likedTrackIds был заполнен
+    // ещё до того, как пользователь откроет этот плейлист вручную.
     const liked = res.data.find((p) => p.isLikedSongs);
-    // Треков в summary нет — lиkedTrackIds заполнится при открытии плейлиста
+    if (liked) {
+      const details = await playlistApi.getById(liked.id);
+      store.setLikedTrackIds(details.data.tracks.map((t) => t.id));
+    }
+
     return res.data;
   });
 
