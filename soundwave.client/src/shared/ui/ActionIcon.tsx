@@ -5,7 +5,7 @@ type ActionIconSize = "sm" | "md" | "lg";
 
 interface ActionIconProps {
   icon: React.ReactNode;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   variant?: ActionIconVariant;
   size?: ActionIconSize;
   // Показывать постоянный фоновый круг (не только при ховере)

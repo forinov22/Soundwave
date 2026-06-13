@@ -71,7 +71,10 @@ const HomePage = () => {
     <div className="mx-auto max-w-7xl pb-20">
       {listenHistory.length > 0 && (
         <>
-          <SectionHeader title="Недавно слушали" onShowAll={() => navigate("/history")} />
+          <SectionHeader
+            title="Недавно слушали"
+            onShowAll={() => navigate("/history")}
+          />
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {listenHistory.slice(0, 5).map((item) => (
               <TrackItem
@@ -88,7 +91,10 @@ const HomePage = () => {
 
       {recommendations.length > 0 && (
         <>
-          <SectionHeader title="Рекомендации для вас" onShowAll={() => navigate("/recommendations")} />
+          <SectionHeader
+            title="Рекомендации для вас"
+            onShowAll={() => navigate("/recommendations")}
+          />
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {recommendations.slice(0, 5).map((item) => (
               <TrackItem

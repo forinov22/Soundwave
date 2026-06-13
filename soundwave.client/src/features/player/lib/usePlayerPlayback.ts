@@ -50,6 +50,12 @@ export function usePlayerPlayback() {
     setTrackList(tracks, startIndex);
   };
 
+  const playShuffle = (tracks: Track[]) => {
+    const randomStart = Math.floor(Math.random() * tracks.length);
+    setTrackList(tracks, randomStart);
+    if (!shuffleMode) toggleShuffle();
+  };
+
   const playNext = () => {
     if (trackList.length === 0 || currentTrackIndex === null) return;
 
@@ -126,5 +132,6 @@ export function usePlayerPlayback() {
     repeatMode,
     toggleShuffle,
     cycleRepeat,
+    playShuffle,
   };
 }

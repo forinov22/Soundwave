@@ -2,11 +2,10 @@ import { useEffect, useState } from "react";
 import { useParams, useOutletContext, useNavigate } from "react-router";
 import {
   Play,
+  Pause,
   Shuffle,
-  MoreHorizontal,
   Users,
   Check,
-  Plus,
   Clock,
   Loader2,
   Heart,
@@ -24,6 +23,8 @@ import { useArtistPublic } from "@/features/artist-public/lib/useArtistPublic";
 import { artistPublicApi } from "@/features/artist-public/api/artistPublicApi";
 import { useAsync } from "@/shared/hooks/useAsync";
 import { useLikeArtist } from "@/features/likes/lib/useLikeArtist";
+import { useLike } from "@/features/playlists/lib/useLike";
+import { usePlayerPlayback } from "@/features/player/lib/usePlayerPlayback";
 import type { Release } from "@/shared/types/Release";
 
 import type { LayoutOutletContext } from "../MainLayout";
@@ -40,8 +41,19 @@ const ArtistDetailsPage = () => {
 
   const { profile, popularTracks, isLoading } = useArtistPublic(artistId);
   const { isArtistFollowed, toggleFollowArtist } = useLikeArtist();
+  const { isLiked, toggleLike } = useLike();
+  const {
+    playAlbum,
+    playShuffle,
+    togglePlay,
+    currentTrack,
+    isPlaying,
+    shuffleMode,
+  } = usePlayerPlayback();
 
-  // Превью релизов для секции "Музыка"
+  const isArtistLoaded = popularTracks.some((t) => t.id === currentTrack?.id);
+  const isArtistPlaying = isArtistLoaded && isPlaying;
+
   const { execute: fetchReleases, isLoading: isReleasesLoading } = useAsync(
     async () => {
       const typeMap: Record<string, string | undefined> = {
@@ -68,7 +80,6 @@ const ArtistDetailsPage = () => {
   }, [artistId, activeFilter, fetchReleases]);
 
   useEffect(() => {
-    // Используем bgColor первого релиза, если есть; иначе дефолт
     setGradientBgColor("#424242");
     return () => setGradientBgColor();
   }, [setGradientBgColor]);
@@ -117,32 +128,51 @@ const ArtistDetailsPage = () => {
       </div>
 
       {/* 2. Блок управления */}
-      <div className="my-8 flex items-center gap-6">
-        <Button
-          size="icon"
-          className="size-14 rounded-full bg-emerald-500 text-black shadow-lg transition-transform hover:scale-105 hover:bg-emerald-400"
-        >
-          <Play className="size-6 fill-current" />
-        </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          className="size-10 rounded-full border-zinc-600 text-zinc-400 hover:border-white hover:text-white"
-        >
-          <Shuffle className="size-5" />
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => toggleFollowArtist(artistId)}
+      <div className="my-8 flex items-center gap-5">
+        {/* Play / Pause */}
+        <div className="relative">
+          {isArtistPlaying && (
+            <span className="absolute inset-0 rounded-full bg-emerald-500 animate-ping opacity-20 pointer-events-none" />
+          )}
+          <button
+            onClick={() => {
+              if (popularTracks.length === 0) return;
+              isArtistLoaded ? togglePlay() : playAlbum(popularTracks, 0);
+            }}
+            disabled={popularTracks.length === 0}
+            className={cn(
+              "relative flex size-12 items-center justify-center rounded-full shadow-lg",
+              "transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:pointer-events-none",
+              "bg-emerald-500 hover:bg-emerald-400 text-black",
+              isArtistPlaying && "hover:scale-105",
+              !isArtistPlaying && "hover:scale-110",
+            )}
+          >
+            {isArtistPlaying ? (
+              <Pause className="size-5 fill-current" />
+            ) : (
+              <Play className="size-5 fill-current translate-x-px" />
+            )}
+          </button>
+        </div>
+
+        {/* Shuffle */}
+        <button
+          onClick={() => popularTracks.length > 0 && playShuffle(popularTracks)}
+          disabled={popularTracks.length === 0}
           className={cn(
-            "rounded-full border-zinc-600 px-6 text-xs font-bold tracking-widest uppercase transition-all",
-            isArtistFollowed(artistId)
-              ? "border-emerald-500 text-emerald-500"
-              : "text-white hover:border-white",
+            "relative flex size-9 items-center justify-center rounded-full",
+            "transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:pointer-events-none",
+            isArtistLoaded && shuffleMode
+              ? "text-emerald-500 hover:text-emerald-400"
+              : "text-zinc-400 hover:text-white",
           )}
         >
-          {isArtistFollowed(artistId) ? "Вы подписаны" : "Подписаться"}
-        </Button>
+          <Shuffle className="size-4" />
+          {isArtistLoaded && shuffleMode && (
+            <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 size-1 rounded-full bg-emerald-500" />
+          )}
+        </button>
         <ActionIcon
           icon={
             <Heart
@@ -154,10 +184,13 @@ const ArtistDetailsPage = () => {
             />
           }
           size="lg"
-          label={isArtistFollowed(artistId) ? "Убрать из медиатеки" : "Сохранить в медиатеку"}
+          label={
+            isArtistFollowed(artistId)
+              ? "Убрать из медиатеки"
+              : "Сохранить в медиатеку"
+          }
           onClick={() => toggleFollowArtist(artistId)}
         />
-        <MoreHorizontal className="size-8 cursor-pointer text-zinc-400 hover:text-white" />
       </div>
 
       {/* 3. Популярные треки */}
@@ -169,7 +202,7 @@ const ArtistDetailsPage = () => {
           <TrackTable
             data={popularTracks}
             getKey={(t) => t.id}
-            onRowClick={() => {}}
+            onRowClick={(_, idx) => playAlbum(popularTracks, idx)}
             columns={[
               {
                 key: "track",
@@ -198,12 +231,24 @@ const ArtistDetailsPage = () => {
                 key: "actions",
                 width: "auto",
                 align: "right",
-                render: () => (
+                render: (track) => (
                   <ActionIcon
-                    icon={<Plus className="size-4" />}
+                    icon={
+                      <Heart
+                        className={
+                          isLiked(track.id)
+                            ? "size-4 fill-emerald-500 text-emerald-500"
+                            : "size-4"
+                        }
+                      />
+                    }
                     size="sm"
-                    label="Добавить"
+                    label={isLiked(track.id) ? "Убрать из избранного" : "В избранное"}
                     className="opacity-0 group-hover:opacity-100"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleLike(track.id);
+                    }}
                   />
                 ),
               },
@@ -276,7 +321,7 @@ const ArtistDetailsPage = () => {
                     <Play className="fill-current" />
                   </Button>
                 }
-                onClick={() => navigate(`/releases/${release.id}`)}
+                onClick={() => navigate(`/album/${release.id}`)}
                 className="p-4"
               />
             ))}

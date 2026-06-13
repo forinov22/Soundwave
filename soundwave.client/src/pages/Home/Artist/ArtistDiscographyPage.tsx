@@ -7,9 +7,7 @@ import {
   ArrowDown,
   Play,
   Heart,
-  Plus,
   Clock,
-  MoreHorizontal,
   Loader2,
 } from "lucide-react";
 
@@ -27,102 +25,127 @@ import { EntityHeader } from "@/shared/ui/EntityHeader";
 import { formatDuration } from "@/shared/lib/formatDuration";
 import { useDiscography } from "@/features/artist-public/lib/useDiscography";
 import { useIntersection } from "@/features/artist-public/lib/useIntersection";
+import { useLike } from "@/features/playlists/lib/useLike";
+import { useLikeRelease } from "@/features/likes/lib/useLikeRelease";
+import { usePlayerPlayback } from "@/features/player/lib/usePlayerPlayback";
 import type { ReleaseDetails } from "@/shared/types/Release";
 import type { DiscographyFilter } from "@/features/artist-public/types";
 
 // ── Секция одного релиза ──────────────────────────────────────────────────────
 
-const ReleaseSection = ({ release }: { release: ReleaseDetails }) => (
-  <div className="mb-12">
-    <EntityHeader
-      image={release.imageUrl ?? ""}
-      type={release.type}
-      title={release.title}
-      meta={[
-        release.releaseDate
-          ? new Date(release.releaseDate).getFullYear().toString()
-          : undefined,
-        `${release.tracks.length} треков`,
-      ]}
-      preset="compact"
-      imageHoverButton={
-        <Button
-          size="icon"
-          className="size-12 rounded-full bg-primary text-primary-foreground transition-transform hover:scale-105"
-        >
-          <Play className="fill-current" />
-        </Button>
-      }
-      actions={
-        <>
+const ReleaseSection = ({ release }: { release: ReleaseDetails }) => {
+  const { playAlbum } = usePlayerPlayback();
+  const { isLiked, toggleLike } = useLike();
+  const { isReleaseLiked, toggleLikeRelease } = useLikeRelease();
+
+  return (
+    <div className="mb-12">
+      <EntityHeader
+        image={release.imageUrl ?? ""}
+        type={release.type}
+        title={release.title}
+        meta={[
+          release.releaseDate
+            ? new Date(release.releaseDate).getFullYear().toString()
+            : undefined,
+          `${release.tracks.length} треков`,
+        ]}
+        preset="compact"
+        imageHoverButton={
+          <Button
+            size="icon"
+            onClick={() => playAlbum(release.tracks, 0)}
+            className="size-12 rounded-full bg-primary text-primary-foreground transition-transform hover:scale-105"
+          >
+            <Play className="fill-current" />
+          </Button>
+        }
+        actions={
           <ActionIcon
-            icon={<Heart className="size-5" />}
+            icon={
+              <Heart
+                className={
+                  isReleaseLiked(release.id)
+                    ? "size-5 fill-emerald-500 text-emerald-500"
+                    : "size-5"
+                }
+              />
+            }
             variant="primary"
             withBackground
-            label="В избранное"
+            label={isReleaseLiked(release.id) ? "Убрать из медиатеки" : "В медиатеку"}
+            onClick={() => toggleLikeRelease(release.id)}
           />
-          <ActionIcon
-            icon={<MoreHorizontal className="size-5" />}
-            label="Ещё"
-          />
-        </>
-      }
-      className="mb-6"
-    />
+        }
+        className="mb-6"
+      />
 
-    <TrackTable
-      data={release.tracks}
-      getKey={(t) => t.id}
-      onRowClick={() => {}}
-      columns={[
-        {
-          key: "track",
-          header: "Название",
-          width: "1fr",
-          render: (track) => (
-            <div className="flex min-w-0 flex-col">
-              <Typography variant="title" size="sm" truncate>
-                {track.title}
+      <TrackTable
+        data={release.tracks}
+        getKey={(t) => t.id}
+        onRowClick={(_, idx) => playAlbum(release.tracks, idx)}
+        columns={[
+          {
+            key: "track",
+            header: "Название",
+            width: "1fr",
+            render: (track) => (
+              <div className="flex min-w-0 flex-col">
+                <Typography variant="title" size="sm" truncate>
+                  {track.title}
+                </Typography>
+                <Typography
+                  variant="subtitle"
+                  size="xs"
+                  underlineOnHover
+                  onClick={() => {}}
+                >
+                  {track.artistName}
+                </Typography>
+              </div>
+            ),
+          },
+          {
+            key: "like",
+            width: "auto",
+            align: "right",
+            render: (track) => (
+              <ActionIcon
+                icon={
+                  <Heart
+                    className={
+                      isLiked(track.id)
+                        ? "size-4 fill-emerald-500 text-emerald-500"
+                        : "size-4"
+                    }
+                  />
+                }
+                size="sm"
+                label={isLiked(track.id) ? "Убрать из избранного" : "В избранное"}
+                className="opacity-0 group-hover:opacity-100"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleLike(track.id);
+                }}
+              />
+            ),
+          },
+          {
+            key: "duration",
+            header: <Clock className="size-4" />,
+            width: "auto",
+            align: "right",
+            render: (track) => (
+              <Typography variant="subtitle" size="sm" className="font-mono">
+                {formatDuration(track.durationSeconds)}
               </Typography>
-              <Typography
-                variant="subtitle"
-                size="xs"
-                underlineOnHover
-                onClick={() => {}}
-              >
-                {track.artistName}
-              </Typography>
-            </div>
-          ),
-        },
-        {
-          key: "add",
-          width: "auto",
-          align: "right",
-          render: () => (
-            <ActionIcon
-              icon={<Plus className="size-4" />}
-              size="sm"
-              label="Добавить"
-              className="opacity-0 group-hover:opacity-100"
-            />
-          ),
-        },
-        {
-          key: "duration",
-          header: <Clock className="size-4" />,
-          width: "auto",
-          align: "right",
-          render: (track) => (
-            <Typography variant="subtitle" size="sm" className="font-mono">
-              {formatDuration(track.durationSeconds)}
-            </Typography>
-          ),
-        },
-      ]}
-    />
-  </div>
-);
+            ),
+          },
+        ]}
+      />
+    </div>
+  );
+};
 
 // ── Фильтры ───────────────────────────────────────────────────────────────────
 
@@ -153,7 +176,6 @@ const ArtistDiscographyPage = () => {
     totalCount,
   } = useDiscography(artistId);
 
-  // Sentinel-элемент в конце списка — когда входит в viewport, грузим следующую страницу
   const { ref: sentinelRef, isIntersecting } = useIntersection({
     threshold: 0.1,
   });
@@ -294,10 +316,8 @@ const ArtistDiscographyPage = () => {
               <ReleaseSection key={release.id} release={release} />
             ))}
 
-            {/* Sentinel — невидимый div, его попадание в viewport = сигнал к загрузке */}
             <div ref={sentinelRef} className="h-4" />
 
-            {/* Спиннер пока грузится следующая страница */}
             {isLoading && (
               <div className="flex justify-center py-8">
                 <Loader2 className="size-6 animate-spin text-primary" />
