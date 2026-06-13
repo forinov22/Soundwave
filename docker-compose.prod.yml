@@ -90,7 +90,7 @@ services:
       NUMBA_CACHE_DIR: /tmp/numba_cache
     volumes:
       - ml_data:/app/data
-      - ml_models:/app/models
+      - ./soundwave.ml/models:/app/models:ro
     depends_on:
       - minio
     restart: unless-stopped
