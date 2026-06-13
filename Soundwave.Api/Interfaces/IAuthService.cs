@@ -8,6 +8,7 @@ public interface IAuthService
     Task<User> GetOrCreateUserAsync(string email, string name, string? picture);
     
     Task<User> RegisterAsync(string email, string password, string name);
+    Task<Artist> CreateArtistAsync(string email, string password, string name, string? description);
     bool VerifyPassword(string password, string passwordHash);
     
     // Refresh tokens

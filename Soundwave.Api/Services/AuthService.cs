@@ -61,6 +61,25 @@ public class AuthService : IAuthService
         return user;
     }
 
+    public async Task<Artist> CreateArtistAsync(string email, string password, string name, string? description)
+    {
+        var artist = new Artist
+        {
+            Email = email,
+            Name = name,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
+            Role = UserRole.Artist,
+            Description = description,
+        };
+
+        _db.Users.Add(artist);
+        await _db.SaveChangesAsync();
+
+        await _playlistService.CreateLikedSongsPlaylistAsync(artist.Id);
+
+        return artist;
+    }
+
     public bool VerifyPassword(string password, string passwordHash)
     {
         return BCrypt.Net.BCrypt.Verify(password, passwordHash);

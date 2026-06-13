@@ -1,6 +1,8 @@
 import { useRef, useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router";
-import { Search, Bell, Mic, Loader2 } from "lucide-react";
+import { Search, Bell, Mic, Loader2, Shield } from "lucide-react";
+
+import { useAuthStore } from "@/features/auth/model/authStore";
 
 import logo from "@/assets/logo.svg";
 import { Input } from "@/components/ui/input";
@@ -10,6 +12,7 @@ import { useRecognize } from "@/features/search/lib/useRecognize";
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const user = useAuthStore((s) => s.user);
   const [searchParams] = useSearchParams();
   const currentQuery = searchParams.get("q") ?? "";
   const [inputValue, setInputValue] = useState(currentQuery);
@@ -98,6 +101,13 @@ const Navbar = () => {
       </div>
 
       <div className="flex items-center gap-4">
+        {user?.isAdmin && (
+          <ActionIcon
+            icon={<Shield className="size-5" />}
+            onClick={() => navigate("/admin")}
+            label="Панель администратора"
+          />
+        )}
         <ActionIcon
           icon={<Bell className="size-5" />}
           onClick={() => navigate("/notifications")}

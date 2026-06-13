@@ -27,6 +27,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<User>()
             .HasDiscriminator<UserRole>("Role")
             .HasValue<User>(UserRole.Listener)
+            .HasValue<User>(UserRole.Admin)
             .HasValue<Artist>(UserRole.Artist);
 
         // Артист — треки (1:N)

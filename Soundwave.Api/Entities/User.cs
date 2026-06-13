@@ -3,7 +3,8 @@
 public enum UserRole
 {
     Listener = 1,
-    Artist = 10,
+    Artist   = 10,
+    Admin    = 20,
 }
 
 public class User

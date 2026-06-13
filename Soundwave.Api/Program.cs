@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Soundwave.Api.Data;
+using Soundwave.Api.Settings;
 using Soundwave.Api.Entities;
 using Soundwave.Api.Extensions;
 using Soundwave.Api.Filters;
@@ -41,8 +43,9 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var adminOptions = scope.ServiceProvider.GetRequiredService<IOptions<AdminOptions>>().Value;
     await db.Database.MigrateAsync();
-    await DbSeeder.SeedAsync(db);
+    await DbSeeder.SeedAsync(db, adminOptions);
 }
 
 app.Run();

@@ -1,13 +1,28 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Soundwave.Api.Data;
 using Soundwave.Api.Entities;
+using Soundwave.Api.Settings;
 
 namespace Soundwave.Api.Helpers;
 
 public static class DbSeeder
 {
-    public static async Task SeedAsync(AppDbContext context)
+    public static async Task SeedAsync(AppDbContext context, AdminOptions adminOptions)
     {
+        // Создаём admin-пользователя если его нет
+        if (!await context.Users.AnyAsync(u => u.Role == UserRole.Admin))
+        {
+            context.Users.Add(new User
+            {
+                Email = adminOptions.Email,
+                Name = "Admin",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(adminOptions.Password),
+                Role = UserRole.Admin,
+            });
+            await context.SaveChangesAsync();
+        }
+
         if (await context.Users.AnyAsync(u => u.Role == UserRole.Artist)) return;
 
         var random = new Random();

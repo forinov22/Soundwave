@@ -14,6 +14,7 @@ public static class DependencyInjection
     {
         services.Configure<S3Options>(configuration.GetSection(S3Options.S3Settings));
         services.Configure<MlServiceOptions>(configuration.GetSection(MlServiceOptions.MlServiceSettings));
+        services.Configure<AdminOptions>(configuration.GetSection(AdminOptions.AdminSettings));
         services.Configure<GoogleOptions>(configuration.GetSection(GoogleOptions.GoogleSettings));
 
         services.AddScoped<IAuthService, AuthService>();

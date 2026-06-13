@@ -18,6 +18,7 @@ import LoginPage from "@/pages/Auth/LoginPage";
 import ProfilePage from "@/pages/Profile/ProfilePage";
 import RegisterPage from "@/pages/Auth/RegisterPage";
 import SearchPage from "@/pages/Search/SearchPage";
+import AdminPage from "@/pages/Admin/AdminPage";
 
 export type AppRoute = {
   index?: true;
@@ -100,6 +101,11 @@ export const routes: AppRoute[] = [
   {
     path: "/profile",
     element: <ProfilePage />,
+    protected: true,
+  },
+  {
+    path: "/admin",
+    element: <AdminPage />,
     protected: true,
   },
   {

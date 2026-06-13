@@ -38,7 +38,8 @@ public class AuthController : ControllerBase
             name = user.Name,
             email = user.Email,
             avatar = user.Avatar,
-            role = user.Role.ToString().ToLower() // "listener" or "artist"
+            role = user.Role.ToString().ToLower(), // "listener", "artist" or "admin"
+            isAdmin = user.Role == UserRole.Admin,
         });
     }
     
