@@ -4,12 +4,19 @@ namespace Soundwave.Api.Interfaces;
 
 public interface IMusicService
 {
+    Task<IEnumerable<Track>> GetTracksByIdsAsync(IEnumerable<int> ids);
+    
     // Только треки, входящие хотя бы в один опубликованный релиз.
     Task<IEnumerable<Track>> GetTrendingTracksAsync();
 
     // Витрина опубликованных релизов. Без треков — на главной они не нужны.
     Task<IEnumerable<Release>> GetPopularReleasesAsync();
+    
+    Task<IEnumerable<Artist>> GetPopularArtistsAsync();
+    Task<IEnumerable<Playlist>> GetPopularPlaylistsAsync();
 
+    Task<Release?> GetReleaseByIdAsync(int id);
+    
     // Мета опубликованного релиза для страницы релиза. Без треков —
     // фронт грузит их отдельным запросом, чтобы не блокировать рендер шапки.
     Task<Release?> GetReleaseMetaByIdAsync(int id);
@@ -28,5 +35,6 @@ public interface IMusicService
         int artistId,
         string? type,
         int page,
-        int pageSize);
+        int pageSize,
+        bool includeTracks = false);
 }

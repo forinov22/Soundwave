@@ -11,12 +11,12 @@ import {
   Heart,
 } from "lucide-react";
 
-import { Slider } from "@/components/ui/slider";
-import type { Track } from "@/features/music/types";
-import { useRightSidebar } from "@/features/sidebar/lib/useRightSidebar";
-import { formatDuration } from "@/shared/lib/formatDuration";
+import type { Track } from "@/shared/types/Track";
 import { ActionIcon } from "@/shared/ui/ActionIcon";
 import { TrackRow } from "@/shared/ui/TrackRow";
+import { formatDuration } from "@/shared/lib/formatDuration";
+import { Slider } from "@/components/ui/slider";
+import { useRightSidebar } from "@/features/sidebar/lib/useRightSidebar";
 
 import { usePlayerPlayback } from "../lib/usePlayerPlayback";
 

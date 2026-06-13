@@ -4,13 +4,12 @@ import { useAsync } from "@/shared/hooks/useAsync";
 import type { ReleaseDetails } from "@/shared/types/Release";
 
 import { artistPublicApi } from "../api/artistPublicApi";
-import type {
-  DiscographyFilter,
-  DiscographySortDir,
-  DiscographySortField,
-} from "../types";
+import type { DiscographyFilter } from "../types";
 
 const PAGE_SIZE = 10;
+
+type DiscographySortField = "date" | "name";
+type DiscographySortDir = "asc" | "desc";
 
 interface UseDiscographyReturn {
   releases: ReleaseDetails[];
@@ -47,7 +46,7 @@ export function useDiscography(artistId: number): UseDiscographyReturn {
 
   const { execute, isLoading, error } = useAsync(
     async (artistId: number, filter: DiscographyFilter, page: number) => {
-      const res = await artistPublicApi.getReleases(artistId, {
+      const res = await artistPublicApi.getReleasesWithTracks(artistId, {
         type: filter,
         page,
         pageSize: PAGE_SIZE,

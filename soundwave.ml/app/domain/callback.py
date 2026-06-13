@@ -9,8 +9,10 @@ Header: X-Internal-Token: <shared_secret>
 from __future__ import annotations
 
 import logging
-
 import httpx
+import warnings
+
+warnings.filterwarnings("ignore", message=".*ssl.*", category=Warning)
 
 from app.config import Settings
 
@@ -22,7 +24,7 @@ class DotNetCallback:
         self._base_url = settings.dotnet_base_url.rstrip("/")
         self._path_template = settings.dotnet_callback_path
         self._token = settings.internal_token
-        self._client = httpx.AsyncClient(timeout=10.0)
+        self._client = httpx.AsyncClient(timeout=10.0, verify=False)
 
     async def notify(
         self,

@@ -18,6 +18,8 @@ export function RightSidebar() {
     return null;
   }
 
+  console.log(artistDetails);
+
   return (
     <AnimatePresence>
       <motion.aside
@@ -68,7 +70,7 @@ export function RightSidebar() {
                       className="overflow-hidden rounded-2xl border border-white/5 bg-zinc-900/50"
                     >
                       <img
-                        src={artistDetails.imageUrl}
+                        src={artistDetails.bannerUrl}
                         className="h-48 w-full object-cover"
                         alt=""
                       />

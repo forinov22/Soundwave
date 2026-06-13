@@ -22,7 +22,7 @@ import { formatDuration } from "@/shared/lib/formatDuration";
 import { useArtistPublic } from "@/features/artist-public/lib/useArtistPublic";
 import { artistPublicApi } from "@/features/artist-public/api/artistPublicApi";
 import { useAsync } from "@/shared/hooks/useAsync";
-import type { ReleaseDetails } from "@/shared/types/Release";
+import type { Release } from "@/shared/types/Release";
 
 import type { LayoutOutletContext } from "../MainLayout";
 
@@ -48,7 +48,7 @@ const ArtistDetailsPage = () => {
         Синглы: "Single",
         EP: "EP",
       };
-      const res = await artistPublicApi.getReleases(artistId, {
+      const res = await artistPublicApi.getReleasesPreviews(artistId, {
         type: (typeMap[activeFilter] as any) ?? undefined,
         page: 1,
         pageSize: PREVIEW_RELEASES_COUNT,
@@ -57,7 +57,7 @@ const ArtistDetailsPage = () => {
     },
   );
 
-  const [previewReleases, setPreviewReleases] = useState<ReleaseDetails[]>([]);
+  const [previewReleases, setPreviewReleases] = useState<Release[]>([]);
 
   useEffect(() => {
     fetchReleases().then((items) => {

@@ -14,6 +14,15 @@ public class MusicService : IMusicService
         _context = context;
     }
 
+    public async Task<IEnumerable<Track>> GetTracksByIdsAsync(IEnumerable<int> ids)
+    {
+        var idList = ids.ToList();
+        return await _context.Tracks
+            .Include(t => t.Artist)
+            .Where(t => idList.Contains(t.Id))
+            .ToListAsync();
+    }
+    
     public async Task<IEnumerable<Track>> GetTrendingTracksAsync()
     {
         // Только треки, входящие хотя бы в один опубликованный релиз.
@@ -36,6 +45,40 @@ public class MusicService : IMusicService
             .OrderByDescending(r => r.PublishedAt)
             .Take(6)
             .ToListAsync();
+    }
+    
+    public async Task<IEnumerable<Artist>> GetPopularArtistsAsync()
+    {
+        return await _context.Users
+            .OfType<Artist>()
+            .Where(a => a.Tracks.Any(t =>
+                t.ReleaseTracks.Any(rt => rt.Release.Status == ReleaseStatus.Published)))
+            .OrderByDescending(a => a.Tracks
+                .Where(t => t.ReleaseTracks.Any(rt => rt.Release.Status == ReleaseStatus.Published))
+                .Sum(t => t.PlayCount))
+            .Take(6)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Playlist>> GetPopularPlaylistsAsync()
+    {
+        return await _context.Playlists
+            .Include(p => p.Owner)
+            .Include(p => p.PlaylistTracks)
+            .Where(p => p.IsPublic && !p.IsLikedSongs)
+            .OrderByDescending(p => p.PlaylistTracks.Count)
+            .Take(6)
+            .ToListAsync();
+    }
+    
+    public Task<Release?> GetReleaseByIdAsync(int id)
+    {
+        return _context.Releases
+            .Include(r => r.Artist)
+            .Include(r => r.ReleaseTracks.OrderBy(rt => rt.Position))
+            .ThenInclude(rt => rt.Track)
+            .ThenInclude(t => t.Artist)
+            .FirstOrDefaultAsync(r => r.Id == id && r.Status == ReleaseStatus.Published);
     }
 
     public Task<Release?> GetReleaseMetaByIdAsync(int id)
@@ -80,16 +123,27 @@ public class MusicService : IMusicService
         int artistId,
         string? type,
         int page,
-        int pageSize)
+        int pageSize,
+        bool includeTracks = false)  // ← добавили
     {
-        // Базовый запрос: опубликованные релизы артиста с треками
         var query = _context.Releases
-            .Include(r => r.ReleaseTracks.OrderBy(rt => rt.Position))
-            .ThenInclude(rt => rt.Track)           // ← добавлено: грузим треки
-            .ThenInclude(t => t.Artist)        // ← и имя артиста для каждого трека
+            .Include(r => r.Artist)
             .Where(r => r.ArtistId == artistId && r.Status == ReleaseStatus.Published);
- 
-        // Фильтр по типу — тип вычисляется из кол-ва треков
+
+        // Треки грузим только если нужны
+        if (includeTracks)
+        {
+            query = query
+                .Include(r => r.ReleaseTracks.OrderBy(rt => rt.Position))
+                .ThenInclude(rt => rt.Track)
+                .ThenInclude(t => t.Artist);
+        }
+        else
+        {
+            // Для подсчёта TrackCount нужны ReleaseTracks без самих треков
+            query = query.Include(r => r.ReleaseTracks);
+        }
+
         if (!string.IsNullOrEmpty(type))
         {
             query = type switch
@@ -100,15 +154,15 @@ public class MusicService : IMusicService
                 _        => query
             };
         }
- 
+
         var totalCount = await query.CountAsync();
- 
+
         var releases = await query
             .OrderByDescending(r => r.ReleaseDate)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
- 
+
         return (releases, totalCount);
     }
 }

@@ -38,6 +38,14 @@ public class ArtistController : BaseApiController
         return Ok(artist.ToDto(_storageService));
     }
     
+    // GET /api/artist/popular
+    [HttpGet("popular")]
+    public async Task<IActionResult> GetPopular()
+    {
+        var artists = await _musicService.GetPopularArtistsAsync();
+        return Ok(artists.Select(a => a.ToDto(_storageService)));
+    }
+    
     // GET /api/artist/{id}/tracks/popular?limit=5
     // Топ треков артиста по PlayCount, только из опубликованных релизов.
     [HttpGet("{id:int}/tracks/popular")]
@@ -59,22 +67,29 @@ public class ArtistController : BaseApiController
         int id,
         [FromQuery] string? type = null,
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 10)
+        [FromQuery] int pageSize = 10,
+        [FromQuery] bool includeTracks = false)  // ← добавили
     {
         var artist = await _artistService.GetArtistByIdAsync(id);
         if (artist == null)
             return NotFound(new { message = "Артист не найден" });
- 
+
         var (releases, totalCount) = await _musicService.GetArtistReleasesAsync(
-            id, type, page, pageSize);
- 
-        // ToDetailsDto включает треки — они уже загружены через Include в MusicService
-        var result = PaginatedResult<ReleaseDetailsDto>.From(
-            releases.Select(r => r.ToDetailsDto(_storageService)),
-            totalCount,
-            page,
-            pageSize);
- 
-        return Ok(result);
+            id, type, page, pageSize, includeTracks);
+
+        if (includeTracks)
+        {
+            var result = PaginatedResult<ReleaseDetailsDto>.From(
+                releases.Select(r => r.ToDetailsDto(_storageService)),
+                totalCount, page, pageSize);
+            return Ok(result);
+        }
+        else
+        {
+            var result = PaginatedResult<ReleaseDto>.From(
+                releases.Select(r => r.ToDto(_storageService)),
+                totalCount, page, pageSize);
+            return Ok(result);
+        }
     }
 }

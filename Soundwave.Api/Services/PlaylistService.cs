@@ -19,6 +19,19 @@ public class PlaylistService : IPlaylistService
 
     // ── Читать ────────────────────────────────────────────────────────────────
 
+    
+    // PlaylistService
+    public async Task<IEnumerable<Playlist>> GetPopularAsync()
+    {
+        return await _context.Playlists
+            .Include(p => p.Owner)
+            .Include(p => p.PlaylistTracks)
+            .Where(p => p.IsPublic && !p.IsLikedSongs)
+            .OrderByDescending(p => p.PlaylistTracks.Count)
+            .Take(6)
+            .ToListAsync();
+    }
+    
     public async Task<IEnumerable<Playlist>> GetUserPlaylistsAsync(int userId)
     {
         return await _context.Playlists

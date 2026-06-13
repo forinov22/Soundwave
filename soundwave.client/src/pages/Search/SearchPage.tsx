@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Heart, Loader2, Search } from "lucide-react";
+import { Play, Heart, Loader2, Search, X } from "lucide-react";
 import { useNavigate } from "react-router";
 
 import { cn } from "@/lib/utils";
@@ -12,6 +12,8 @@ import { ActionIcon } from "@/shared/ui/ActionIcon";
 import { formatDuration } from "@/shared/lib/formatDuration";
 import { useSearch } from "@/features/search/lib/useSearch";
 import type { SearchFilterType } from "@/features/search/types";
+import { useSearchStore } from "@/features/search/model/searchStore";
+import { usePlayerPlayback } from "@/features/player/lib/usePlayerPlayback";
 
 // ── Фильтры ───────────────────────────────────────────────────────────────
 
@@ -97,6 +99,9 @@ const Section = ({
 const SearchPage = () => {
   const navigate = useNavigate();
   const { query, filter, setFilter, result, isLoading, isEmpty } = useSearch();
+  const recognizeResult = useSearchStore((s) => s.recognizeResult);
+  const setRecognizeResult = useSearchStore((s) => s.setRecognizeResult);
+  const { playTrack } = usePlayerPlayback();
 
   return (
     <motion.div
@@ -105,6 +110,109 @@ const SearchPage = () => {
       transition={{ duration: 0.25 }}
       className="mx-auto max-w-7xl pb-32"
     >
+      {recognizeResult && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8 rounded-2xl border border-white/10 bg-surface p-6"
+        >
+          <div className="mb-4 flex items-center justify-between">
+            <Typography
+              variant="label"
+              size="xs"
+              className="text-text-secondary"
+            >
+              Результат распознавания
+            </Typography>
+            <button
+              onClick={() => setRecognizeResult(null)}
+              className="text-text-muted hover:text-text-primary"
+            >
+              <X className="size-4" />
+            </button>
+          </div>
+
+          {recognizeResult.bestMatch ? (
+            // Уверенное совпадение
+            <div className="flex items-center gap-4">
+              <img
+                src={recognizeResult.bestMatch.imageUrl}
+                className="size-20 rounded-xl shadow-lg"
+                alt=""
+              />
+              <div className="min-w-0 flex-1">
+                <Typography variant="title" size="md" truncate>
+                  {recognizeResult.bestMatch.title}
+                </Typography>
+                <Typography variant="subtitle" size="sm">
+                  {recognizeResult.bestMatch.artistName}
+                </Typography>
+              </div>
+              <button
+                onClick={() => playTrack(recognizeResult.bestMatch!)}
+                className="flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90"
+              >
+                <Play className="size-5 fill-current" />
+              </button>
+            </div>
+          ) : recognizeResult.candidates.length > 0 ? (
+            // Неуверенные кандидаты
+            <div className="space-y-1">
+              <Typography
+                variant="subtitle"
+                size="sm"
+                className="mb-3 text-text-muted"
+              >
+                Возможно, это один из этих треков:
+              </Typography>
+              <TrackTable
+                data={recognizeResult.candidates}
+                getKey={(t) => t.id}
+                onRowClick={(track) => playTrack(track)}
+                showHeader={false}
+                columns={[
+                  {
+                    key: "track",
+                    width: "1fr",
+                    render: (track) => (
+                      <TrackRow
+                        image={track.imageUrl}
+                        title={track.title}
+                        subtitle={track.artistName}
+                        size="sm"
+                      />
+                    ),
+                  },
+                  {
+                    key: "duration",
+                    width: "auto",
+                    align: "right",
+                    render: (track) => (
+                      <Typography
+                        variant="subtitle"
+                        size="sm"
+                        className="font-mono"
+                      >
+                        {formatDuration(track.durationSeconds)}
+                      </Typography>
+                    ),
+                  },
+                ]}
+              />
+            </div>
+          ) : (
+            // Ничего не найдено
+            <Typography
+              variant="subtitle"
+              size="sm"
+              className="text-text-muted"
+            >
+              Не удалось распознать трек. Попробуйте записать более длинный
+              фрагмент.
+            </Typography>
+          )}
+        </motion.div>
+      )}
       {/* Фильтры — только если есть запрос */}
       {!isEmpty && (
         <div className="mb-8 flex flex-wrap gap-2">
@@ -124,7 +232,6 @@ const SearchPage = () => {
           ))}
         </div>
       )}
-
       {/* Пустое состояние — нет запроса */}
       {isEmpty && (
         <div className="flex flex-col items-center justify-center py-32 text-center">
@@ -137,14 +244,12 @@ const SearchPage = () => {
           </Typography>
         </div>
       )}
-
       {/* Загрузка */}
       {isLoading && (
         <div className="flex h-64 items-center justify-center">
           <Loader2 className="size-8 animate-spin text-primary" />
         </div>
       )}
-
       {/* Нет результатов */}
       {!isEmpty &&
         !isLoading &&
@@ -163,7 +268,6 @@ const SearchPage = () => {
             </Typography>
           </div>
         )}
-
       {/* Результаты */}
       {result && (
         <AnimatePresence mode="wait">

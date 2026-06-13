@@ -35,14 +35,13 @@ public class ReleasesController : BaseApiController
         return Ok(releases.Select(r => r.ToDto(_storage)));
     }
 
-    // GET /api/releases/{id} — мета релиза (без треков, только Published).
-    // Треки клиент дотягивает отдельным запросом.
+    // GET /api/releases/{id} — релиз с треками (только Published)
     [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetMeta(int id)
+    public async Task<IActionResult> GetById(int id)
     {
-        var release = await _music.GetReleaseMetaByIdAsync(id);
+        var release = await _music.GetReleaseByIdAsync(id);
         if (release is null) return NotFound();
-        return Ok(release.ToDto(_storage));
+        return Ok(release.ToDetailsDto(_storage));
     }
 
     // GET /api/releases/{id}/tracks — треки опубликованного релиза.

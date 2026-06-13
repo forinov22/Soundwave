@@ -21,6 +21,14 @@ public class PlaylistsController : BaseApiController
         _playlists = playlists;
         _storage = storage;
     }
+    
+    // GET /api/playlists/popular
+    [HttpGet("popular")]
+    public async Task<IActionResult> GetPopular()
+    {
+        var playlists = await _playlists.GetPopularAsync();
+        return Ok(playlists.Select(p => p.ToSummaryDto(_storage)));
+    }
 
     // GET /api/playlists/me — мои плейлисты (для сайдбара)
     [Authorize]

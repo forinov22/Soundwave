@@ -4,6 +4,7 @@ namespace Soundwave.Api.Services;
 
 public interface IPlaylistService
 {
+    Task<IEnumerable<Playlist>> GetPopularAsync();
     Task<IEnumerable<Playlist>> GetUserPlaylistsAsync(int userId);
     Task<Playlist?> GetByIdAsync(int playlistId, int? requestingUserId);
     Task<Playlist?> GetLikedSongsPlaylistAsync(int userId);

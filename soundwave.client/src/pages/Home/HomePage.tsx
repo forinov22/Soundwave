@@ -6,6 +6,8 @@ import AlbumItem from "@/shared/ui/AlbumItem";
 import TrackItem from "@/shared/ui/TrackItem";
 import { useMusic } from "@/features/music/lib/useMusic.ts";
 import { usePlayerPlayback } from "@/features/player/lib/usePlayerPlayback";
+import { ArtistItem } from "@/shared/ui/ArtistItem";
+import { MediaCard } from "@/shared/ui/MediaCard";
 
 const SectionHeader = ({
   title,
@@ -28,8 +30,14 @@ const SectionHeader = ({
 );
 
 const HomePage = () => {
-  const { trendingTracks, popularReleases, fetchHome, isHomeLoading } =
-    useMusic();
+  const {
+    trendingTracks,
+    popularReleases,
+    popularArtists,
+    popularPlaylists,
+    fetchHome,
+    isHomeLoading,
+  } = useMusic();
   const { playTrack } = usePlayerPlayback();
   const navigate = useNavigate();
 
@@ -83,8 +91,32 @@ const HomePage = () => {
         onShowAll={() => navigate("/artists")}
       />
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-        {/* ArtistItem должен иметь rounded-full для картинки */}
-        {/* {popularArtists.map(artist => <ArtistItem key={artist.id} artist={artist} />)} */}
+        {popularArtists.slice(0, 5).map((artist) => (
+          <ArtistItem
+            key={artist.id}
+            name={artist.name}
+            image={artist.avatarUrl ?? ""}
+            onClick={() => navigate(`/artist/${artist.id}`)}
+          />
+        ))}
+      </div>
+
+      <SectionHeader
+        title="Популярные плейлисты"
+        onShowAll={() => navigate("/playlists")}
+      />
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        {popularPlaylists.slice(0, 5).map((playlist) => (
+          <MediaCard
+            key={playlist.id}
+            image={playlist.imageUrl ?? ""}
+            title={playlist.title}
+            subtitle={`${playlist.trackCount} треков`}
+            imageZoomOnHover
+            titleUnderlineOnHover
+            onClick={() => navigate(`/playlists/${playlist.id}`)}
+          />
+        ))}
       </div>
     </div>
   );

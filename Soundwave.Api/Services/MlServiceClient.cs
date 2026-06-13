@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+using Soundwave.Api.DTOs;
 using Soundwave.Api.Settings;
 
 namespace Soundwave.Api.Services;
@@ -39,5 +40,20 @@ public class MlServiceClient
             $"/tracks/{externalTrackId}");
         request.Headers.Add("X-Internal-Token", _internalToken);
         await _http.SendAsync(request);
+    }
+    
+    public async Task<RecognizeResult?> RecognizeAsync(Stream audioStream, string fileName, string contentType)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post, "/recognize");
+        request.Headers.Add("X-Internal-Token", _internalToken);
+
+        var content = new MultipartFormDataContent();
+        content.Add(new StreamContent(audioStream), "audio", fileName);
+        request.Content = content;
+
+        var response = await _http.SendAsync(request);
+        if (!response.IsSuccessStatusCode) return null;
+
+        return await response.Content.ReadFromJsonAsync<RecognizeResult>();
     }
 }

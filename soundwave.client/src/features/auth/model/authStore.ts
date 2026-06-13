@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 
-import type { User } from "@/shared/types/user";
+import type { User } from "@/shared/types/User";
 
 type AuthState = {
   accessToken: string | null;
@@ -20,25 +20,16 @@ export const useAuthStore = create<AuthState>()(
         user: null,
 
         setToken: (token) =>
-          set(
-            { accessToken: token },
-            false,
-            "auth/setToken"
-          ),
+          set({ accessToken: token }, false, "auth/setToken"),
 
         logout: () =>
-          set(
-            { accessToken: null, user: null },
-            false,
-            "auth/logout"
-          ),
+          set({ accessToken: null, user: null }, false, "auth/logout"),
 
-        setUser: (user) =>
-          set({ user }, false, "auth/setUser"),
+        setUser: (user) => set({ user }, false, "auth/setUser"),
       }),
       {
         name: "auth-storage",
-      }
-    )
-  )
+      },
+    ),
+  ),
 );

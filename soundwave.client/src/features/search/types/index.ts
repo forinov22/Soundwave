@@ -45,3 +45,9 @@ export interface SearchResult {
   artists: SearchArtist[];
   playlists: SearchPlaylist[];
 }
+
+export interface RecognizeResult {
+  confident: boolean;
+  bestMatch: Track | null;
+  candidates: Track[];
+}

@@ -1,4 +1,4 @@
-import type { ReleaseDetails, ReleaseType } from "@/shared/types/Release";
+import type { ReleaseType } from "@/shared/types/Release";
 
 // Публичный профиль артиста — соответствует ArtistDetailsDto
 export interface ArtistPublicProfile {
@@ -12,6 +12,3 @@ export interface ArtistPublicProfile {
 
 // Фильтр для дискографии — null = все
 export type DiscographyFilter = ReleaseType | null;
-
-export type DiscographySortField = "date" | "name";
-export type DiscographySortDir = "asc" | "desc";

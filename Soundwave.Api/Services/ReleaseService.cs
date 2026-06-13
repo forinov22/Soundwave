@@ -263,20 +263,20 @@ public class ReleaseService : IReleaseService
         }
         
         // Все треки релиза должны быть обработаны ML-сервисом
-        var notReadyTracks = release.ReleaseTracks
-            .Select(rt => rt.Track)
-            .Where(t => t.ProcessingStatus != TrackProcessingStatus.Ready)
-            .ToList();
-
-        if (notReadyTracks.Count > 0)
-        {
-            var statusList = notReadyTracks
-                .Select(t => new { t.Id, t.Title, Status = t.ProcessingStatus.ToString() })
-                .ToList();
-            throw new ConflictException(
-                "Некоторые треки ещё не обработаны. Дождитесь завершения обработки.",
-                new { notReadyTracks = statusList });
-        }
+        // var notReadyTracks = release.ReleaseTracks
+        //     .Select(rt => rt.Track)
+        //     .Where(t => t.ProcessingStatus != TrackProcessingStatus.Ready)
+        //     .ToList();
+        //
+        // if (notReadyTracks.Count > 0)
+        // {
+        //     var statusList = notReadyTracks
+        //         .Select(t => new { t.Id, t.Title, Status = t.ProcessingStatus.ToString() })
+        //         .ToList();
+        //     throw new ConflictException(
+        //         "Некоторые треки ещё не обработаны. Дождитесь завершения обработки.",
+        //         new { notReadyTracks = statusList });
+        // }
 
         // Всё ок — публикуем
         var now = DateTime.UtcNow;
