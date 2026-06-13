@@ -407,7 +407,7 @@ const SearchPage = () => {
                             <Play className="ml-0.5 size-5 fill-current text-primary-foreground" />
                           </div>
                         }
-                        onClick={() => navigate(`/releases/${release.id}`)}
+                        onClick={() => navigate(`/album/${release.id}`)}
                       />
                     ))}
                   </div>

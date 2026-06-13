@@ -71,10 +71,7 @@ const HomePage = () => {
     <div className="mx-auto max-w-7xl pb-20">
       {listenHistory.length > 0 && (
         <>
-          <SectionHeader
-            title="Недавно слушали"
-            onShowAll={() => {}}
-          />
+          <SectionHeader title="Недавно слушали" onShowAll={() => {}} />
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {listenHistory.slice(0, 5).map((item) => (
               <TrackItem
@@ -91,10 +88,7 @@ const HomePage = () => {
 
       {recommendations.length > 0 && (
         <>
-          <SectionHeader
-            title="Рекомендации для вас"
-            onShowAll={() => {}}
-          />
+          <SectionHeader title="Рекомендации для вас" onShowAll={() => {}} />
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {recommendations.slice(0, 5).map((item) => (
               <TrackItem
@@ -156,23 +150,27 @@ const HomePage = () => {
         ))}
       </div>
 
-      <SectionHeader
-        title="Популярные плейлисты"
-        onShowAll={() => navigate("/playlists")}
-      />
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-        {popularPlaylists.slice(0, 5).map((playlist) => (
-          <MediaCard
-            key={playlist.id}
-            image={playlist.imageUrl ?? ""}
-            title={playlist.title}
-            subtitle={`${playlist.trackCount} треков`}
-            imageZoomOnHover
-            titleUnderlineOnHover
-            onClick={() => navigate(`/playlists/${playlist.id}`)}
+      {popularPlaylists.length > 0 && (
+        <>
+          <SectionHeader
+            title="Популярные плейлисты"
+            onShowAll={() => navigate("/playlists")}
           />
-        ))}
-      </div>
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            {popularPlaylists.slice(0, 5).map((playlist) => (
+              <MediaCard
+                key={playlist.id}
+                image={playlist.imageUrl ?? ""}
+                title={playlist.title}
+                subtitle={`${playlist.trackCount} треков`}
+                imageZoomOnHover
+                titleUnderlineOnHover
+                onClick={() => navigate(`/playlists/${playlist.id}`)}
+              />
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 };
