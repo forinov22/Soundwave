@@ -40,7 +40,7 @@ services:
 
   api:
     build:
-      context: ./Soundwave.Api
+      context: .
       dockerfile: Soundwave.Api/Dockerfile
     container_name: soundwave-api
     environment:
@@ -70,7 +70,7 @@ services:
   ml:
     build:
       context: ./soundwave.ml
-      dockerfile: soundwave.ml/Dockerfile
+      dockerfile: Dockerfile
     container_name: soundwave-ml
     environment:
       HOST: 0.0.0.0
