@@ -58,8 +58,8 @@ services:
       MlService__InternalToken: ${INTERNAL_TOKEN}
       AdminSettings__Email: ${ADMIN_EMAIL}
       AdminSettings__Password: ${ADMIN_PASSWORD}
-      Google__ClientId: ${Google__ClientId}
-      Google__ClientSecret: ${Google__ClientSecret}
+      GoogleOptions__ClientId: ${Google__ClientId}
+      GoogleOptions__ClientSecret: ${Google__ClientSecret}
     depends_on:
       postgres:
         condition: service_healthy
