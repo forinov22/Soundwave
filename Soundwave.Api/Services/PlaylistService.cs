@@ -283,6 +283,7 @@ public class PlaylistService : IPlaylistService
     {
         var playlist = await _context.Playlists
             .Include(p => p.PlaylistTracks)
+            .ThenInclude(pt => pt.Track)
             .FirstOrDefaultAsync(p => p.Id == playlistId);
 
         if (playlist is null) throw new NotFoundException("Плейлист не найден");

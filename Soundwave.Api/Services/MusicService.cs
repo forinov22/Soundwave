@@ -23,6 +23,19 @@ public class MusicService : IMusicService
             .ToListAsync();
     }
     
+    public async Task<IEnumerable<Track>> SearchTracksAsync(string query, int limit = 20)
+    {
+        var q = query.ToLower();
+        return await _context.Tracks
+            .Include(t => t.Artist)
+            .Where(t =>
+                t.ReleaseTracks.Any(rt => rt.Release.Status == ReleaseStatus.Published) &&
+                (t.Title.ToLower().Contains(q) || t.Artist.Name.ToLower().Contains(q)))
+            .OrderByDescending(t => t.PlayCount)
+            .Take(limit)
+            .ToListAsync();
+    }
+
     public async Task<IEnumerable<Track>> GetTrendingTracksAsync()
     {
         // Только треки, входящие хотя бы в один опубликованный релиз.

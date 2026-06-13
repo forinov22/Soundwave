@@ -165,7 +165,7 @@ const HomePage = () => {
                 subtitle={`${playlist.trackCount} треков`}
                 imageZoomOnHover
                 titleUnderlineOnHover
-                onClick={() => navigate(`/playlists/${playlist.id}`)}
+                onClick={() => navigate(`/playlist/${playlist.id}`)}
               />
             ))}
           </div>

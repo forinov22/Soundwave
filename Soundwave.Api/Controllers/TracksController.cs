@@ -25,6 +25,17 @@ public class TracksController : BaseApiController
         _storage = storage;
     }
 
+    // GET /api/tracks/search?q=text&limit=20 — полнотекстовый поиск по треку/артисту
+    [HttpGet("search")]
+    public async Task<IActionResult> Search([FromQuery] string? q, [FromQuery] int limit = 20)
+    {
+        if (string.IsNullOrWhiteSpace(q))
+            return Ok(Array.Empty<object>());
+
+        var tracks = await _music.SearchTracksAsync(q.Trim(), limit);
+        return Ok(tracks.Select(t => t.ToDto(_storage)));
+    }
+
     // GET /api/tracks/trending — публичная витрина (только из Published-релизов)
     [HttpGet("trending")]
     public async Task<IActionResult> GetTrending()

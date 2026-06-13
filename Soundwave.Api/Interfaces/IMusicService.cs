@@ -5,6 +5,7 @@ namespace Soundwave.Api.Interfaces;
 public interface IMusicService
 {
     Task<IEnumerable<Track>> GetTracksByIdsAsync(IEnumerable<int> ids);
+    Task<IEnumerable<Track>> SearchTracksAsync(string query, int limit = 20);
     
     // Только треки, входящие хотя бы в один опубликованный релиз.
     Task<IEnumerable<Track>> GetTrendingTracksAsync();

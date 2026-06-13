@@ -153,7 +153,11 @@ function PlaylistDetailsPage() {
                 }
                 variant="primary"
                 size="lg"
-                label={isPlaylistSaved(details.id) ? "Убрать из медиатеки" : "Сохранить в медиатеку"}
+                label={
+                  isPlaylistSaved(details.id)
+                    ? "Убрать из медиатеки"
+                    : "Сохранить в медиатеку"
+                }
                 onClick={() => toggleSavePlaylist(details.id)}
               />
             )}
@@ -305,7 +309,7 @@ function PlaylistDetailsPage() {
           </Typography>
           <TrackSearchInput
             addedTrackIds={addedTrackIds}
-            onAdd={(track) => addTrack(track.id)}
+            onAdd={(id) => addTrack(id)}
             isLoading={isAddingTrack}
             className="max-w-lg"
           />
