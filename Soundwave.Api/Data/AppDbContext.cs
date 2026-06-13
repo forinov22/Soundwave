@@ -12,6 +12,7 @@ public class AppDbContext : DbContext
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<Track> Tracks => Set<Track>();
     public DbSet<User> Users => Set<User>();
+    public DbSet<ListenEvent> ListenEvents => Set<ListenEvent>();
     public DbSet<UserLikedRelease> UserLikedReleases => Set<UserLikedRelease>();
     public DbSet<UserFollowedArtist> UserFollowedArtists => Set<UserFollowedArtist>();
     public DbSet<UserSavedPlaylist> UserSavedPlaylists => Set<UserSavedPlaylist>();
@@ -103,5 +104,15 @@ public class AppDbContext : DbContext
         // UserSavedPlaylists
         modelBuilder.Entity<UserSavedPlaylist>()
             .HasKey(x => new { x.UserId, x.PlaylistId });
+
+        // ListenEvents
+        modelBuilder.Entity<ListenEvent>()
+            .HasOne(e => e.Track)
+            .WithMany()
+            .HasForeignKey(e => e.TrackId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ListenEvent>()
+            .HasIndex(e => new { e.UserId, e.ListenedAt });
     }
 }

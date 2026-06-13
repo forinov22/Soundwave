@@ -42,6 +42,27 @@ public class MlServiceClient
         await _http.SendAsync(request);
     }
     
+    /// <summary>Возвращает список внешних track_id похожих треков из ML-сервиса.</summary>
+    public async Task<IEnumerable<int>> GetSimilarTracksAsync(string externalTrackId, int k = 20)
+    {
+        var request = new HttpRequestMessage(
+            HttpMethod.Get,
+            $"/tracks/{externalTrackId}/similar?k={k}");
+        request.Headers.Add("X-Internal-Token", _internalToken);
+
+        var response = await _http.SendAsync(request);
+        if (!response.IsSuccessStatusCode) return [];
+
+        var result = await response.Content.ReadFromJsonAsync<SimilarResponse>();
+        return result?.Items
+            .Select(i => int.TryParse(i.TrackId, out var id) ? id : 0)
+            .Where(id => id > 0)
+            ?? [];
+    }
+
+    private record SimilarResponse(string SourceTrackId, List<SimilarItem> Items);
+    private record SimilarItem(string TrackId, double Distance);
+
     public async Task<RecognizeResult?> RecognizeAsync(Stream audioStream, string fileName, string contentType)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, "/recognize");

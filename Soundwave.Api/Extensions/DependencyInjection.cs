@@ -24,6 +24,7 @@ public static class DependencyInjection
         services.AddScoped<IReleaseService, ReleaseService>();
         services.AddScoped<IPlaylistService, PlaylistService>();
         services.AddScoped<ILikesService, LikesService>();
+        services.AddScoped<IListenHistoryService, ListenHistoryService>();
         services.AddScoped<SearchService>();
 
         return services;

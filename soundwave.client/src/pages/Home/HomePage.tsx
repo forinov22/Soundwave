@@ -8,6 +8,9 @@ import { useMusic } from "@/features/music/lib/useMusic.ts";
 import { usePlayerPlayback } from "@/features/player/lib/usePlayerPlayback";
 import { ArtistItem } from "@/shared/ui/ArtistItem";
 import { MediaCard } from "@/shared/ui/MediaCard";
+import { useHistory } from "@/features/history/lib/useHistory";
+import type { ListenHistoryItem } from "@/features/history/types";
+import type { Track } from "@/shared/types/Track";
 
 const SectionHeader = ({
   title,
@@ -29,6 +32,17 @@ const SectionHeader = ({
   </div>
 );
 
+const toPlayerTrack = (item: ListenHistoryItem): Track => ({
+  id: item.trackId,
+  title: item.title,
+  imageUrl: item.imageUrl ?? "",
+  audioUrl: item.audioUrl,
+  artistId: item.artistId,
+  artistName: item.artistName,
+  durationSeconds: item.durationSeconds,
+  playCount: item.playCount,
+});
+
 const HomePage = () => {
   const {
     trendingTracks,
@@ -40,6 +54,7 @@ const HomePage = () => {
   } = useMusic();
   const { playTrack } = usePlayerPlayback();
   const navigate = useNavigate();
+  const { listenHistory, recommendations } = useHistory();
 
   useEffect(() => {
     fetchHome();
@@ -54,6 +69,46 @@ const HomePage = () => {
 
   return (
     <div className="mx-auto max-w-7xl pb-20">
+      {listenHistory.length > 0 && (
+        <>
+          <SectionHeader
+            title="Недавно слушали"
+            onShowAll={() => {}}
+          />
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            {listenHistory.slice(0, 5).map((item) => (
+              <TrackItem
+                key={item.trackId}
+                name={item.title}
+                image={item.imageUrl ?? ""}
+                artist={item.artistName}
+                onClick={() => playTrack(toPlayerTrack(item))}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
+      {recommendations.length > 0 && (
+        <>
+          <SectionHeader
+            title="Рекомендации для вас"
+            onShowAll={() => {}}
+          />
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            {recommendations.slice(0, 5).map((item) => (
+              <TrackItem
+                key={item.trackId}
+                name={item.title}
+                image={item.imageUrl ?? ""}
+                artist={item.artistName}
+                onClick={() => playTrack(toPlayerTrack(item))}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
       <SectionHeader
         title="Популярные треки"
         onShowAll={() => navigate("/tracks")}

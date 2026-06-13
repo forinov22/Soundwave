@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Soundwave.Api.DTOs;
 using Soundwave.Api.Extensions;
 using Soundwave.Api.Interfaces;
@@ -12,15 +13,18 @@ public class ArtistController : BaseApiController
     private readonly IArtistService _artistService;
     private readonly IMusicService _musicService;
     private readonly IStorageService _storageService;
+    private readonly IListenHistoryService _historyService;
 
     public ArtistController(
         IArtistService artistService,
         IMusicService musicService,
-        IStorageService storageService)
+        IStorageService storageService,
+        IListenHistoryService historyService)
     {
         _artistService = artistService;
         _musicService = musicService;
         _storageService = storageService;
+        _historyService = historyService;
     }
 
     // GET /api/artist/{id} — публичный профиль артиста.
@@ -38,6 +42,18 @@ public class ArtistController : BaseApiController
         return Ok(artist.ToDto(_storageService));
     }
     
+    // GET /api/artist/me/stats — приватная статистика артиста
+    [HttpGet("me/stats")]
+    [Authorize]
+    public async Task<IActionResult> GetMyStats()
+    {
+        var userId = GetUserId();
+        if (userId == null) return Unauthorized();
+
+        var stats = await _historyService.GetArtistStatsAsync(userId.Value);
+        return Ok(stats);
+    }
+
     // GET /api/artist/popular
     [HttpGet("popular")]
     public async Task<IActionResult> GetPopular()

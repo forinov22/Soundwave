@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from "react";
 
 import { usePlayerPlayback } from "../lib/usePlayerPlayback";
 import { usePlayerTime } from "../lib/usePlayerTime";
+import { useRecordListen } from "@/features/history/lib/useRecordListen";
 import PlaybackControls from "./PlaybackControls";
 
 function Player() {
@@ -16,6 +17,8 @@ function Player() {
     lastSeekTime, // Достаем сигнал перемотки
     setCurrentTime,
   } = usePlayerTime();
+
+  useRecordListen();
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const [durationSeconds, setDurationSeconds] = useState(0);

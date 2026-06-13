@@ -99,4 +99,22 @@ export const artistApi = {
   // Draft → hard delete, Published → soft (Archived). Бэк сам разруливает.
   deleteRelease: (releaseId: number) =>
     apiClient.delete<void>(`/api/releases/${releaseId}`),
+
+  getMyStats: () => apiClient.get<ArtistStats>("/api/artist/me/stats"),
 };
+
+export interface ArtistStats {
+  totalPlays: number;
+  totalTracks: number;
+  totalReleases: number;
+  followers: number;
+  topTracks: TopTrackStat[];
+}
+
+export interface TopTrackStat {
+  id: number;
+  title: string;
+  imageUrl: string | null;
+  playCount: number;
+  durationSeconds: number;
+}
