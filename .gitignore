@@ -5,6 +5,10 @@
 
 # dotenv files
 .env
+.env.prod
+
+# claude
+.claude
 
 # User-specific files
 *.rsuser

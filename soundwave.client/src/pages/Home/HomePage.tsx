@@ -134,8 +134,8 @@ const HomePage = () => {
           <AlbumItem
             key={release.id}
             name={release.title}
-            image={release.imageUrl}
-            description={release.description}
+            image={release.imageUrl ?? ""}
+            description={release.description ?? ""}
             onClick={() => navigate(`/album/${release.id}`)}
           />
         ))}

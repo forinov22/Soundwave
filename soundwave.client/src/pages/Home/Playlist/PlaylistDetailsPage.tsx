@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -58,7 +57,6 @@ function PlaylistDetailsPage() {
     isLoading,
     error,
     updatePlaylist,
-    isUpdating,
     addTrack,
     isAddingTrack,
     removeTrack,
@@ -321,7 +319,9 @@ function PlaylistDetailsPage() {
                       />
                     }
                     size="sm"
-                    label={isLiked(track.id) ? "Убрать из избранного" : "В избранное"}
+                    label={
+                      isLiked(track.id) ? "Убрать из избранного" : "В избранное"
+                    }
                     className="opacity-0 group-hover:opacity-100"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -396,7 +396,7 @@ function PlaylistDetailsPage() {
           initialDescription={details.description}
           initialImage={details.imageUrl ?? undefined}
           onSave={handleSaveEdit}
-          isSaving={isUpdating}
+          // isSaving={isUpdating}
         />
       )}
     </div>

@@ -1,5 +1,5 @@
 import { apiClient } from "@/shared/api/apiClient";
-import type { SearchResult } from "../types";
+import type { SearchResult, RecognizeResult } from "../types";
 
 export const searchApi = {
   search: (q: string, type?: string) =>

@@ -1,6 +1,6 @@
 import { useShallow } from "zustand/react/shallow";
 
-import type { Track } from "@/features/music/types";
+import type { Track } from "@/shared/types/Track";
 
 import { usePlayer } from "../model/playerStore";
 
@@ -87,9 +87,7 @@ export function usePlayerPlayback() {
       const pos = shuffledIndices.indexOf(currentTrackIndex);
       const prevPos = pos - 1;
       if (prevPos < 0) {
-        setCurrentTrackIndex(
-          shuffledIndices[shuffledIndices.length - 1],
-        );
+        setCurrentTrackIndex(shuffledIndices[shuffledIndices.length - 1]);
       } else {
         setCurrentTrackIndex(shuffledIndices[prevPos]);
       }

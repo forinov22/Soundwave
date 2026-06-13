@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, Music2, Pencil, Rocket, Trash2 } from "lucide-react";
+import { ChevronDown, Music2, Pencil, Trash2 } from "lucide-react";
 
 import { ActionIcon } from "@/shared/ui/ActionIcon";
 import { Button } from "@/components/ui/button";

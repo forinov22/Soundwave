@@ -1,0 +1,129 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: soundwave-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - soundwave
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: soundwave-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio_data:/data
+    restart: unless-stopped
+    networks:
+      - soundwave
+    # порты 9000/9001 НЕ публикуем — только через nginx
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  api:
+    build:
+      context: ./Soundwave.Api
+      dockerfile: Soundwave.Api/Dockerfile
+    container_name: soundwave-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+      Jwt__Secret: ${JWT_SECRET}
+      Jwt__Issuer: ${JWT_ISSUER}
+      Jwt__Audience: ${JWT_AUDIENCE}
+      Storage__Endpoint: http://minio:9000
+      Storage__AccessKey: ${MINIO_ROOT_USER}
+      Storage__SecretKey: ${MINIO_ROOT_PASSWORD}
+      Storage__BucketName: ${MINIO_BUCKET}
+      Storage__PublicEndpoint: https://${DOMAIN}/storage
+      MlService__BaseUrl: http://ml:8001
+      MlService__InternalToken: ${INTERNAL_TOKEN}
+      AdminSettings__Email: ${ADMIN_EMAIL}
+      AdminSettings__Password: ${ADMIN_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - soundwave
+
+  ml:
+    build:
+      context: ./soundwave.ml
+      dockerfile: soundwave.ml/Dockerfile
+    container_name: soundwave-ml
+    environment:
+      HOST: 0.0.0.0
+      PORT: 8001
+      INTERNAL_TOKEN: ${INTERNAL_TOKEN}
+      S3_BUCKET: ${MINIO_BUCKET}
+      S3_ACCESS_KEY: ${MINIO_ROOT_USER}
+      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      S3_ENDPOINT_URL: http://minio:9000
+      S3_FORCE_PATH_STYLE: "true"
+      DOTNET_BASE_URL: http://api:8080
+      DOTNET_CALLBACK_PATH: /api/internal/tracks/{track_id}/processed
+      EMBEDDING_SIZE: 256
+      N_MELS: 128
+      TARGET_SR: 22050
+      DEVICE: cpu
+      NUMBA_CACHE_DIR: /tmp/numba_cache
+    volumes:
+      - ml_data:/app/data
+      - ml_models:/app/models
+    depends_on:
+      - minio
+    restart: unless-stopped
+    networks:
+      - soundwave
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 30s
+      timeout: 10s
+      start_period: 90s
+      retries: 3
+
+  nginx:
+    image: nginx:alpine
+    container_name: soundwave-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/frontend:/usr/share/nginx/html:ro
+    depends_on:
+      - api
+    restart: unless-stopped
+    networks:
+      - soundwave
+
+networks:
+  soundwave:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  minio_data:
+  ml_data:
+  ml_models:

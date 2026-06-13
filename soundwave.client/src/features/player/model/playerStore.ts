@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-import type { Track } from "@/features/music/types";
+import type { Track } from "@/shared/types/Track";
 
 export type RepeatMode = "none" | "all" | "one";
 

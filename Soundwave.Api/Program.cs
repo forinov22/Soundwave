@@ -27,10 +27,6 @@ if (isDevelopment)
 {
     app.MapOpenApi();
 }
-else
-{
-    app.UseHttpsRedirection();
-}
 
 app.UseCors("frontend");
 
@@ -43,7 +39,6 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     var adminOptions = scope.ServiceProvider.GetRequiredService<IOptions<AdminOptions>>().Value;
-    await db.Database.EnsureDeletedAsync();
     await db.Database.MigrateAsync();
     await DbSeeder.SeedAsync(db, adminOptions);
 }
