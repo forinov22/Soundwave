@@ -43,25 +43,18 @@ public class SearchService
         var searchArtists = searchAll || type == "Artists";
         var searchPlaylists = searchAll || type == "Playlists";
 
-        var tasks = new List<Task>();
-
+        // DbContext не thread-safe — запросы выполняем последовательно
         if (searchTracks)
-            tasks.Add(SearchTracksAsync(q, TrackLimit)
-                .ContinueWith(t => tracks = t.Result));
+            tracks = await SearchTracksAsync(q, TrackLimit);
 
         if (searchReleases)
-            tasks.Add(SearchReleasesAsync(q, ReleaseLimit)
-                .ContinueWith(t => releases = t.Result));
+            releases = await SearchReleasesAsync(q, ReleaseLimit);
 
         if (searchArtists)
-            tasks.Add(SearchArtistsAsync(q, ArtistLimit)
-                .ContinueWith(t => artists = t.Result));
+            artists = await SearchArtistsAsync(q, ArtistLimit);
 
         if (searchPlaylists)
-            tasks.Add(SearchPlaylistsAsync(q, PlaylistLimit)
-                .ContinueWith(t => playlists = t.Result));
-
-        await Task.WhenAll(tasks);
+            playlists = await SearchPlaylistsAsync(q, PlaylistLimit);
 
         // TopResult — первый найденный среди треков, потом релизов, потом артистов
         SearchTrackDto? topResult = null;

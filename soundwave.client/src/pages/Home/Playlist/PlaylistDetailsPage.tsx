@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import {
   Play,
+  Pause,
+  Shuffle,
   MoreHorizontal,
   Clock,
   Lock,
@@ -29,6 +31,8 @@ import { TrackRow } from "@/shared/ui/TrackRow";
 import { Typography } from "@/shared/ui/Typography";
 import { usePlaylistDetails } from "@/features/playlists/lib/usePlaylistDetails";
 import { useLikePlaylist } from "@/features/likes/lib/useLikePlaylist";
+import { useLike } from "@/features/playlists/lib/useLike";
+import { usePlayerPlayback } from "@/features/player/lib/usePlayerPlayback";
 
 import { EditPlaylistModal } from "./EditPlaylistModal";
 import { TrackSearchInput } from "./TrackSearchInput";
@@ -64,6 +68,16 @@ function PlaylistDetailsPage() {
 
   const [isEditOpen, setIsEditOpen] = useState(false);
 
+  const { isLiked, toggleLike } = useLike();
+  const {
+    playAlbum,
+    playShuffle,
+    togglePlay,
+    currentTrack,
+    isPlaying,
+    shuffleMode,
+  } = usePlayerPlayback();
+
   if (isLoading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -86,6 +100,10 @@ function PlaylistDetailsPage() {
   }
 
   const isOwner = details.ownerId === userId;
+
+  const tracks = details.tracks;
+  const isPlaylistLoaded = tracks.some((t) => t.id === currentTrack?.id);
+  const isPlaylistPlaying = isPlaylistLoaded && isPlaying;
   const addedTrackIds = details.tracks.map((t) => t.id);
 
   const totalDuration = details.tracks.reduce(
@@ -132,13 +150,49 @@ function PlaylistDetailsPage() {
         preset="album"
         actions={
           <>
-            <Button
-              size="icon"
-              className="size-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/80"
-              disabled={details.tracks.length === 0}
+            {/* Play / Pause */}
+            <div className="relative">
+              {isPlaylistPlaying && (
+                <span className="pointer-events-none absolute inset-0 animate-ping rounded-full bg-emerald-500 opacity-20" />
+              )}
+              <button
+                onClick={() => {
+                  if (tracks.length === 0) return;
+                  isPlaylistLoaded ? togglePlay() : playAlbum(tracks, 0);
+                }}
+                disabled={tracks.length === 0}
+                className={cn(
+                  "relative flex size-12 items-center justify-center rounded-full shadow-lg",
+                  "transition-all duration-200 active:scale-95 disabled:pointer-events-none disabled:opacity-40",
+                  "bg-emerald-500 text-black hover:bg-emerald-400",
+                  isPlaylistPlaying ? "hover:scale-105" : "hover:scale-110",
+                )}
+              >
+                {isPlaylistPlaying ? (
+                  <Pause className="size-5 fill-current" />
+                ) : (
+                  <Play className="size-5 translate-x-px fill-current" />
+                )}
+              </button>
+            </div>
+
+            {/* Shuffle */}
+            <button
+              onClick={() => tracks.length > 0 && playShuffle(tracks)}
+              disabled={tracks.length === 0}
+              className={cn(
+                "relative flex size-9 items-center justify-center rounded-full",
+                "transition-all duration-200 active:scale-95 disabled:pointer-events-none disabled:opacity-40",
+                isPlaylistLoaded && shuffleMode
+                  ? "text-emerald-500 hover:text-emerald-400"
+                  : "text-zinc-400 hover:text-white",
+              )}
             >
-              <Play className="size-6 fill-current" />
-            </Button>
+              <Shuffle className="size-4" />
+              {isPlaylistLoaded && shuffleMode && (
+                <span className="absolute bottom-0.5 left-1/2 size-1 -translate-x-1/2 rounded-full bg-emerald-500" />
+              )}
+            </button>
 
             {!isOwner && !details.isLikedSongs && details.isPublic && (
               <ActionIcon
@@ -219,11 +273,11 @@ function PlaylistDetailsPage() {
         className="mb-8"
       />
 
-      {details.tracks.length > 0 ? (
+      {tracks.length > 0 ? (
         <TrackTable
-          data={details.tracks}
+          data={tracks}
           getKey={(t) => t.id}
-          onRowClick={() => {}}
+          onRowClick={(_, idx) => playAlbum(tracks, idx)}
           columns={[
             {
               key: "track",
@@ -256,6 +310,24 @@ function PlaylistDetailsPage() {
               align: "right",
               render: (track) => (
                 <div className="flex items-center gap-2">
+                  <ActionIcon
+                    icon={
+                      <Heart
+                        className={
+                          isLiked(track.id)
+                            ? "size-4 fill-emerald-500 text-emerald-500"
+                            : "size-4"
+                        }
+                      />
+                    }
+                    size="sm"
+                    label={isLiked(track.id) ? "Убрать из избранного" : "В избранное"}
+                    className="opacity-0 group-hover:opacity-100"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleLike(track.id);
+                    }}
+                  />
                   <Typography
                     variant="subtitle"
                     size="sm"

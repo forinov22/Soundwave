@@ -14,6 +14,7 @@ import { useSearch } from "@/features/search/lib/useSearch";
 import type { SearchFilterType } from "@/features/search/types";
 import { useSearchStore } from "@/features/search/model/searchStore";
 import { usePlayerPlayback } from "@/features/player/lib/usePlayerPlayback";
+import { useLike } from "@/features/playlists/lib/useLike";
 
 // ── Фильтры ───────────────────────────────────────────────────────────────
 
@@ -101,7 +102,8 @@ const SearchPage = () => {
   const { query, filter, setFilter, result, isLoading, isEmpty } = useSearch();
   const recognizeResult = useSearchStore((s) => s.recognizeResult);
   const setRecognizeResult = useSearchStore((s) => s.setRecognizeResult);
-  const { playTrack } = usePlayerPlayback();
+  const { playTrack, playAlbum } = usePlayerPlayback();
+  const { isLiked, toggleLike } = useLike();
 
   return (
     <motion.div
@@ -323,7 +325,7 @@ const SearchPage = () => {
                         <TrackTable
                           data={result.tracks}
                           getKey={(t) => t.id}
-                          onRowClick={() => {}}
+                          onRowClick={(_, idx) => playAlbum(result.tracks, idx)}
                           showHeader={false}
                           columns={[
                             {
@@ -342,13 +344,25 @@ const SearchPage = () => {
                               key: "like",
                               width: "auto",
                               align: "right",
-                              render: () => (
+                              render: (track) => (
                                 <ActionIcon
-                                  icon={<Heart className="size-4" />}
+                                  icon={
+                                    <Heart
+                                      className={
+                                        isLiked(track.id)
+                                          ? "size-4 fill-emerald-500 text-emerald-500"
+                                          : "size-4"
+                                      }
+                                    />
+                                  }
                                   variant="primary"
                                   size="sm"
-                                  label="В избранное"
+                                  label={isLiked(track.id) ? "Убрать из избранного" : "В избранное"}
                                   className="opacity-0 group-hover:opacity-100"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleLike(track.id);
+                                  }}
                                 />
                               ),
                             },
