@@ -7,6 +7,12 @@ import PlaylistDetailsPage from "@/pages/Home/Playlist/PlaylistDetailsPage";
 import ArtistDetailsPage from "@/pages/Home/Artist/ArtistDetailsPage";
 import ArtistDiscographyPage from "@/pages/Home/Artist/ArtistDiscographyPage";
 import HomePage from "@/pages/Home/HomePage";
+import TracksPage from "@/pages/Home/TracksPage";
+import AlbumsPage from "@/pages/Home/AlbumsPage";
+import ArtistsPage from "@/pages/Home/ArtistsPage";
+import PlaylistsPage from "@/pages/Home/PlaylistsPage";
+import HistoryPage from "@/pages/Home/HistoryPage";
+import RecommendationsPage from "@/pages/Home/RecommendationsPage";
 import MainLayout from "@/pages/Home/MainLayout";
 import LoginPage from "@/pages/Auth/LoginPage";
 import ProfilePage from "@/pages/Profile/ProfilePage";
@@ -64,6 +70,30 @@ export const routes: AppRoute[] = [
       {
         path: "artist/:id/discography",
         element: <ArtistDiscographyPage />,
+      },
+      {
+        path: "tracks",
+        element: <TracksPage />,
+      },
+      {
+        path: "albums",
+        element: <AlbumsPage />,
+      },
+      {
+        path: "artists",
+        element: <ArtistsPage />,
+      },
+      {
+        path: "playlists",
+        element: <PlaylistsPage />,
+      },
+      {
+        path: "history",
+        element: <HistoryPage />,
+      },
+      {
+        path: "recommendations",
+        element: <RecommendationsPage />,
       },
     ],
   },
