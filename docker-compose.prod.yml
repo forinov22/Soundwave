@@ -49,13 +49,13 @@ services:
       Jwt__Secret: ${JWT_SECRET}
       Jwt__Issuer: ${JWT_ISSUER}
       Jwt__Audience: ${JWT_AUDIENCE}
-      Storage__Endpoint: http://minio:9000
-      Storage__AccessKey: ${MINIO_ROOT_USER}
-      Storage__SecretKey: ${MINIO_ROOT_PASSWORD}
-      Storage__BucketName: ${MINIO_BUCKET}
-      Storage__PublicEndpoint: https://${DOMAIN}/storage
-      MlService__BaseUrl: http://ml:8001
-      MlService__InternalToken: ${INTERNAL_TOKEN}
+      S3Settings__Endpoint: http://minio:9000
+      S3Settings__AccessKey: ${MINIO_ROOT_USER}
+      S3Settings__SecretKey: ${MINIO_ROOT_PASSWORD}
+      S3Settings__BucketName: ${MINIO_BUCKET}
+      S3Settings__PublicEndpoint: https://${DOMAIN}/storage
+      MlServiceSettings__BaseUrl: http://ml:8001
+      MlServiceSettings__InternalToken: ${INTERNAL_TOKEN}
       AdminSettings__Email: ${ADMIN_EMAIL}
       AdminSettings__Password: ${ADMIN_PASSWORD}
       GoogleOptions__ClientId: ${Google__ClientId}

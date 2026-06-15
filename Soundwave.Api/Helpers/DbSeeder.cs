@@ -8,21 +8,8 @@ namespace Soundwave.Api.Helpers;
 
 public static class DbSeeder
 {
-    public static async Task SeedAsync(AppDbContext context, AdminOptions adminOptions)
+    public static async Task SeedAsync(AppDbContext context)
     {
-        // Создаём admin-пользователя если его нет
-        if (!await context.Users.AnyAsync(u => u.Role == UserRole.Admin))
-        {
-            context.Users.Add(new User
-            {
-                Email = adminOptions.Email,
-                Name = "Admin",
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(adminOptions.Password),
-                Role = UserRole.Admin,
-            });
-            await context.SaveChangesAsync();
-        }
-
         if (await context.Users.AnyAsync(u => u.Role == UserRole.Artist)) return;
 
         var random = new Random();
@@ -144,6 +131,24 @@ public static class DbSeeder
                 CreatedAt = DateTime.UtcNow.AddDays(-k),
                 UpdatedAt = DateTime.UtcNow.AddDays(-k),
             });
+        }
+        
+        await context.SaveChangesAsync();
+    }
+
+    public static async Task SeedAdminAsync(AppDbContext context, AdminOptions adminOptions)
+    {
+        // Создаём admin-пользователя если его нет
+        if (!await context.Users.AnyAsync(u => u.Role == UserRole.Admin))
+        {
+            context.Users.Add(new User
+            {
+                Email = adminOptions.Email,
+                Name = "Admin",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(adminOptions.Password),
+                Role = UserRole.Admin,
+            });
+            await context.SaveChangesAsync();
         }
 
         await context.SaveChangesAsync();
