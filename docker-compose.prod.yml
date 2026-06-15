@@ -54,6 +54,7 @@ services:
       S3Settings__SecretKey: ${MINIO_ROOT_PASSWORD}
       S3Settings__BucketName: ${MINIO_BUCKET}
       S3Settings__PublicEndpoint: https://${DOMAIN}/storage
+      S3Settings__ForcePathStyle: "true"
       MlServiceSettings__BaseUrl: http://ml:8001
       MlServiceSettings__InternalToken: ${INTERNAL_TOKEN}
       AdminSettings__Email: ${ADMIN_EMAIL}
