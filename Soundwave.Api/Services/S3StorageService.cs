@@ -57,7 +57,15 @@ public class S3StorageService : IStorageService
             Protocol = Protocol.HTTP,
         };
 
-        return _s3Client.GetPreSignedURL(request);
+        var url = _s3Client.GetPreSignedURL(request);
+
+        if (!string.IsNullOrEmpty(_options.PublicEndpoint))
+        {
+            var internalBase = $"{_options.ServiceUrl}/{_options.BucketName}";
+            url = url.Replace(internalBase, _options.PublicEndpoint.TrimEnd('/'));
+        }
+
+        return url;
     }
 
     public async Task DeleteFileAsync(string objectKey)
