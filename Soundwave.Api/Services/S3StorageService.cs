@@ -49,6 +49,9 @@ public class S3StorageService : IStorageService
     {
         if (string.IsNullOrEmpty(objectKey)) return string.Empty;
 
+        if (!string.IsNullOrEmpty(_options.PublicEndpoint))
+            return $"{_options.PublicEndpoint.TrimEnd('/')}/{objectKey}";
+
         var request = new GetPreSignedUrlRequest
         {
             BucketName = _options.BucketName,
@@ -57,15 +60,7 @@ public class S3StorageService : IStorageService
             Protocol = Protocol.HTTP,
         };
 
-        var url = _s3Client.GetPreSignedURL(request);
-
-        if (!string.IsNullOrEmpty(_options.PublicEndpoint))
-        {
-            var internalBase = $"{_options.ServiceUrl}/{_options.BucketName}";
-            url = url.Replace(internalBase, _options.PublicEndpoint.TrimEnd('/'));
-        }
-
-        return url;
+        return _s3Client.GetPreSignedURL(request);
     }
 
     public async Task DeleteFileAsync(string objectKey)
