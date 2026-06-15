@@ -49,7 +49,7 @@ services:
       Jwt__Secret: ${JWT_SECRET}
       Jwt__Issuer: ${JWT_ISSUER}
       Jwt__Audience: ${JWT_AUDIENCE}
-      S3Settings__Endpoint: http://minio:9000
+      S3Settings__ServiceUrl: http://minio:9000
       S3Settings__AccessKey: ${MINIO_ROOT_USER}
       S3Settings__SecretKey: ${MINIO_ROOT_PASSWORD}
       S3Settings__BucketName: ${MINIO_BUCKET}
@@ -58,8 +58,8 @@ services:
       MlServiceSettings__InternalToken: ${INTERNAL_TOKEN}
       AdminSettings__Email: ${ADMIN_EMAIL}
       AdminSettings__Password: ${ADMIN_PASSWORD}
-      GoogleOptions__ClientId: ${Google__ClientId}
-      GoogleOptions__ClientSecret: ${Google__ClientSecret}
+      GoogleOptions__ClientId: ${GoogleOptions__ClientId}
+      GoogleOptions__ClientSecret: ${GoogleOptions__ClientSecret}
     depends_on:
       postgres:
         condition: service_healthy
