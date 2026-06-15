@@ -100,7 +100,7 @@ public static class DependencyInjection
         {
             options.AddPolicy("frontend", policy =>
             {
-                policy.WithOrigins("http://localhost:3000")
+                policy.WithOrigins("http://localhost:3000", "http://165.245.219.55")
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials();
