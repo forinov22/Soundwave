@@ -304,7 +304,7 @@ function PlaylistDetailsPage() {
             {
               key: "duration",
               header: <Clock className="size-4" />,
-              width: "auto",
+              width: "130px",
               align: "right",
               render: (track) => (
                 <div className="flex items-center gap-2">

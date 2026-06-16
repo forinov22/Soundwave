@@ -25,35 +25,11 @@ const Header = () => {
 
   return (
     <>
+      {/* Навбар */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link to="/" className="rounded-lg transition-opacity hover:opacity-80">
-            <img src={logo} alt="logo" className="size-10" />
-          </Link>
-          <div className="flex items-center gap-3">
-            {profile?.avatarUrl && (
-              <img
-                src={profile.avatarUrl}
-                alt="avatar"
-                className="size-12 rounded-full object-cover"
-              />
-            )}
-            <div>
-              <Typography
-                as="h1"
-                variant="title"
-                size="lg"
-                className="text-2xl font-bold"
-              >
-                {profile?.name ?? "Профиль артиста"}
-              </Typography>
-              <Typography variant="subtitle" size="sm" className="mt-0.5">
-                {profile?.description ?? "Управляйте своим музыкальным каталогом"}
-              </Typography>
-            </div>
-          </div>
-        </div>
-
+        <Link to="/" className="rounded-lg transition-opacity hover:opacity-80">
+          <img src={logo} alt="logo" className="h-8 w-auto" />
+        </Link>
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsEditOpen(true)}
@@ -63,6 +39,34 @@ const Header = () => {
             Изменить профиль
           </button>
           <UserButton />
+        </div>
+      </div>
+
+      {/* Профиль артиста */}
+      <div className="mt-6 flex items-center gap-5">
+        {profile?.avatarUrl ? (
+          <img
+            src={profile.avatarUrl}
+            alt="avatar"
+            className="size-20 shrink-0 rounded-full object-cover ring-2 ring-white/10"
+          />
+        ) : (
+          <div className="size-20 shrink-0 rounded-full bg-zinc-700" />
+        )}
+        <div className="min-w-0">
+          <Typography as="h1" variant="title" size="lg" className="text-3xl font-bold" truncate>
+            {profile?.name ?? "Профиль артиста"}
+          </Typography>
+          {profile?.description && (
+            <Typography variant="subtitle" size="sm" className="mt-1 line-clamp-2">
+              {profile.description}
+            </Typography>
+          )}
+          {profile?.monthlyListeners != null && (
+            <Typography variant="subtitle" size="sm" className="mt-0.5 text-zinc-500">
+              {profile.monthlyListeners.toLocaleString("ru-RU")} слушателей в месяц
+            </Typography>
+          )}
         </div>
       </div>
 

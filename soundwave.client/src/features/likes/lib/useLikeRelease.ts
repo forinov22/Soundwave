@@ -18,12 +18,12 @@ export function useLikeRelease() {
 
       try {
         const res = await likesApi.toggleLikeRelease(releaseId);
-        // Синхронизируем с сервером
-        useLikesStore.setState((s) => {
-          const ids = new Set(s.likedReleaseIds);
-          res.data.liked ? ids.add(releaseId) : ids.delete(releaseId);
-          return { likedReleaseIds: ids };
-        });
+        if (res.data.liked) {
+          // Рефетч полного объекта для обновления сайдбара
+          likesApi.getLikedReleases().then((r) => store.setLikedReleases(r.data));
+        } else {
+          store.removeLikedRelease(releaseId);
+        }
       } catch {
         // Откат
         useLikesStore.setState((s) => {

@@ -17,11 +17,11 @@ export function useLikePlaylist() {
 
       try {
         const res = await likesApi.toggleSavePlaylist(playlistId);
-        useLikesStore.setState((s) => {
-          const ids = new Set(s.savedPlaylistIds);
-          res.data.saved ? ids.add(playlistId) : ids.delete(playlistId);
-          return { savedPlaylistIds: ids };
-        });
+        if (res.data.saved) {
+          likesApi.getSavedPlaylists().then((r) => store.setSavedPlaylists(r.data));
+        } else {
+          store.removeSavedPlaylist(playlistId);
+        }
       } catch {
         useLikesStore.setState((s) => {
           const ids = new Set(s.savedPlaylistIds);

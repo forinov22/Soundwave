@@ -278,6 +278,10 @@ public class ReleaseService : IReleaseService
                 new { notReadyTracks = statusList });
         }
 
+        // Для сингла без своей обложки берём изображение трека
+        if (string.IsNullOrEmpty(release.ImageS3Path) && release.ReleaseTracks.Count == 1)
+            release.ImageS3Path = release.ReleaseTracks.First().Track.ImageS3Path;
+
         // Всё ок — публикуем
         var now = DateTime.UtcNow;
         release.Status = ReleaseStatus.Published;

@@ -17,11 +17,11 @@ export function useLikeArtist() {
 
       try {
         const res = await likesApi.toggleFollowArtist(artistId);
-        useLikesStore.setState((s) => {
-          const ids = new Set(s.followedArtistIds);
-          res.data.followed ? ids.add(artistId) : ids.delete(artistId);
-          return { followedArtistIds: ids };
-        });
+        if (res.data.followed) {
+          likesApi.getFollowedArtists().then((r) => store.setFollowedArtists(r.data));
+        } else {
+          store.removeFollowedArtist(artistId);
+        }
       } catch {
         useLikesStore.setState((s) => {
           const ids = new Set(s.followedArtistIds);

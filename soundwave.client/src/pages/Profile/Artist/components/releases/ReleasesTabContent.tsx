@@ -14,6 +14,7 @@ const ReleasesTabContent = () => {
     published,
     fetchDrafts,
     fetchPublished,
+    fetchTracks,
     isDraftsLoading,
     isPublishedLoading,
   } = useArtist();
@@ -21,6 +22,7 @@ const ReleasesTabContent = () => {
   useEffect(() => {
     if (drafts.length === 0) fetchDrafts();
     if (published.length === 0) fetchPublished();
+    fetchTracks();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

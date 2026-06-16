@@ -159,7 +159,7 @@ function AlbumDetailsPage() {
           {
             key: "duration",
             header: <Clock className="size-4" />,
-            width: "auto",
+            width: "80px",
             align: "right",
             render: (track) => (
               <Typography variant="subtitle" size="sm">
