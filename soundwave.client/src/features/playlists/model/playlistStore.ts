@@ -72,13 +72,23 @@ export const usePlaylistStore = create<PlaylistState>((set, get) => ({
   setLikedTrackIds: (ids) => set({ likedTrackIds: new Set(ids) }),
 
   addLikedTrack: (id) =>
-    set((s) => ({ likedTrackIds: new Set([...s.likedTrackIds, id]) })),
+    set((s) => ({
+      likedTrackIds: new Set([...s.likedTrackIds, id]),
+      playlists: s.playlists.map((p) =>
+        p.isLikedSongs ? { ...p, trackCount: p.trackCount + 1 } : p,
+      ),
+    })),
 
   removeLikedTrack: (id) =>
     set((s) => {
       const next = new Set(s.likedTrackIds);
       next.delete(id);
-      return { likedTrackIds: next };
+      return {
+        likedTrackIds: next,
+        playlists: s.playlists.map((p) =>
+          p.isLikedSongs ? { ...p, trackCount: Math.max(0, p.trackCount - 1) } : p,
+        ),
+      };
     }),
 
   isLiked: (id) => get().likedTrackIds.has(id),

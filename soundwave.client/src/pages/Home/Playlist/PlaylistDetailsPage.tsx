@@ -328,13 +328,6 @@ function PlaylistDetailsPage() {
                       toggleLike(track.id);
                     }}
                   />
-                  <Typography
-                    variant="subtitle"
-                    size="sm"
-                    className="w-10 text-right font-mono"
-                  >
-                    {formatDuration(track.durationSeconds)}
-                  </Typography>
                   {isOwner && (
                     <button
                       onClick={(e) => {
@@ -351,6 +344,13 @@ function PlaylistDetailsPage() {
                       ✕
                     </button>
                   )}
+                  <Typography
+                    variant="subtitle"
+                    size="sm"
+                    className="w-10 text-right font-mono"
+                  >
+                    {formatDuration(track.durationSeconds)}
+                  </Typography>
                 </div>
               ),
             },
