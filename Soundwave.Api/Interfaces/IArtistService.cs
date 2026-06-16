@@ -25,4 +25,15 @@ public interface IArtistService
     // - Если трек в черновиках и force=false → ConflictException со списком черновиков.
     // - Если force=true → удаляются связи с черновиками, затем сам трек.
     Task DeleteTrackAsync(int trackId, int artistId, bool force);
+
+    Task<Artist> UpdateProfileAsync(
+        int artistId,
+        string? name,
+        string? description,
+        Stream? avatarStream,
+        string? avatarFileName,
+        string? avatarContentType,
+        Stream? bannerStream,
+        string? bannerFileName,
+        string? bannerContentType);
 }

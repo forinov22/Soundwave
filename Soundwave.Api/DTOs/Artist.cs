@@ -1,4 +1,14 @@
-﻿namespace Soundwave.Api.DTOs;
+﻿using Microsoft.AspNetCore.Http;
+
+namespace Soundwave.Api.DTOs;
+
+public record UpdateArtistProfileRequest
+{
+    public string? Name { get; init; }
+    public string? Description { get; init; }
+    public IFormFile? Avatar { get; init; }
+    public IFormFile? Banner { get; init; }
+}
 
 public record ArtistDetailsDto(
     int Id,

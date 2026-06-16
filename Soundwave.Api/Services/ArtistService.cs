@@ -171,6 +171,50 @@ public class ArtistService : IArtistService
         }
     }
 
+    public async Task<Artist> UpdateProfileAsync(
+        int artistId,
+        string? name,
+        string? description,
+        Stream? avatarStream,
+        string? avatarFileName,
+        string? avatarContentType,
+        Stream? bannerStream,
+        string? bannerFileName,
+        string? bannerContentType)
+    {
+        var artist = await _context.Users
+            .OfType<Artist>()
+            .FirstOrDefaultAsync(a => a.Id == artistId)
+            ?? throw new NotFoundException("Артист не найден");
+
+        if (!string.IsNullOrWhiteSpace(name))
+            artist.Name = name;
+
+        if (description is not null)
+            artist.Description = description;
+
+        if (avatarStream is not null && avatarFileName is not null && avatarContentType is not null)
+        {
+            if (!string.IsNullOrEmpty(artist.Avatar))
+            {
+                try { await _storage.DeleteFileAsync(artist.Avatar); } catch { }
+            }
+            artist.Avatar = await _storage.UploadFileAsync(avatarStream, avatarFileName, avatarContentType, "images/avatars");
+        }
+
+        if (bannerStream is not null && bannerFileName is not null && bannerContentType is not null)
+        {
+            if (!string.IsNullOrEmpty(artist.BackgroundImage))
+            {
+                try { await _storage.DeleteFileAsync(artist.BackgroundImage); } catch { }
+            }
+            artist.BackgroundImage = await _storage.UploadFileAsync(bannerStream, bannerFileName, bannerContentType, "images/banners");
+        }
+
+        await _context.SaveChangesAsync();
+        return artist;
+    }
+
     // ── helpers ──────────────────────────────────────────────────────────────
 
     // Читает длину из аудио-стрима через TagLib.

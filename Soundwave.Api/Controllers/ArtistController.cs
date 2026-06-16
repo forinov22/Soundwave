@@ -42,6 +42,23 @@ public class ArtistController : BaseApiController
         return Ok(artist.ToDto(_storageService));
     }
     
+    // PATCH /api/artist/me/profile — обновление профиля артиста
+    [HttpPatch("me/profile")]
+    [Authorize]
+    public async Task<IActionResult> UpdateProfile([FromForm] UpdateArtistProfileRequest request)
+    {
+        if (!TryGetUserId(out var userId)) return Unauthorized();
+
+        var artist = await _artistService.UpdateProfileAsync(
+            userId,
+            request.Name,
+            request.Description,
+            request.Avatar?.OpenReadStream(), request.Avatar?.FileName, request.Avatar?.ContentType,
+            request.Banner?.OpenReadStream(), request.Banner?.FileName, request.Banner?.ContentType);
+
+        return Ok(artist.ToDto(_storageService));
+    }
+
     // GET /api/artist/me/stats — приватная статистика артиста
     [HttpGet("me/stats")]
     [Authorize]

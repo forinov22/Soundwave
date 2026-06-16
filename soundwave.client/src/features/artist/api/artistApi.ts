@@ -101,7 +101,26 @@ export const artistApi = {
     apiClient.delete<void>(`/api/releases/${releaseId}`),
 
   getMyStats: () => apiClient.get<ArtistStats>("/api/artist/me/stats"),
+
+  updateProfile: (payload: { name?: string; description?: string; avatar?: File; banner?: File }) => {
+    const form = toFormData({
+      name: payload.name,
+      description: payload.description,
+      avatar: payload.avatar,
+      banner: payload.banner,
+    });
+    return apiClient.patch<ArtistProfile>("/api/artist/me/profile", form);
+  },
 };
+
+export interface ArtistProfile {
+  id: number;
+  name: string;
+  avatarUrl: string | null;
+  bannerUrl: string | null;
+  description: string | null;
+  monthlyListeners: number;
+}
 
 export interface ArtistStats {
   totalPlays: number;
