@@ -17,6 +17,7 @@ interface TrackTableProps<T> {
   showIndex?: boolean;
   showHeader?: boolean;
   getKey: (row: T) => string | number;
+  isActive?: (row: T) => boolean;
   className?: string;
 }
 
@@ -31,6 +32,7 @@ export function TrackTable<T>({
   showIndex = true,
   showHeader = true,
   getKey,
+  isActive,
   className,
 }: Readonly<TrackTableProps<T>>) {
   const gridCols = [
@@ -83,14 +85,19 @@ export function TrackTable<T>({
               "group grid items-center gap-4 rounded-lg px-4 py-3 transition-colors",
               "hover:bg-track-row-hover",
               onRowClick && "cursor-pointer",
+              isActive?.(row) && "bg-white/[0.07]",
             )}
           >
             {/* Индекс: номер скрывается при ховере, Play появляется */}
             {showIndex && (
               <div className="flex w-4 items-center justify-center">
-                <span className="text-sm text-text-secondary group-hover:hidden">
-                  {idx + 1}
-                </span>
+                {isActive?.(row) ? (
+                  <Play className="size-3 fill-current text-primary group-hover:hidden" />
+                ) : (
+                  <span className="text-sm text-text-secondary group-hover:hidden">
+                    {idx + 1}
+                  </span>
+                )}
                 <Play className="hidden size-3 fill-current text-text-primary group-hover:block" />
               </div>
             )}

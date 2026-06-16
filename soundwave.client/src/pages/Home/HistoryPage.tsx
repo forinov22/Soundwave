@@ -48,6 +48,7 @@ const HistoryPage = () => {
           {listenHistory.map((item) => (
             <TrackItem
               key={item.trackId}
+              trackId={item.trackId}
               name={item.title}
               image={item.imageUrl ?? ""}
               artist={item.artistName}

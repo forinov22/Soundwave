@@ -28,6 +28,7 @@ const TracksPage = () => {
           {trendingTracks.map((track) => (
             <TrackItem
               key={track.id}
+              trackId={track.id}
               name={track.title}
               image={track.imageUrl}
               artist={track.artistName}

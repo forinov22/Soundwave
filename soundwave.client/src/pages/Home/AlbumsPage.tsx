@@ -31,7 +31,7 @@ const AlbumsPage = () => {
               name={release.title}
               image={release.imageUrl ?? ""}
               description={release.description ?? ""}
-              onClick={() => navigate(`/releases/${release.id}`)}
+              onClick={() => navigate(`/album/${release.id}`)}
             />
           ))}
         </div>

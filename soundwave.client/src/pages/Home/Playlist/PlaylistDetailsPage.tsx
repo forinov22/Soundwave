@@ -322,7 +322,9 @@ function PlaylistDetailsPage() {
                             "group flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 transition-colors",
                             snapshot.isDragging
                               ? "bg-zinc-800 shadow-xl"
-                              : "hover:bg-white/5",
+                              : track.id === currentTrack?.id
+                                ? "bg-white/[0.07]"
+                                : "hover:bg-white/5",
                           )}
                         >
                           {/* Хэндл */}
@@ -411,6 +413,7 @@ function PlaylistDetailsPage() {
           <TrackTable
             data={tracks}
             getKey={(t) => t.id}
+            isActive={(t) => t.id === currentTrack?.id}
             onRowClick={(_, idx) => playAlbum(tracks, idx)}
             columns={[
               {

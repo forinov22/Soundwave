@@ -39,12 +39,19 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     var adminOptions = scope.ServiceProvider.GetRequiredService<IOptions<AdminOptions>>().Value;
+
+    if (isDevelopment)
+    {
+        db.Database.EnsureDeleted();
+    }
     await db.Database.MigrateAsync();
+
     await DbSeeder.SeedAdminAsync(db, adminOptions);
     if (isDevelopment)
     {
         await DbSeeder.SeedAsync(db);
     }
+    await DbSeeder.SeedListenStatsAsync(db);
 }
 
 app.Run();

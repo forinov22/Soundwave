@@ -4,6 +4,7 @@ import {
   CircleAlert,
   Clock,
   Play,
+  Pause,
   Heart,
   MoreHorizontal,
   Loader2,
@@ -13,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { useMusic } from "@/features/music/lib/useMusic";
 import { usePlayerPlayback } from "@/features/player/lib/usePlayerPlayback";
 import { useLikeRelease } from "@/features/likes/lib/useLikeRelease";
+import { useLike } from "@/features/playlists/lib/useLike";
 import { formatDuration } from "@/shared/lib/formatDuration";
 import { ActionIcon } from "@/shared/ui/ActionIcon";
 import { Typography } from "@/shared/ui/Typography";
@@ -26,10 +28,11 @@ import type { ReleaseDetails } from "@/shared/types/Release";
 function AlbumDetailsPage() {
   const { setGradientBgColor } = useOutletContext<LayoutOutletContext>();
   const { id } = useParams();
-  const { playAlbum } = usePlayerPlayback();
+  const { playAlbum, togglePlay, currentTrack, isPlaying } = usePlayerPlayback();
 
   const { fetchRelease, isReleaseLoading, releaseError } = useMusic();
   const { isReleaseLiked, toggleLikeRelease } = useLikeRelease();
+  const { isLiked, toggleLike } = useLike();
 
   const [release, setRelease] = useState<ReleaseDetails | null>(null);
 
@@ -83,6 +86,9 @@ function AlbumDetailsPage() {
     );
   }
 
+  const isAlbumLoaded = release.tracks.some((t) => t.id === currentTrack?.id);
+  const isAlbumPlaying = isAlbumLoaded && isPlaying;
+
   return (
     <div className="relative">
       {/* Header */}
@@ -96,10 +102,14 @@ function AlbumDetailsPage() {
           <>
             <Button
               size="icon"
-              onClick={() => playAlbum(release.tracks, 0)}
+              onClick={() => isAlbumLoaded ? togglePlay() : playAlbum(release.tracks, 0)}
               className="size-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/80"
             >
-              <Play className="size-6 fill-current" />
+              {isAlbumPlaying ? (
+                <Pause className="size-6 fill-current" />
+              ) : (
+                <Play className="size-6 fill-current" />
+              )}
             </Button>
             <ActionIcon
               icon={
@@ -130,6 +140,7 @@ function AlbumDetailsPage() {
       <TrackTable
         data={release.tracks}
         getKey={(t) => t.id}
+        isActive={(t) => t.id === currentTrack?.id}
         onRowClick={(_, idx) => playAlbum(release.tracks, idx)}
         columns={[
           {
@@ -159,12 +170,32 @@ function AlbumDetailsPage() {
           {
             key: "duration",
             header: <Clock className="size-4" />,
-            width: "80px",
+            width: "130px",
             align: "right",
             render: (track) => (
-              <Typography variant="subtitle" size="sm">
-                {formatDuration(track.durationSeconds)}
-              </Typography>
+              <div className="flex items-center justify-end gap-2">
+                <ActionIcon
+                  icon={
+                    <Heart
+                      className={
+                        isLiked(track.id)
+                          ? "size-4 fill-emerald-500 text-emerald-500"
+                          : "size-4"
+                      }
+                    />
+                  }
+                  size="sm"
+                  label={isLiked(track.id) ? "Убрать из избранного" : "В избранное"}
+                  className="opacity-0 group-hover:opacity-100"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleLike(track.id);
+                  }}
+                />
+                <Typography variant="subtitle" size="sm" className="w-10 text-right font-mono">
+                  {formatDuration(track.durationSeconds)}
+                </Typography>
+              </div>
             ),
           },
         ]}

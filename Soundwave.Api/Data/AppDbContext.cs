@@ -23,11 +23,13 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // TPH-наследование User → Artist
+        // TPH-наследование User → Artist.
+        // IsComplete(false): незамапленные значения дискриминатора материализуются
+        // как базовый тип User (покрывает Listener=1 и Admin=20 без дублирования HasValue).
         modelBuilder.Entity<User>()
             .HasDiscriminator<UserRole>("Role")
+            .IsComplete(false)
             .HasValue<User>(UserRole.Listener)
-            .HasValue<User>(UserRole.Admin)
             .HasValue<Artist>(UserRole.Artist);
 
         // Артист — треки (1:N)

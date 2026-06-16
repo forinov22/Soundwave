@@ -31,6 +31,8 @@ public class ArtistService : IArtistService
         return await _context.Users
             .OfType<Artist>()
             .Include(a => a.Tracks)
+                .ThenInclude(t => t.ReleaseTracks)
+                    .ThenInclude(rt => rt.Release)
             .FirstOrDefaultAsync(a => a.Id == id);
     }
 

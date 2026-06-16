@@ -79,6 +79,7 @@ const HomePage = () => {
             {listenHistory.slice(0, 5).map((item) => (
               <TrackItem
                 key={item.trackId}
+                trackId={item.trackId}
                 name={item.title}
                 image={item.imageUrl ?? ""}
                 artist={item.artistName}
@@ -99,6 +100,7 @@ const HomePage = () => {
             {recommendations.slice(0, 5).map((item) => (
               <TrackItem
                 key={item.trackId}
+                trackId={item.trackId}
                 name={item.title}
                 image={item.imageUrl ?? ""}
                 artist={item.artistName}
@@ -117,6 +119,7 @@ const HomePage = () => {
         {trendingTracks.slice(0, 5).map((track) => (
           <TrackItem
             key={track.id}
+            trackId={track.id}
             name={track.title}
             image={track.imageUrl}
             artist={track.artistName}
