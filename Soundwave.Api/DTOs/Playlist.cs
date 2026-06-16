@@ -48,3 +48,5 @@ public record UpdatePlaylistRequest(
 );
 
 public record AddTrackRequest(int TrackId);
+
+public record ReorderPlaylistTracksRequest(IList<int> TrackIds);

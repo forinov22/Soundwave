@@ -59,6 +59,12 @@ export function usePlaylistDetails(playlistId: number) {
     store.removePlaylist(playlistId);
   });
 
+  const { execute: reorderTracks } = useAsync(async (trackIds: number[]) => {
+    const res = await playlistApi.reorderTracks(playlistId, trackIds);
+    store.updatePlaylistDetails(res.data);
+    return res.data;
+  });
+
   const { execute: togglePublic } = useAsync(async () => {
     if (!details) return;
     const res = await playlistApi.update(playlistId, {
@@ -77,6 +83,7 @@ export function usePlaylistDetails(playlistId: number) {
     isAddingTrack,
     removeTrack,
     deletePlaylist,
+    reorderTracks,
     togglePublic,
   };
 }

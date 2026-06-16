@@ -244,6 +244,30 @@ public class PlaylistService : IPlaylistService
         await _context.SaveChangesAsync();
     }
 
+    // ── Порядок ───────────────────────────────────────────────────────────────
+
+    public async Task ReorderTracksAsync(int playlistId, int userId, IList<int> trackIdsInOrder)
+    {
+        var playlist = await LoadOwnedAsync(playlistId, userId);
+
+        var currentIds = playlist.PlaylistTracks.Select(pt => pt.TrackId).ToHashSet();
+        if (currentIds.Count != trackIdsInOrder.Count || !currentIds.SetEquals(trackIdsInOrder.ToHashSet()))
+            throw new ValidationException("Набор треков не совпадает с текущим");
+
+        var byTrackId = playlist.PlaylistTracks.ToDictionary(pt => pt.TrackId);
+
+        // Сначала уходим в отрицательные позиции, чтобы не нарушить уникальный индекс
+        var tmp = -1;
+        foreach (var pt in playlist.PlaylistTracks)
+            pt.Position = tmp--;
+        await _context.SaveChangesAsync();
+
+        for (int i = 0; i < trackIdsInOrder.Count; i++)
+            byTrackId[trackIdsInOrder[i]].Position = i + 1;
+
+        await _context.SaveChangesAsync();
+    }
+
     // ── Лайк ─────────────────────────────────────────────────────────────────
 
     // Возвращает true если трек добавлен, false если убран (toggle).

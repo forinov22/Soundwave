@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
 import {
   Play,
@@ -12,7 +12,9 @@ import {
   Pencil,
   Loader2,
   Heart,
+  GripVertical,
 } from "lucide-react";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 import { cn } from "@/lib/utils";
 import {
@@ -32,6 +34,7 @@ import { usePlaylistDetails } from "@/features/playlists/lib/usePlaylistDetails"
 import { useLikePlaylist } from "@/features/likes/lib/useLikePlaylist";
 import { useLike } from "@/features/playlists/lib/useLike";
 import { usePlayerPlayback } from "@/features/player/lib/usePlayerPlayback";
+import type { PlaylistTrack } from "@/features/playlists/types";
 
 import { EditPlaylistModal } from "./EditPlaylistModal";
 import { TrackSearchInput } from "./TrackSearchInput";
@@ -60,11 +63,18 @@ function PlaylistDetailsPage() {
     addTrack,
     isAddingTrack,
     removeTrack,
+    reorderTracks,
     deletePlaylist,
     togglePublic,
   } = usePlaylistDetails(playlistId);
 
   const [isEditOpen, setIsEditOpen] = useState(false);
+  // Локальный порядок треков для оптимистичного D&D
+  const [localTracks, setLocalTracks] = useState<PlaylistTrack[]>([]);
+
+  useEffect(() => {
+    if (details) setLocalTracks(details.tracks);
+  }, [details?.tracks]);
 
   const { isLiked, toggleLike } = useLike();
   const {
@@ -98,8 +108,9 @@ function PlaylistDetailsPage() {
   }
 
   const isOwner = details.ownerId === userId;
+  const canDrag = isOwner && !details.isLikedSongs;
 
-  const tracks = details.tracks;
+  const tracks = localTracks.length > 0 ? localTracks : details.tracks;
   const isPlaylistLoaded = tracks.some((t) => t.id === currentTrack?.id);
   const isPlaylistPlaying = isPlaylistLoaded && isPlaying;
   const addedTrackIds = details.tracks.map((t) => t.id);
@@ -112,9 +123,13 @@ function PlaylistDetailsPage() {
   const handleSaveEdit = async (data: {
     name: string;
     description: string;
-    image: string | null;
+    file: File | null;
   }) => {
-    await updatePlaylist({ title: data.name, description: data.description });
+    await updatePlaylist({
+      title: data.name,
+      description: data.description,
+      image: data.file ?? undefined,
+    });
   };
 
   const handleDelete = async () => {
@@ -122,7 +137,17 @@ function PlaylistDetailsPage() {
     navigate(-1);
   };
 
-  let image = details.imageUrl ?? (
+  const handleDragEnd = (result: { source: { index: number }; destination: { index: number } | null }) => {
+    if (!result.destination || result.destination.index === result.source.index) return;
+
+    const reordered = [...localTracks];
+    const [moved] = reordered.splice(result.source.index, 1);
+    reordered.splice(result.destination.index, 0, moved);
+    setLocalTracks(reordered);
+    reorderTracks(reordered.map((t) => t.id));
+  };
+
+  let image: React.ReactNode = details.imageUrl ?? (
     <div className="flex size-full items-center justify-center rounded bg-zinc-700">
       <span className="text-9xl text-zinc-400">♪</span>
     </div>
@@ -272,90 +297,186 @@ function PlaylistDetailsPage() {
       />
 
       {tracks.length > 0 ? (
-        <TrackTable
-          data={tracks}
-          getKey={(t) => t.id}
-          onRowClick={(_, idx) => playAlbum(tracks, idx)}
-          columns={[
-            {
-              key: "track",
-              header: "Название",
-              width: "4fr",
-              render: (track) => (
-                <TrackRow
-                  image={track.imageUrl}
-                  title={track.title}
-                  subtitle={track.artistName}
-                  size="sm"
-                />
-              ),
-            },
-            {
-              key: "album",
-              header: "Альбом",
-              width: "3fr",
-              hideOnMobile: true,
-              render: (track) => (
-                <Typography variant="subtitle" size="sm" truncate>
-                  {track.albumTitle ?? "—"}
-                </Typography>
-              ),
-            },
-            {
-              key: "duration",
-              header: <Clock className="size-4" />,
-              width: "130px",
-              align: "right",
-              render: (track) => (
-                <div className="flex items-center gap-2">
-                  <ActionIcon
-                    icon={
-                      <Heart
-                        className={
-                          isLiked(track.id)
-                            ? "size-4 fill-emerald-500 text-emerald-500"
-                            : "size-4"
-                        }
-                      />
-                    }
+        canDrag ? (
+          // ── Drag-and-drop список для владельца ──────────────────────────
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <Droppable droppableId="playlist-tracks">
+              {(provided) => (
+                <div
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                  className="space-y-0.5"
+                >
+                  {tracks.map((track, index) => (
+                    <Draggable
+                      key={track.id}
+                      draggableId={String(track.id)}
+                      index={index}
+                    >
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          onClick={() => playAlbum(tracks, index)}
+                          className={cn(
+                            "group flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 transition-colors",
+                            snapshot.isDragging
+                              ? "bg-zinc-800 shadow-xl"
+                              : "hover:bg-white/5",
+                          )}
+                        >
+                          {/* Хэндл */}
+                          <div
+                            {...provided.dragHandleProps}
+                            onClick={(e) => e.stopPropagation()}
+                            className="shrink-0 text-zinc-600 opacity-0 transition group-hover:opacity-100 hover:text-zinc-400"
+                          >
+                            <GripVertical className="size-4" />
+                          </div>
+
+                          {/* Трек */}
+                          <div className="min-w-0 flex-1">
+                            <TrackRow
+                              image={track.imageUrl}
+                              title={track.title}
+                              subtitle={track.artistName}
+                              size="sm"
+                            />
+                          </div>
+
+                          {/* Альбом */}
+                          <div className="hidden w-40 shrink-0 md:block">
+                            <Typography variant="subtitle" size="sm" truncate>
+                              {track.albumTitle ?? "—"}
+                            </Typography>
+                          </div>
+
+                          {/* Лайк + крестик + время */}
+                          <div className="flex shrink-0 items-center gap-2" style={{ width: 130 }}>
+                            <ActionIcon
+                              icon={
+                                <Heart
+                                  className={
+                                    isLiked(track.id)
+                                      ? "size-4 fill-emerald-500 text-emerald-500"
+                                      : "size-4"
+                                  }
+                                />
+                              }
+                              size="sm"
+                              label={
+                                isLiked(track.id)
+                                  ? "Убрать из избранного"
+                                  : "В избранное"
+                              }
+                              className="opacity-0 group-hover:opacity-100"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleLike(track.id);
+                              }}
+                            />
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeTrack(track.id);
+                              }}
+                              className={cn(
+                                "flex size-7 items-center justify-center rounded-full",
+                                "text-icon opacity-0 transition-all group-hover:opacity-100",
+                                "hover:bg-red-500/10 hover:text-red-400 active:scale-90",
+                              )}
+                              aria-label="Удалить трек"
+                            >
+                              ✕
+                            </button>
+                            <Typography
+                              variant="subtitle"
+                              size="sm"
+                              className="w-10 text-right font-mono"
+                            >
+                              {formatDuration(track.durationSeconds)}
+                            </Typography>
+                          </div>
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
+        ) : (
+          // ── Обычная таблица для не-владельцев ───────────────────────────
+          <TrackTable
+            data={tracks}
+            getKey={(t) => t.id}
+            onRowClick={(_, idx) => playAlbum(tracks, idx)}
+            columns={[
+              {
+                key: "track",
+                header: "Название",
+                width: "4fr",
+                render: (track) => (
+                  <TrackRow
+                    image={track.imageUrl}
+                    title={track.title}
+                    subtitle={track.artistName}
                     size="sm"
-                    label={
-                      isLiked(track.id) ? "Убрать из избранного" : "В избранное"
-                    }
-                    className="opacity-0 group-hover:opacity-100"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleLike(track.id);
-                    }}
                   />
-                  {isOwner && (
-                    <button
+                ),
+              },
+              {
+                key: "album",
+                header: "Альбом",
+                width: "3fr",
+                hideOnMobile: true,
+                render: (track) => (
+                  <Typography variant="subtitle" size="sm" truncate>
+                    {track.albumTitle ?? "—"}
+                  </Typography>
+                ),
+              },
+              {
+                key: "duration",
+                header: <Clock className="size-4" />,
+                width: "130px",
+                align: "right",
+                render: (track) => (
+                  <div className="flex items-center gap-2">
+                    <ActionIcon
+                      icon={
+                        <Heart
+                          className={
+                            isLiked(track.id)
+                              ? "size-4 fill-emerald-500 text-emerald-500"
+                              : "size-4"
+                          }
+                        />
+                      }
+                      size="sm"
+                      label={
+                        isLiked(track.id) ? "Убрать из избранного" : "В избранное"
+                      }
+                      className="opacity-0 group-hover:opacity-100"
                       onClick={(e) => {
                         e.stopPropagation();
-                        removeTrack(track.id);
+                        toggleLike(track.id);
                       }}
-                      className={cn(
-                        "flex size-7 items-center justify-center rounded-full",
-                        "text-icon opacity-0 transition-all group-hover:opacity-100",
-                        "hover:bg-red-500/10 hover:text-red-400 active:scale-90",
-                      )}
-                      aria-label="Удалить трек"
+                    />
+                    <Typography
+                      variant="subtitle"
+                      size="sm"
+                      className="w-10 text-right font-mono"
                     >
-                      ✕
-                    </button>
-                  )}
-                  <Typography
-                    variant="subtitle"
-                    size="sm"
-                    className="w-10 text-right font-mono"
-                  >
-                    {formatDuration(track.durationSeconds)}
-                  </Typography>
-                </div>
-              ),
-            },
-          ]}
-        />
+                      {formatDuration(track.durationSeconds)}
+                    </Typography>
+                  </div>
+                ),
+              },
+            ]}
+          />
+        )
       ) : (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <Typography variant="title" size="lg" className="mb-2">
@@ -396,7 +517,6 @@ function PlaylistDetailsPage() {
           initialDescription={details.description}
           initialImage={details.imageUrl ?? undefined}
           onSave={handleSaveEdit}
-          // isSaving={isUpdating}
         />
       )}
     </div>

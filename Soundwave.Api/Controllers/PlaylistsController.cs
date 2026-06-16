@@ -131,6 +131,18 @@ public class PlaylistsController : BaseApiController
         return Ok(updated!.ToDetailsDto(_storage));
     }
 
+    // PUT /api/playlists/{id}/tracks/order — изменить порядок треков
+    [Authorize]
+    [HttpPut("{id:int}/tracks/order")]
+    public async Task<IActionResult> ReorderTracks(int id, [FromBody] ReorderPlaylistTracksRequest request)
+    {
+        if (!TryGetUserId(out var userId)) return Unauthorized();
+
+        await _playlists.ReorderTracksAsync(id, userId, request.TrackIds);
+        var updated = await _playlists.GetByIdAsync(id, userId);
+        return Ok(updated!.ToDetailsDto(_storage));
+    }
+
     // POST /api/playlists/tracks/{trackId}/like — лайк/анлайк
     [Authorize]
     [HttpPost("tracks/{trackId:int}/like")]

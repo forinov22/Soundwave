@@ -15,7 +15,7 @@ interface EditPlaylistModalProps {
   onSave: (data: {
     name: string;
     description: string;
-    image: string | null;
+    file: File | null;
   }) => void;
 }
 
@@ -32,6 +32,7 @@ export function EditPlaylistModal({
   const [imagePreview, setImagePreview] = useState<string | null>(
     initialImage ?? null,
   );
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!isOpen) return null;
@@ -39,8 +40,8 @@ export function EditPlaylistModal({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const url = URL.createObjectURL(file);
-    setImagePreview(url);
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
   };
 
   const handleImageAreaClick = () => fileInputRef.current?.click();
@@ -50,7 +51,7 @@ export function EditPlaylistModal({
     onSave({
       name: name.trim(),
       description: description.trim(),
-      image: imagePreview,
+      file: imageFile,
     });
     onClose();
   };

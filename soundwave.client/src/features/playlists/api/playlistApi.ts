@@ -40,6 +40,9 @@ export const playlistApi = {
       `/api/playlists/${playlistId}/tracks/${trackId}`,
     ),
 
+  reorderTracks: (playlistId: number, trackIds: number[]) =>
+    apiClient.put<PlaylistDetails>(`/api/playlists/${playlistId}/tracks/order`, { trackIds }),
+
   // Лайк / анлайк
   toggleLike: (trackId: number) =>
     apiClient.post<{ liked: boolean }>(`/api/playlists/tracks/${trackId}/like`),

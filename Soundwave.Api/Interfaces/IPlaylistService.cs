@@ -26,4 +26,5 @@ public interface IPlaylistService
     Task RemoveTrackAsync(int playlistId, int userId, int trackId);
     Task<bool> ToggleLikeAsync(int userId, int trackId);
     Task<bool> IsLikedAsync(int userId, int trackId);
+    Task ReorderTracksAsync(int playlistId, int userId, IList<int> trackIdsInOrder);
 }

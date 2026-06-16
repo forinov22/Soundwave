@@ -18,8 +18,6 @@ export function RightSidebar() {
     return null;
   }
 
-  console.log(artistDetails);
-
   return (
     <AnimatePresence>
       <motion.aside
