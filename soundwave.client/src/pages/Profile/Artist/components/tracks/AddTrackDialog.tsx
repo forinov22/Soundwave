@@ -22,7 +22,7 @@ interface CreateTrackModel {
 }
 
 const AddTrackDialog = () => {
-  const { createTrack, isCreatingTrack } = useArtist();
+  const { createTrack } = useArtist();
   const [isOpen, setIsOpen] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
@@ -50,19 +50,20 @@ const AddTrackDialog = () => {
     if (file) setNewTrack((p) => ({ ...p, audio: file }));
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!newTrack.audio || !newTrack.image || !newTrack.name.trim()) return;
 
-    const track = await createTrack({
+    // Захватываем данные формы до сброса
+    const payload = {
       title: newTrack.name.trim(),
       audio: newTrack.audio,
       image: newTrack.image,
-    });
+    };
 
-    if (track) {
-      setIsOpen(false);
-      reset();
-    }
+    // Закрываем диалог сразу — загрузка идёт в фоне
+    setIsOpen(false);
+    reset();
+    createTrack(payload);
   };
 
   return (
@@ -179,15 +180,10 @@ const AddTrackDialog = () => {
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={
-              !newTrack.name.trim() ||
-              !newTrack.audio ||
-              !newTrack.image ||
-              isCreatingTrack
-            }
+            disabled={!newTrack.name.trim() || !newTrack.audio || !newTrack.image}
             className="rounded-full bg-primary px-6 font-semibold text-primary-foreground hover:bg-primary/90"
           >
-            {isCreatingTrack ? "Загрузка..." : "Загрузить"}
+            Загрузить
           </Button>
         </DialogFooter>
       </DialogContent>

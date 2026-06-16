@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 
 import { useArtist } from "@/features/artist/lib/useArtist";
 import { useDeleteTrackWithConfirm } from "@/features/artist/lib/useDeleteTrackWithConfirm";
@@ -10,7 +10,7 @@ import TracksTable from "./TracksTable";
 import DeleteTrackConfirmDialog from "./DeleteTrackConfirmDialog";
 
 const TracksTabContent = () => {
-  const { tracks, fetchTracks, isTracksLoading } = useArtist();
+  const { tracks, fetchTracks, isTracksLoading, isCreatingTrack, createTrackError } = useArtist();
 
   const dt = useDeleteTrackWithConfirm();
 
@@ -36,10 +36,25 @@ const TracksTabContent = () => {
             {isTracksLoading
               ? "Загрузка..."
               : `${tracks.length} ${pluralizeTracks(tracks.length)}`}
+            {isCreatingTrack && (
+              <span className="ml-2 inline-flex items-center gap-1 text-xs text-text-secondary">
+                <Loader2 className="size-3 animate-spin" />
+                загружается...
+              </span>
+            )}
           </Typography>
         </div>
         <AddTrackDialog />
       </div>
+
+      {createTrackError && (
+        <div className="mb-4 flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/[0.06] p-4">
+          <AlertCircle className="mt-0.5 size-4 shrink-0 text-red-400" />
+          <Typography variant="subtitle" size="sm" className="flex-1">
+            Не удалось загрузить трек: {createTrackError}
+          </Typography>
+        </div>
+      )}
 
       {dt.blockedMessage && (
         <div className="mb-4 flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/[0.06] p-4">
